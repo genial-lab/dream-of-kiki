@@ -339,13 +339,35 @@ This is weaker but sufficient for the canonical DE composition defined in 4.3.
 #### DR-3 (Substrate-agnosticism)
 
 ```
-∀ substrate S, if S implements signatures of primitives in §2,
+∀ substrate S, if S satisfies the Conformance Criterion below,
 then DR-0, DR-1, DR-2 (or DR-2') hold on S.
 ```
 
-**Interpretation** : kiki and hypothetical E-SNN are both valid instantiations.
+**Interpretation** : kiki-oniric and hypothetical E-SNN are both valid instantiations **iff they pass the Conformance Criterion**. Pure signature typing is **not** sufficient — behavioral conformance is required.
 
-**Proof** : by construction — primitives are typed interfaces; any conforming implementation inherits the axioms. (Non-trivial substrates may require verification of specific properties, but the framework-level axioms are preserved by signature conformance.)
+**Conformance Criterion (executable)** : a substrate S instantiates the framework iff all three conditions hold:
+
+1. **Signature typing** — S implements the typed Protocol signatures of primitives α, β, γ, δ, 1, 2, 3, 4 as defined in §2.1 (Python Protocol types, TypeScript interfaces, or equivalent in target language).
+
+2. **Axiom property tests** — the property test suite for DR-0, DR-1, and DR-2 (or DR-2') passes on S with ≥100% coverage on BLOCKING cases. Test suite is versioned in T-Ops under `tests/conformance/axioms/` and executed via `dream-harness conformance --substrate <S>`.
+
+3. **BLOCKING invariants enforceable** — invariants S1 (retained non-regression), S2 (no NaN/Inf), S3 (hierarchy valid), and I1 (episodic conservation) are implemented as runtime checks on S with automated enforcement (abort-on-violation + logging to `aborted-swaps/` or equivalent).
+
+**Formal statement** :
+
+```
+conforms(S) ≜ typed(S) ∧ axiom_tests_pass(S) ∧ invariants_enforced(S, {S1,S2,S3,I1})
+∀ S, conforms(S) ⟹ (DR-0 ∧ DR-1 ∧ DR-2) holds on S
+```
+
+**Proof sketch** : given `conforms(S)`, each of the three conditions directly enables one part of the axioms:
+- `typed(S)` → operations are compositional in type (closure part of DR-2)
+- `axiom_tests_pass(S)` → behavioral axioms are empirically validated (functional composition part of DR-2, accountability DR-0, conservation DR-1)
+- `invariants_enforced(S)` → runtime guarantees preserve axioms under concurrent execution (swap worktree, async dream process)
+
+Together, conforming substrate is validated both **statically** (typing + property tests) and **dynamically** (invariant enforcement), not merely asserted by construction.
+
+**Cycle-1 status** : kiki-oniric conformance is established incrementally — signature typing locked by S2 (Story 0 expose-primitives), axiom tests passing by S6 (aligned with G3-draft milestone), invariants enforceable by S8 (full Track A P_equ runtime). Cycle-2 substrate E-SNN must pass the same three conditions before being claimed as instantiation.
 
 #### DR-4 (Profile chain inclusion)
 
@@ -558,7 +580,7 @@ Interface changes require bump of **both** tracks' DualVer minor.
 1. **DR-2 proof** — is strict compositionality provable, or must we fall back to DR-2'? (G3 decision S8)
 2. **Commutativity boundary** — for which op pairs does `op_2 ∘ op_1 = op_1 ∘ op_2`? (informs canonical order)
 3. **Budget additivity under parallel C-branch** — how does additivity compose when recombine runs in parallel with serial A→B→D branch? (needs parallel monoid extension)
-4. **Substrate conformance criterion** — precise spec of what "implements signature" means for DR-3 — is typing enough, or are additional laws needed?
+4. **Substrate conformance criterion** — RESOLVED (see §6.2 DR-3) : conformance requires signature typing ∧ axiom property tests ∧ BLOCKING invariants enforceable. Typing alone is insufficient.
 5. **Monotonicity metric class for DR-4.L** — formally characterize which metrics are monotone in capacity for the lemma to hold strictly.
 
 These questions feed into the proof work of section C.4 (formal-proofs appendix), weeks S5-S8.
