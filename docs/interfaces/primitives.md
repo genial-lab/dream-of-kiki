@@ -1,6 +1,6 @@
 # Primitives Interface Contract
 
-**Version** : C-v0.3.1+STABLE (draft, bump to C-v0.5.0 at S4.2)
+**Version** : C-v0.5.0+STABLE
 **Owners** : Track C (design) + Track A (implementation)
 **Locked** : S2 → S4 (evolves with framework)
 

@@ -1,8 +1,8 @@
 # Eval matrix stratification rules
 # Referenced by harness/config/eval_matrix.py
-# Version: C-v0.3.1+STABLE
+# Version: C-v0.5.0+STABLE
 
-version: "C-v0.3.1+STABLE"
+version: "C-v0.5.0+STABLE"
 
 bump_rules:
   PATCH:

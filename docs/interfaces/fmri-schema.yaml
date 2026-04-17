@@ -2,7 +2,7 @@
 # Locked at S4.1 based on G1 Branch A (Studyforrest)
 # Reference: docs/feasibility/studyforrest-rsa-note.md
 
-version: "C-v0.3.1+STABLE"
+version: "C-v0.5.0+STABLE"
 data_source: studyforrest
 branch: A  # GO-STUDYFORREST from G1 decision
 
