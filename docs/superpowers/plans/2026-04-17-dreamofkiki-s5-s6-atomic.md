@@ -318,6 +318,25 @@ def test_runtime_unknown_operation_raises() -> None:
     ep = make_episode("de-0004", (Operation.RECOMBINE,))
     with pytest.raises(NotImplementedError, match="recombine"):
         runtime.execute(ep)
+
+
+def test_runtime_logs_failed_episode_on_handler_exception() -> None:
+    def failing_handler(_episode: DreamEpisode) -> None:
+        raise RuntimeError("handler blew up")
+
+    runtime = DreamRuntime()
+    runtime.register_handler(Operation.REPLAY, failing_handler)
+    ep = make_episode("de-fail", (Operation.REPLAY,))
+
+    with pytest.raises(RuntimeError, match="blew up"):
+        runtime.execute(ep)
+
+    # DR-0: log entry must exist even though handler raised
+    assert len(runtime.log) == 1
+    assert runtime.log[0].episode_id == "de-fail"
+    assert runtime.log[0].completed is False
+    assert "RuntimeError" in runtime.log[0].error
+    assert "blew up" in runtime.log[0].error
 ```
 
 ## Step S5.2.2 — Verify failing
@@ -354,11 +373,17 @@ OperationHandler = Callable[[DreamEpisode], None]
 
 @dataclass(frozen=True)
 class EpisodeLogEntry:
-    """Immutable log entry per executed DE — DR-0 accountability."""
+    """Immutable log entry per executed DE — DR-0 accountability.
+
+    `completed=False` + non-empty `error` means the DE raised during
+    handler execution. DR-0 still satisfied: every DE produces a log
+    entry regardless of handler outcome.
+    """
 
     episode_id: str
     operations_executed: tuple[Operation, ...]
     completed: bool
+    error: str | None = None
 
 
 class DreamRuntime:
@@ -385,6 +410,10 @@ class DreamRuntime:
     def execute(self, episode: DreamEpisode) -> None:
         """Execute all operations of a DE sequentially.
 
+        DR-0 guarantee: every call appends a log entry regardless
+        of handler outcome. `completed=False` + `error` populated
+        when a handler raises.
+
         Raises NotImplementedError if any operation lacks a handler.
         """
         for op in episode.operation_set:
@@ -393,25 +422,33 @@ class DreamRuntime:
                     f"No handler registered for operation {op.value!r}"
                 )
 
-        for op in episode.operation_set:
-            self._handlers[op](episode)
-
-        self._log.append(
-            EpisodeLogEntry(
-                episode_id=episode.episode_id,
-                operations_executed=episode.operation_set,
-                completed=True,
+        error: str | None = None
+        completed = False
+        try:
+            for op in episode.operation_set:
+                self._handlers[op](episode)
+            completed = True
+        except Exception as exc:
+            error = f"{type(exc).__name__}: {exc}"
+            raise
+        finally:
+            self._log.append(
+                EpisodeLogEntry(
+                    episode_id=episode.episode_id,
+                    operations_executed=episode.operation_set,
+                    completed=completed,
+                    error=error,
+                )
             )
-        )
 ```
 
 ## Step S5.2.4 — Verify passing
 
 Run : `uv run pytest tests/unit/test_runtime.py -v --no-cov`
-Expected: 4 passed.
+Expected: 5 passed.
 
 Run : `uv run pytest`
-Expected: 28 tests (24 + 4 new), coverage ≥90%.
+Expected: 29 tests (24 + 5 new), coverage ≥90%.
 
 ## Step S5.2.5 — Commit
 
