@@ -1,0 +1,408 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\documentclass[
+]{article}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{longtable,booktabs,array}
+\newcounter{none} % for unnumbered tables
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={dreamOfkiki: A Substrate-Agnostic Formal Framework for Dream-Based Knowledge Consolidation in Artificial Cognitive Systems},
+  pdfauthor={dreamOfkiki project contributors},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{dreamOfkiki: A Substrate-Agnostic Formal Framework for
+Dream-Based Knowledge Consolidation in Artificial Cognitive Systems}
+\author{dreamOfkiki project contributors}
+\date{2026}
+
+\begin{document}
+\maketitle
+
+\section{Paper 1 --- Full Draft
+Assembly}\label{paper-1-full-draft-assembly}
+
+⚠️ \textbf{Status} : draft assembly. Section files are the source of
+truth ; this file is the rendering target. Edits go in section files,
+then re-assemble.
+
+⚠️ \textbf{Synthetic data caveats} apply to §7 Results (numbers from
+mega-v2 synthetic placeholder). Real ablation lands cycle 1 closeout
+(S20+) or cycle 2.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{1. Abstract}\label{abstract}
+
+→ See \texttt{abstract.md} (250-word target).
+
+{[}INCLUDE: abstract.md{]}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{2. Introduction}\label{introduction}
+
+→ See \texttt{introduction.md} (\textasciitilde1.5 pages,
+\textasciitilde1200 words).
+
+{[}INCLUDE: introduction.md{]}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{3. Background --- four theoretical
+pillars}\label{background-four-theoretical-pillars}
+
+→ See \texttt{background.md} (\textasciitilde1.5 pages,
+\textasciitilde1500 words).
+
+{[}INCLUDE: background.md{]}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{4. Framework C}\label{framework-c}
+
+⚠️ \textbf{Source} :
+\texttt{docs/specs/2026-04-17-dreamofkiki-framework-C-design.md} covers
+this section. Paper version below is a condensed narrative of that spec,
+structured per §4 outline.md.
+
+\subsubsection{4.1 Primitives --- 8 typed
+Protocols}\label{primitives-8-typed-protocols}
+
+Awake → Dream channels : - α (raw traces, P\_max only) --- firehose ring
+buffer - β (curated episodic) --- SQLite append-log with saillance
+gating - γ (weights snapshot) --- checkpoint pointer fallback - δ
+(hierarchical latents) --- ring buffer N=256 multi-species
+
+Dream → Awake channels : - 1 (weight delta) --- applied via swap
+protocol - 2 (latent samples) --- generative replay queue - 3 (hierarchy
+diff) --- atomic apply at swap with S3 guard - 4 (attention prior) ---
+meta-cognitive guidance (P\_max only)
+
+\subsubsection{4.2 Profiles --- chain inclusion
+DR-4}\label{profiles-chain-inclusion-dr-4}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1875}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2708}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2917}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Profile
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Channels in
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Channels out
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Operations
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+P\_min & β & 1 & replay, downscale \\
+P\_equ & β + δ & 1 + 3 + 4 & replay, downscale, restructure,
+recombine\_light \\
+P\_max & α + β + δ & 1 + 2 + 3 + 4 & replay, downscale, restructure,
+recombine\_full \\
+\end{longtable}
+}
+
+DR-4 (proven in \texttt{docs/proofs/dr4-profile-inclusion.md}) :
+ops(P\_min) ⊆ ops(P\_equ) ⊆ target\_ops(P\_max), and similarly for
+channels. P\_max is skeleton-only in cycle 1.
+
+\subsubsection{4.3 Dream-episode 5-tuple
+ontology}\label{dream-episode-5-tuple-ontology}
+
+Each dream-episode (DE) is a 5-tuple :
+\texttt{(trigger,\ input\_slice,\ operation\_set,\ output\_channels,\ budget)}.
+Triggers ∈ \{SCHEDULED, SATURATION, EXTERNAL\}. Operations are a
+non-empty tuple of \{REPLAY, DOWNSCALE, RESTRUCTURE, RECOMBINE\}.
+BudgetCap enforces non-negative finite (FLOPs, wall\_time\_s, energy\_j)
+per K1 invariant.
+
+\subsubsection{4.4 Operations --- semigroup of consolidation
+steps}\label{operations-semigroup-of-consolidation-steps}
+
+The operation set forms a free non-commutative semigroup under
+composition \texttt{∘} with additive budget (DR-2 compositionality,
+proof draft in \texttt{docs/proofs/dr2-compositionality.md}). Canonical
+order : replay → downscale → restructure (serial, A-B-D pillar order) ;
+recombine in parallel (C pillar). The op-pair analysis
+(\texttt{docs/proofs/op-pair-analysis.md}) enumerates all 16 pairs,
+finding 12 non-commutative cross-pairs.
+
+\subsubsection{4.5 Axioms DR-0..DR-4}\label{axioms-dr-0..dr-4}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{DR-0 (accountability)} : every executed DE produces an
+  EpisodeLogEntry, even on handler exception (try/finally guarantee).
+\item
+  \textbf{DR-1 (episodic conservation)} : every β record is consumed
+  before purge.
+\item
+  \textbf{DR-2 (compositionality)} : op composition forms a semigroup
+  with type closure + budget additivity + functional composition.
+  Free-generator universal property is open (G3 reviewer pending).
+\item
+  \textbf{DR-3 (substrate-agnosticism)} : Conformance Criterion =
+  signature typing ∧ axiom property tests pass ∧ BLOCKING invariants
+  enforceable. kiki-oniric satisfies all three.
+\item
+  \textbf{DR-4 (profile chain inclusion)} : P\_min ⊆ P\_equ ⊆ P\_max for
+  ops and channels.
+\end{itemize}
+
+\subsubsection{4.6 Invariants --- I/S/K with enforcement
+matrix}\label{invariants-isk-with-enforcement-matrix}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{I1} episodic conservation (BLOCKING)
+\item
+  \textbf{I2} hierarchy traceability (BLOCKING)
+\item
+  \textbf{I3} latent distributional drift (WARN)
+\item
+  \textbf{S1} retained non-regression (BLOCKING, swap guard)
+\item
+  \textbf{S2} finite weights no NaN/Inf (BLOCKING, swap guard)
+\item
+  \textbf{S3} topology valid (BLOCKING, swap guard)
+\item
+  \textbf{S4} attention prior bounded (P\_max only)
+\item
+  \textbf{K1} dream-episode budget (BLOCKING)
+\item
+  \textbf{K3} swap latency bounded (WARN)
+\item
+  \textbf{K4} eval matrix coverage on MAJOR bump (BLOCKING)
+\end{itemize}
+
+\subsubsection{4.7 DualVer formal+empirical
+versioning}\label{dualver-formalempirical-versioning}
+
+\texttt{C-vX.Y.Z+\{STABLE,UNSTABLE\}} --- formal axis (FC) and empirical
+axis (EC) bump independently. Current : C-v0.5.0+STABLE (target post-G3
+: C-v0.7.0+STABLE).
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{5. Conformance Criterion validation
+approach}\label{conformance-criterion-validation-approach}
+
+⚠️ \textbf{Substrate-agnostic by design.} Paper 1 confines itself to the
+abstract conformance contract any compliant implementation must satisfy.
+An empirical instantiation (the cycle-1 reference implementation) is
+reported in Paper 2.
+
+\subsubsection{5.1 Deterministic compilation
+graph}\label{deterministic-compilation-graph}
+
+A conformant substrate exposes a deterministic compilation graph for
+each of the four operations so that re-running with the same seed
+produces bit-stable outputs (R1 contract). This is the hardest
+pre-condition for the run registry to register a batch as reproducible.
+
+\subsubsection{5.2 Single-threaded scheduler with handler
+registry}\label{single-threaded-scheduler-with-handler-registry}
+
+DR-0 accountability requires that every executed dream-episode produces
+an \texttt{EpisodeLogEntry} even on handler exception. A single-threaded
+scheduler with a per-Operation handler registry and a try/except/finally
+pattern is the canonical realization ; multi-threaded variants must
+demonstrate equivalent log guarantees.
+
+\subsubsection{5.3 Atomic swap with invariant
+guards}\label{atomic-swap-with-invariant-guards}
+
+The awake-state promotion must be atomic and must abort on any violated
+BLOCKING invariant (S1 retained non-regression, S2 weight finiteness, S3
+topology validity). Conformant substrates expose a
+\texttt{SwapAborted}-style escape hatch keyed by the violated invariant
+ID.
+
+\subsubsection{5.4 Profile chain
+inclusion}\label{profile-chain-inclusion}
+
+DR-4 requires that any conformant set of profiles (P\_min ⊆ P\_equ ⊆
+P\_max) inherit ops and channels by inclusion. The conformance test
+suite ships generic membership checks ; substrate-specific wiring is
+reported in Paper 2.
+
+\subsubsection{5.5 Reference implementation
+pointer}\label{reference-implementation-pointer}
+
+See Paper 2 for an empirical instantiation (cycle-1 MLX-based reference
+implementation). Paper 1 makes no claim about a specific implementation
+beyond the formal contract above.
+
+\subsubsection{5.6 Proof sketches ---
+DR-0..DR-4}\label{proof-sketches-dr-0..dr-4}
+
+DR-0 proven by handler-registry try/finally invariant ; DR-1 proven by
+β-buffer drain accounting ; DR-2 proof draft in
+\texttt{docs/proofs/dr2-compositionality.md} ; DR-3 proven by
+Conformance Criterion (signature typing + axiom property tests +
+BLOCKING invariants enforceable) ; DR-4 proven in
+\texttt{docs/proofs/dr4-profile-inclusion.md} (chain inclusion of ops
+and channels).
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{6. Methodology}\label{methodology}
+
+→ See \texttt{methodology.md}.
+
+{[}INCLUDE: methodology.md{]}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{7. Results}\label{results}
+
+→ See \texttt{results-section.md}.
+
+{[}INCLUDE: results-section.md{]}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{8. Discussion}\label{discussion}
+
+→ See \texttt{discussion.md}.
+
+{[}INCLUDE: discussion.md{]}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{9. Future Work}\label{future-work}
+
+→ See \texttt{future-work.md}.
+
+{[}INCLUDE: future-work.md{]}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{10. References}\label{references}
+
+→ See \texttt{references.bib} (16 entries cycle-1 stub, will extend to
+\textasciitilde30-40 in S20-S22 as the full draft is rendered).
+
+Key citations (alphabetical) : - Diekelmann \& Born 2010 (sleep memory)
+- French 1999 (catastrophic forgetting) - Friston 2010 (FEP) - Hobson
+2009 (REM dreaming) - Kirkpatrick 2017 (EWC) - McClelland 1995 (CLS) -
+McCloskey \& Cohen 1989 (forgetting) - Rao \& Ballard 1999 (predictive
+coding) - Rebuffi 2017 (iCaRL) - Shin 2017 (generative replay) - Solms
+2021 (consciousness) - Stickgold 2005 (consolidation) - Tononi \&
+Cirelli 2014 (SHY) - van de Ven 2020 (brain-inspired replay) - Walker \&
+Stickgold 2004 (consolidation) - Whittington \& Bogacz 2017 (predictive
+coding)
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Word count summary (target : \textasciitilde5000 words main
++ supp)}\label{word-count-summary-target-5000-words-main-supp}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+Section & Target & Status \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+§1 Abstract & ≤250 & drafted (\textasciitilde265, needs trim) \\
+§2 Introduction & ≤1500 & drafted (\textasciitilde1200) \\
+§3 Background & ≤1500 & drafted (\textasciitilde1500) \\
+§4 Framework & condensed in main + spec ref & done \\
+§5 Implementation & condensed & done \\
+§6 Methodology & ≤1500 & drafted (\textasciitilde1500) \\
+§7 Results & ≤2000 & drafted (placeholder) \\
+§8 Discussion & ≤1500 & drafted (\textasciitilde1500) \\
+§9 Future Work & ≤700 & drafted (\textasciitilde700) \\
+§10 References & n/a & 16 entries stub \\
+\end{longtable}
+}
+
+\textbf{Estimated total} : \textasciitilde10000 words (needs aggressive
+trim for Nature HB 5000-word main-text discipline ; supp can absorb
+overflow).
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Notes for revision}\label{notes-for-revision}
+
+\begin{itemize}
+\tightlist
+\item
+  Render via Quarto / pandoc into PDF + LaTeX for arXiv submit (S21.1)
+\item
+  Insert OSF DOI in §6.1 once OSF lock is completed
+\item
+  Replace synthetic placeholders in §7 with real ablation values post
+  S20+
+\item
+  Trim §1 abstract to ≤250 words
+\item
+  Trim §3 + §6 + §8 to fit overall main-text budget
+\item
+  Add Figures (1 architecture diagram, 2 results boxplot, 3 Jonckheere
+  trend, 4 four-pillars conceptual)
+\item
+  Bibtex render with proper \texttt{\textbackslash{}cite\{\}} calls
+\end{itemize}
+
+\end{document}
