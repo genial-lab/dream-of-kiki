@@ -49,3 +49,47 @@ def downscale_handler(
         state.compound_factor *= factor
 
     return handler
+
+
+def downscale_handler_mlx(
+    state: DownscaleOpState,
+    model,  # mlx.nn.Module — typed loosely for lazy import
+) -> Callable[[DreamEpisode], None]:
+    """Build a downscale handler with real MLX weight shrinkage.
+
+    Walks the model parameter tree, multiplies each leaf array by
+    `shrink_factor`, then forces evaluation. State counters updated
+    consistently with skeleton handler.
+
+    The skeleton `downscale_handler` remains for tests / contexts
+    not requiring MLX. This MLX variant is the production path for
+    the G2 GO-FULL gate (real weight shrinkage).
+
+    Reference: docs/specs/2026-04-17-dreamofkiki-framework-C-design.md §4.2
+    """
+    import mlx.core as mx
+
+    def _shrink(node, factor: float):
+        if isinstance(node, dict):
+            return {k: _shrink(v, factor) for k, v in node.items()}
+        if isinstance(node, (list, tuple)):
+            shrunk = [_shrink(v, factor) for v in node]
+            return type(node)(shrunk)
+        if isinstance(node, mx.array):
+            return node * factor
+        return node
+
+    def handler(episode: DreamEpisode) -> None:
+        factor = episode.input_slice.get("shrink_factor", 1.0)
+        if not (0.0 < factor <= 1.0):
+            raise ValueError(
+                f"shrink_factor must be in (0, 1], got {factor}"
+            )
+        new_params = _shrink(model.parameters(), factor)
+        model.update(new_params)
+        mx.eval(model.parameters())
+        state.total_episodes_handled += 1
+        state.last_factor_applied = factor
+        state.compound_factor *= factor
+
+    return handler
