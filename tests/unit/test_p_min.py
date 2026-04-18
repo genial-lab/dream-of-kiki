@@ -1,4 +1,7 @@
-"""Unit tests for P_min profile (replay + downscale + swap)."""
+"""Unit tests for P_min profile wiring (replay + downscale).
+
+Swap protocol E2E tests are in test_p_min_e2e.py (S9.4+).
+"""
 from __future__ import annotations
 
 from kiki_oniric.dream.episode import (
