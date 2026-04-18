@@ -4,7 +4,7 @@
 
 **Goal** : passer du **skeleton** (P_min wiré sans MLX) au **fonctionnel empirique** (P_min mesurable + P_equ wiré + G4 gate). Phase pivot vers ablation S13-S18.
 
-**Architecture** : 8 tasks atomiques (S9.1-S9.4, S10.1-S10.2, S11.1-S11.2, S12.1) + livrable G4. Mix MLX integration code + ops complexes (restructure D-Friston, recombine C-Hobson VAE) + profile wiring + report. Total attendu : 8 commits.
+**Architecture** : 11 tasks atomiques (S9.1-S9.5, S10.1-S10.2, S11.1-S11.2, S12.1-S12.2) — 8 dev tasks + 3 docs tasks. Mix MLX integration code + ops complexes (restructure D-Friston, recombine C-Hobson VAE) + profile wiring + reports. Total attendu : 11 commits.
 
 **Tech Stack** : Python 3.12+ uv, **MLX** (Apple Silicon — `mx.array`, `mx.optimizers`, lazy compilation), pytest + hypothesis, dataclasses frozen. Single-threaded encore (concurrent dream worker S13+).
 
