@@ -16,9 +16,21 @@ from kiki_oniric.substrates.mlx_kiki_oniric import (
     MLX_SUBSTRATE_VERSION,
     mlx_substrate_components,
 )
+from kiki_oniric.substrates.esnn_thalamocortical import (
+    ESNN_SUBSTRATE_NAME,
+    ESNN_SUBSTRATE_VERSION,
+    EsnnBackend,
+    EsnnSubstrate,
+    esnn_substrate_components,
+)
 
 __all__ = [
     "MLX_SUBSTRATE_NAME",
     "MLX_SUBSTRATE_VERSION",
     "mlx_substrate_components",
+    "ESNN_SUBSTRATE_NAME",
+    "ESNN_SUBSTRATE_VERSION",
+    "EsnnBackend",
+    "EsnnSubstrate",
+    "esnn_substrate_components",
 ]
