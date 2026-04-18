@@ -30,6 +30,24 @@ class RecombineOpState:
     total_samples_emitted: int = 0
     last_sample: list[float] | None = None
     sample_history: list[list[float]] = field(default_factory=list)
+    # New in C2.6 for full VAE variant — populated only by the
+    # `recombine_handler_full_mlx` factory. Light variants keep it
+    # as None for backward compatibility.
+    last_kl_divergence: float | None = None
+
+
+@dataclass(frozen=True)
+class RecombineFullResult:
+    """Output of a full VAE recombine op (sample + KL divergence).
+
+    Returned conceptually by `recombine_handler_full_mlx` via the
+    state object (`state.last_sample` + `state.last_kl_divergence`).
+    This dataclass exposes the pair in an immutable form for code
+    paths that prefer value-level plumbing over state mutation.
+    """
+
+    sample: list[float]
+    kl_divergence: float
 
 
 def _interpolate(
@@ -175,5 +193,81 @@ def recombine_handler_mlx(
         state.total_samples_emitted += 1
         state.last_sample = sample
         state.sample_history.append(sample)
+
+    return handler
+
+
+def recombine_handler_full_mlx(
+    state: RecombineOpState,
+    encoder,
+    decoder,
+    seed: int = 0,
+) -> Callable[[DreamEpisode], None]:
+    """Build a full VAE recombine handler (C-Hobson full, C2.6).
+
+    Upgrade from `recombine_handler_mlx` light variant (C2.3)
+    with proper full VAE semantics :
+    - encoder : input -> (mu, log_sigma)
+    - reparameterization : z = mu + sigma * epsilon (eps ~ N(0,I))
+    - decoder : z -> output sample
+    - KL divergence computed vs standard Gaussian prior :
+      KL = -0.5 * mean(1 + log_sigma - mu**2 - exp(log_sigma))
+      (non-negative by construction of KL(q||p) with p = N(0,I))
+
+    Seed-based per-episode determinism for reproducibility (R1
+    contract). `state.last_sample` + `state.last_kl_divergence`
+    populated after each call.
+
+    Preserves : DR-0 (episode count + history), DR-4 (recombine is
+    part of P_equ/P_max chain), I3 (latent shape consistency).
+
+    Reference:
+    docs/specs/2026-04-17-dreamofkiki-framework-C-design.md §4.2
+    """
+    import mlx.core as mx
+
+    def handler(episode: DreamEpisode) -> None:
+        latents = episode.input_slice.get("delta_latents", [])
+        # I3 input shape : keep API compatibility with light
+        # handlers that require >= 2 latents. Only latents[0] is
+        # consumed — diversity comes from sampling z.
+        if len(latents) < 2:
+            raise ValueError(
+                f"I3: delta_latents must contain at least 2 "
+                f"latents, got {len(latents)}"
+            )
+        if not all(len(lat) == len(latents[0]) for lat in latents):
+            raise ValueError(
+                "I3: delta_latents must all have the same "
+                "dimensionality"
+            )
+
+        # Per-episode seed re-init for reproducibility. We mutate
+        # the process-wide MLX RNG here (test path expects seed
+        # diversity across factory calls) but the seed schedule
+        # is deterministic : seed + episode_index.
+        mx.random.seed(seed + state.total_episodes_handled)
+
+        x = mx.array(latents[0])
+        mu, log_sigma = encoder(x)
+        sigma = mx.exp(0.5 * log_sigma)
+        epsilon = mx.random.normal(shape=mu.shape)
+        z = mu + sigma * epsilon
+        sample_arr = decoder(z)
+        # KL(q(z|x) || N(0, I)) with q(z|x) = N(mu, exp(log_sigma))
+        # under the convention log_sigma = log(sigma**2) (log-var).
+        # KL = -0.5 * mean(1 + log_sigma - mu**2 - exp(log_sigma))
+        kl = -0.5 * mx.mean(
+            1.0 + log_sigma - mu * mu - mx.exp(log_sigma)
+        )
+        mx.eval(sample_arr, kl)
+
+        sample = [float(v) for v in sample_arr.tolist()]
+        kl_value = float(kl.item())
+        state.total_episodes_handled += 1
+        state.total_samples_emitted += 1
+        state.last_sample = sample
+        state.sample_history.append(sample)
+        state.last_kl_divergence = kl_value
 
     return handler
