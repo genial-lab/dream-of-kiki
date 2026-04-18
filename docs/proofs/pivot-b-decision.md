@@ -1,3 +1,12 @@
+<!--
+SPDX-License-Identifier: CC-BY-4.0
+Authorship byline : dreamOfkiki project contributors
+License : Creative Commons Attribution 4.0 International (CC-BY-4.0)
+-->
+
+**Authorship byline** : *dreamOfkiki project contributors*
+**License** : CC-BY-4.0
+
 # Pivot B Decision Tree
 
 **Trigger** : G5 PUBLICATION-READY gate cannot be reached by S22

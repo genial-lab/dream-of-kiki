@@ -28,8 +28,9 @@ front matter and resolves to an immutable timestamp record.
 
 All hypothesis tests use a Bonferroni-corrected significance
 threshold : `α_per_hypothesis = 0.05 / 4 = 0.0125`. The four
-tests are implemented in `kiki_oniric/eval/statistics.py`,
-wrapping `scipy.stats` :
+tests are implemented in the reference implementation's
+statistical module (which wraps standard statistical libraries ;
+see Paper 2 for the substrate-specific code path) :
 
 - **`welch_one_sided`** (H1) : `scipy.stats.ttest_ind` with
   `equal_var=False`, p-value halved for one-sided interpretation.

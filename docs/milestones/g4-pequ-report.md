@@ -33,7 +33,10 @@
 
 ### Test coverage
 
-- 86 tests total (target ≥90% coverage, currently ~95%)
+- 86 tests total (target ≥90% coverage, currently ~95% ; run_id:
+  `syn_s12_g4_pequ_report_baseline`, dump:
+  `docs/milestones/ablation-results.json` for the matching
+  ablation batch)
 - `kiki_oniric/dream/operations/`: replay, downscale, restructure,
   recombine all 100% line coverage
 - `kiki_oniric/dream/guards/`: finite, topology fully tested with
@@ -84,9 +87,10 @@ expected) :
 > + statistical pipeline, not P_equ efficacy on real linguistic
 > data.
 
-Synthetic ablation run (3 profiles × 3 seeds, mega-v2 fallback).
-See `ablation-results.md` for full table + JSON dump (run_id
-recorded in `RunRegistry`).
+Synthetic ablation run (3 profiles × 3 seeds, mega-v2 fallback ;
+run_id: `syn_s15_3_g4_synthetic_pipeline_v1`, dump:
+`docs/milestones/ablation-results.json`).
+See `ablation-results.md` for full table + JSON dump.
 
 **Hypothesis tests (Bonferroni α = 0.0125)** : 3/4 significant
 

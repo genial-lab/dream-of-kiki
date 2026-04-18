@@ -30,10 +30,11 @@ evidence (synapse size reductions during sleep) and by behavioral
 evidence (sleep-dependent improvement on previously trained
 tasks). In our framework, SHY corresponds to the `downscale`
 operation : multiplicative shrinkage of weights by a factor in
-(0, 1]. As established in our op-pair analysis, downscale is
-**commutative but not idempotent** (shrink_f ∘ shrink_f gives
-factor², not factor) — a property that constrains canonical
-ordering choices.
+(0, 1]. As established in our op-pair analysis (see
+`docs/proofs/op-pair-analysis.md`, axioms DR-2 + invariants S2),
+downscale is **commutative but not idempotent** (shrink_f ∘
+shrink_f gives factor², not factor) — a property that constrains
+canonical ordering choices.
 
 ## 3.3 Pillar C — Hobson / Solms creative dreaming
 
@@ -61,7 +62,10 @@ hierarchical model (add layer, remove layer, reroute
 connectivity) to reduce predictive error on retained episodes.
 The S3 topology guard (validate_topology) ensures that
 restructure operations preserve framework-level invariants
-(species connectivity, no self-loops, layer count bounds).
+S3 (species connectivity, no self-loops, layer count bounds —
+see `docs/invariants/registry.md` for canonical definitions and
+the S3 guard reference in
+`kiki_oniric/dream/guards/topology.py`).
 
 ## 3.5 The compositional gap
 
@@ -77,9 +81,11 @@ analysis (`docs/proofs/op-pair-analysis.md`) establishes that 12
 of the 16 (op_i, op_j) cross-pairs are **non-commutative** —
 that is, applying replay then downscale produces a different
 cognitive state than applying downscale then replay. The
-canonical ordering chosen in framework §4.3 (replay → downscale
-→ restructure ; recombine in parallel) is therefore a load-
-bearing design decision, not an arbitrary implementation choice.
+canonical ordering chosen in
+`docs/specs/2026-04-17-dreamofkiki-framework-C-design.md` §4.3
+(replay → downscale → restructure ; recombine in parallel) is
+therefore a load-bearing design decision, not an arbitrary
+implementation choice.
 
 A proper formal framework must therefore (i) specify the
 operations as composable primitives with well-defined types,
@@ -87,10 +93,16 @@ operations as composable primitives with well-defined types,
 an executable account that any compliant substrate can
 implement, and (iv) support empirical ablation comparing
 different operation profiles. None of the prior art does all
-four. Our Framework C (§4) is the first to do so, with the
-free-semigroup compositionality axiom DR-2 (proven in
-`docs/proofs/dr2-compositionality.md`) as the foundational
-property and the Conformance Criterion DR-3 as the executable
+four. Our Framework C-v0.5.0+STABLE (§4) is the first to do so,
+mapping the four pillars to the canonical axiom framework :
+pillar A → DR-1 episodic conservation, pillar B → DR-2
+compositionality (downscale order constraint), pillar D → DR-3
+substrate-agnosticism (the restructure topology guard S3 lives
+on this axis), pillar C → DR-4 profile chain inclusion that
+keeps the recombine-rich profiles on top. The free-semigroup
+compositionality axiom DR-2 (proven in
+`docs/proofs/dr2-compositionality.md`) is the foundational
+property and the Conformance Criterion DR-3 the executable
 contract for substrate-agnosticism.
 
 ---

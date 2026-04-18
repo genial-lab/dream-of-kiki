@@ -6,29 +6,33 @@
 
 ## 8.1 Theoretical contribution
 
-Our framework C is, to our knowledge, the first executable formal
-framework for dream-based consolidation in artificial cognitive
-systems. By axiomatizing the four pillars (replay, downscaling,
-restructuring, recombination) as composable operations on a free
-semigroup with additive budget, we make explicit what prior work
-left implicit : the **order and composition** of consolidation
-operations matters, and reasoning about their interactions
-requires more than ad-hoc engineering choices.
+Our framework C-v0.5.0+STABLE is, to our knowledge, the first
+executable formal framework for dream-based consolidation in
+artificial cognitive systems. By axiomatizing the four pillars
+(replay (DR-1), downscaling (DR-2), restructuring (DR-3),
+recombination (DR-4)) as composable operations on a free
+semigroup with additive budget (see DR-2 in
+`docs/proofs/dr2-compositionality.md`), we make explicit what
+prior work left implicit : the **order and composition** of
+consolidation operations matters, and reasoning about their
+interactions requires more than ad-hoc engineering choices.
 
 The Conformance Criterion (DR-3) operationalizes
 substrate-agnosticism : any substrate that satisfies signature
 typing + axiom property tests + BLOCKING-invariant enforceability
 inherits the framework's guarantees. This is qualitatively
 different from prior frameworks that bind theory to a specific
-implementation [Kirkpatrick 2017, van de Ven 2020] — `kiki-oniric`
-is an *instance*, not the framework itself. The DR-4 profile
+implementation [Kirkpatrick 2017, van de Ven 2020] — implementation
+details are discussed in Paper 2. The DR-4 profile
 chain inclusion (P_min ⊆ P_equ ⊆ P_max) further structures the
 ablation space such that experimental claims about richer
 profiles do not inadvertently rely on weaker-profile invariants.
 
 ## 8.2 Empirical contribution
 
-The synthetic ablation pipeline (S15.3) demonstrates that the
+The synthetic ablation pipeline (S15.3, run_id
+`syn_s15_3_g4_synthetic_pipeline_v1`, dump
+`docs/milestones/ablation-results.json`) demonstrates that the
 statistical evaluation chain (Welch / TOST / Jonckheere /
 one-sample t-test under Bonferroni correction) is end-to-end
 operational on a 500-item stratified benchmark. Three of four
@@ -42,10 +46,12 @@ mega-v2 + MLX-inferred predictor integration (S20+), the
 **measurement infrastructure** itself is validated : the
 RetainedBenchmark loader with SHA-256 integrity, the
 `evaluate_retained` predictor bridge, the AblationRunner harness,
-and the four statistical wrappers all interoperate cleanly.
-Reproducibility contract R1 (deterministic `run_id` from
-(c_version, profile, seed, commit_sha)) is enforced by the run
-registry.
+and the four statistical wrappers all interoperate cleanly. The
+synthetic batch above is registered under
+profile `G4_ablation` in the project registry so the JSON dump
+remains traceable. Reproducibility contract R1 (deterministic
+`run_id` from (c_version, profile, seed, commit_sha)) is enforced
+by the run registry.
 
 ## 8.3 Limitations
 
@@ -53,18 +59,19 @@ Three limitations bound the cycle-1 contribution :
 
 **(i) Synthetic data caveats.** All quantitative results in §7
 are produced by mock predictors at scripted accuracy levels
-(50% baseline, 70% P_min, 85% P_equ). They validate the
+(50% baseline, 70% P_min, 85% P_equ; run_id
+`syn_s15_3_g4_synthetic_pipeline_v1`). They validate the
 *pipeline*, not the *consolidation efficacy*. Real
 mega-v2 + MLX-inferred predictors land cycle 1 closeout (S20+)
 or cycle 2 ; until then, all numbers should be read as
 infrastructure-validation evidence only.
 
-**(ii) Single-substrate validation.** kiki-oniric is the only
-substrate exercised. While DR-3 Conformance Criterion is
+**(ii) Single-substrate validation.** A single substrate is
+exercised in cycle 1. While DR-3 Conformance Criterion is
 formulated to be substrate-agnostic, only one instance has
-passed all three conformance conditions. Cycle 2 introduces a
-second substrate (E-SNN thalamocortical on Loihi-2) precisely
-to test the substrate-agnosticism claim empirically.
+passed all three conformance conditions. Cycle 2 introduces an
+additional substrate to test the substrate-agnosticism claim
+empirically per the DR-3 Conformance Criterion.
 
 **(iii) P_max skeleton only.** The P_max profile is declared via
 metadata (target ops, target channels) but its handlers are

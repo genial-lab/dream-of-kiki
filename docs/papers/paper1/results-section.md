@@ -2,9 +2,16 @@
 
 **Target length** : ~1.5-2 pages markdown (≈ 1500-2000 words)
 
-⚠️ **Caveat** : current numbers from synthetic ablation (S15.3 G4
-pilot). Real mega-v2 + real MLX-inferred predictors land cycle 1
-S20+ ; this draft is structurally complete but values placeholder.
+⚠️ **Caveat (synthetic placeholder, G2/G4 pilot).** Every
+quantitative claim in this section comes from mock predictors at
+scripted accuracy levels (50%/70%/85%) registered under run_id
+`syn_s15_3_g4_synthetic_pipeline_v1` (dump
+`docs/milestones/ablation-results.json`). Numbers validate the
+*pipeline*, not P_equ efficacy on real linguistic data ; the
+section is preserved here so reviewers can audit the reporting
+template, but no headline empirical claim should be drawn from
+it. Real mega-v2 + MLX-inferred predictors land cycle-1 closeout
+(S20+) and will replace these placeholders.
 
 ---
 
@@ -18,7 +25,10 @@ predictor matched expected outputs and aborted with `S1 guard
 failed` in 100% of cycles when accuracy degraded — establishing
 the swap gating contract operationally.
 
-**Table 7.1 — P_min pilot (G2)**
+**Table 7.1 — P_min pilot (G2, synthetic placeholder, G2 pilot)**
+
+run_id : `syn_g2_pmin_pipeline_v1`
+dump : `docs/milestones/g2-pmin-report.md`
 
 | Seed | Baseline acc | P_min acc | Δ |
 |------|--------------|-----------|---|
@@ -26,20 +36,26 @@ the swap gating contract operationally.
 | 123  | [SYNTH 0.500] | [SYNTH 0.800] | +0.300 |
 | 7    | [SYNTH 0.500] | [SYNTH 0.800] | +0.300 |
 
-Gate criterion (Δ ≥ −0.02) : **PASS**. See
-`docs/milestones/g2-pmin-report.md` for raw results.
+Gate verdict (synthetic pipeline validation only ; criterion
+Δ ≥ −0.02) : **PASS**. See `docs/milestones/g2-pmin-report.md`
+for raw results.
 
 ---
 
 ## 7.2 P_equ functional ablation (G4)
 
-P_equ adds restructure (D-Friston FEP) and recombine (C-Hobson
-VAE-light) operations alongside replay + downscale, with channels
-β+δ → 1+3+4 wired. We ran the ablation runner across 3 profiles
-(baseline, P_min, P_equ) × 3 seeds on a synthetic mega-v2-style
-500-item benchmark stratified across 25 domains.
+P_equ adds the `restructure` operation (Friston FEP source) and
+the `recombine` operation (Hobson REM source) alongside `replay`
++ `downscale`, with channels β+δ → 1+3+4 wired. We ran the
+ablation runner across 3 profiles (baseline, P_min, P_equ) × 3
+seeds on a synthetic mega-v2-style 500-item benchmark stratified
+across 25 domains.
 
-**Table 7.2 — G4 ablation accuracy**
+**Table 7.2 — G4 ablation accuracy (synthetic placeholder, G4
+pilot)**
+
+run_id : `syn_s15_3_g4_synthetic_pipeline_v1`
+dump : `docs/milestones/ablation-results.json`
 
 | Profile  | Mean acc | Std | Range |
 |----------|----------|-----|-------|
@@ -47,51 +63,63 @@ VAE-light) operations alongside replay + downscale, with channels
 | P_min    | [SYNTH 0.700] | [SYNTH 0.000] | 0.700-0.700 |
 | P_equ    | [SYNTH 0.850] | [SYNTH 0.000] | 0.850-0.850 |
 
-(Replace with real ablation values post-S20+.)
+(Replace with real ablation values post-S20+ ; new run_id will be
+registered when real predictors are wired.)
 
 ---
 
-## 7.3 H1 — Forgetting reduction
+## 7.3 H1 — Forgetting reduction (synthetic placeholder)
 
 Welch's t-test (one-sided) on forgetting (1 − accuracy) of P_equ
-versus baseline :
+versus baseline (run_id
+`syn_s15_3_g4_synthetic_pipeline_v1`, dump
+`docs/milestones/ablation-results.json`) :
 
 - **Statistic** : t = [SYNTH −47.43]
 - **p-value** : p < 0.001 (synthetic, will be tightened with real data)
 - **Bonferroni α** : 0.0125
-- **Decision** : **reject H0** — P_equ significantly reduces
-  forgetting versus baseline.
+- **Synthetic-pipeline outcome** : H0 rejected on the mock
+  predictors. **No empirical hypothesis decision** is announced
+  here ; the genuine H1 verdict is deferred to S20+ when real
+  mega-v2 predictors are wired and a fresh run_id is registered.
 
 ---
 
 ## 7.4 H3 — Monotonic representational alignment
+       (synthetic placeholder)
 
 Jonckheere-Terpstra trend test on accuracy across the ordered
-profile chain (P_min < P_equ) :
+profile chain (P_min < P_equ) (run_id
+`syn_s15_3_g4_synthetic_pipeline_v1`, dump
+`docs/milestones/ablation-results.json`) :
 
 - **J-statistic** : [SYNTH 9.0]
 - **p-value** : [SYNTH 0.0248]
 - **Bonferroni α** : 0.0125
-- **Decision** : **fail to reject H0** at the Bonferroni-corrected
-  threshold (would reject at conventional α = 0.05). We report this
-  as a **borderline result** in the discussion ; cycle 2 with
-  P_max integrated should provide the third group needed to
-  strengthen the trend signal.
+- **Synthetic-pipeline outcome** : fails to reject H0 at the
+  Bonferroni-corrected threshold (would reject at conventional
+  α = 0.05). **No empirical hypothesis decision** is announced
+  here ; cycle 2 with P_max integrated should provide the third
+  group needed to strengthen the trend signal on real data.
 
 ---
 
-## 7.5 H4 — Energy budget compliance
+## 7.5 H4 — Energy budget compliance (synthetic placeholder)
 
 One-sample t-test on the energy ratio
 energy(dream) / energy(awake) versus the threshold 2.0 (master
-spec §7.2 viability criterion) :
+spec §7.2 viability criterion) (run_id
+`syn_s15_3_g4_synthetic_pipeline_v1`, dump
+`docs/milestones/ablation-results.json`) :
 
 - **Sample mean** : [SYNTH 1.6]
 - **t-statistic** : [SYNTH −5.66]
 - **p-value** : [SYNTH 0.0101]
 - **Bonferroni α** : 0.0125
-- **Decision** : **reject H0** — energy ratio significantly
-  below 2.0 ; dream compute overhead within budget.
+- **Synthetic-pipeline outcome** : H0 rejected on the mock
+  energy-ratio sample ; the **empirical** H4 verdict is deferred
+  to S20+ when real wall-clock energy traces are recorded under
+  a freshly registered run_id.
 
 ---
 

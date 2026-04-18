@@ -14,6 +14,7 @@ Cognitive Science (Pivot B fallback)
 ## Cross-references
 
 - Framework spec : `docs/specs/2026-04-17-dreamofkiki-framework-C-design.md`
+  (C-v0.5.0+STABLE per CHANGELOG.md)
 - Master spec : `docs/specs/2026-04-17-dreamofkiki-master-design.md`
 - Proofs : `docs/proofs/dr2-compositionality.md`,
   `docs/proofs/dr4-profile-inclusion.md`,
@@ -27,5 +28,4 @@ Cognitive Science (Pivot B fallback)
 ## Authorship
 
 Byline : *dreamOfkiki project contributors*. See `CONTRIBUTORS.md`
-at repo root for full list (humans + AI collaborators per
-open-science transparency).
+at repo root for the full list.

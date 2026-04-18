@@ -15,8 +15,9 @@ Structure :
   consolidation gap in AI)
 - Sentence 2 : contribution claim (formal framework with executable
   axioms DR-0..DR-4 + Conformance Criterion)
-- Sentence 3 : empirical validation summary (kiki-oniric ablation,
-  P_min vs P_equ on retained benchmark + RSA fMRI on Studyforrest)
+- Sentence 3 : pipeline-validation summary (synthetic
+  placeholder ablation, statistical pipeline end-to-end ;
+  empirical numbers reported in Paper 2)
 - Sentence 4 : significance (substrate-agnostic, open-science
   reproducible, OSF pre-registered)
 - 1-2 sentences : key result + future work pointer (E SNN cycle 2)
@@ -33,8 +34,9 @@ Subsections :
   Kirkpatrick 2017 EWC, Tononi SHY, Friston FEP, Hobson/Solms)
 - 2.3 The four pillars (A consolidation, B homeostasis, C creative,
   D predictive) and why a unified formal framework is missing
-- 2.4 Contribution roadmap : framework C with executable axioms +
-  Conformance Criterion + ablation on kiki-oniric
+- 2.4 Contribution roadmap : framework C-v0.5.0+STABLE with
+  executable axioms + Conformance Criterion ; reference
+  implementation reported in Paper 2
 
 ---
 
@@ -49,62 +51,97 @@ Subsections :
 
 ---
 
-## 4. Framework C
+## 4. Framework C-v0.5.0+STABLE
 
 Subsections :
-- 4.1 Primitives : 8 typed Protocols (α, β, γ, δ, 1-4 channels)
+- 4.1 Primitives : 8 typed Protocols (α, β, γ, δ, 1-4 channels).
+  Each operation must enumerate its **guard reference**
+  (replay → S1, downscale → S2, restructure → S3, recombine → I3
+  WARN) and bind to a conformance test under
+  `tests/conformance/`. Rule : **don't add an operation without
+  an accompanying guard reference and a conformance test.**
 - 4.2 Profiles : P_min, P_equ, P_max with chain inclusion DR-4
 - 4.3 Dream-episode 5-tuple ontology
 - 4.4 Operations : replay, downscale, restructure, recombine
 - 4.5 Axioms DR-0..DR-4
   - 4.5.1 DR-0 Accountability
   - 4.5.2 DR-1 Episodic conservation
-  - 4.5.3 DR-2 Compositionality (free semigroup, see proofs)
+  - 4.5.3 DR-2 Compositionality (free semigroup) — proof
+    deferred (see `docs/proofs/dr2-compositionality.md` draft)
   - 4.5.4 DR-3 Substrate-agnosticism + Conformance Criterion
   - 4.5.5 DR-4 Profile chain inclusion
 - 4.6 Invariants I/S/K with enforcement matrix
 - 4.7 DualVer formal+empirical versioning
+  (current : C-v0.5.0+STABLE per CHANGELOG.md)
 
 ---
 
-## 5. Implementation : kiki-oniric
+## 5. Conformance Criterion validation approach
+
+Substrate-agnostic. Substrate-specific implementation details
+(MLX, runtime, ablation pipeline) live in Paper 2.
 
 Subsections :
-- 5.1 Substrate choice : MLX on Apple Silicon
-- 5.2 Runtime : DreamRuntime with DR-0 log guarantee + swap protocol
-- 5.3 Profiles wired : P_min (replay+downscale), P_equ (4 ops + 3
-  channels)
-- 5.4 Concurrent worker skeleton (cycle-2 forward-compat API)
-- 5.5 Open-source : github.com/electron-rare/dream-of-kiki (MIT)
+- 5.1 Deterministic compilation graph
+- 5.2 Single-threaded scheduler with handler registry (DR-0
+  log guarantee)
+- 5.3 Atomic swap with invariant guards (S1 + S2 + S3)
+- 5.4 Profile chain inclusion DR-4
+- 5.5 Pointer to Paper 2 for an empirical instantiation
 
 ---
 
 ## 6. Methodology
 
 Subsections :
-- 6.1 Hypotheses H1-H4 (OSF pre-registration DOI cited)
+- 6.1 Hypotheses H1-H4 (OSF pre-registration DOI cited).
+  H1-H4 mapped to canonical axiom IDs : H1 → DR-1 (episodic
+  conservation reduces forgetting), H2 → DR-4 (P_max ⊆ P_equ
+  equivalence at the boundary), H3 → DR-2 (compositionality
+  monotonicity), H4 → K1 (budget compliance).
 - 6.2 Statistical tests : Welch (H1), TOST (H2), Jonckheere (H3),
   one-sample t (H4) ; Bonferroni α = 0.0125
 - 6.3 Benchmark : mega-v2 (498K examples, 25 domains, stratified
-  500-item retained set with SHA-256 integrity)
+  500-item retained set with SHA-256 integrity ;
+  `is_synthetic=true` flag set by the adapter when the real
+  mega-v2 path is unavailable, so downstream tooling can filter
+  registered run_ids by source). Cycle 1 reports use the
+  synthetic placeholder run_id
+  `syn_s15_3_g4_synthetic_pipeline_v1` ; the dump under
+  `docs/milestones/ablation-results.json` records the source as
+  `synthetic-placeholder`.
 - 6.4 RSA fMRI : Studyforrest (Branch A locked G1, FreeSurfer
-  parcellation STG/IFG/AG)
+  parcellation STG/IFG/AG ; cycle 1 reports infrastructure
+  validation only — synthetic placeholder, real RSA deferred to
+  cycle 2 with a freshly registered run_id)
 - 6.5 Reproducibility : R1 contract (deterministic run_id), Zenodo
   DOI artifact pinning
 
 ---
 
-## 7. Results
+## 7. Results (synthetic placeholder, G2/G4 pilot)
 
 → `results-section.md` (S18.2 draft)
 
+Every empirical entry below cites the registered run_id from
+`harness.storage.run_registry.RunRegistry` and the dump file
+under `docs/milestones/`. Synthetic placeholders are explicitly
+flagged with `(synthetic placeholder, G2 pilot)` /
+`(synthetic placeholder, G4 pilot)` per project guidance.
+
 Subsections :
-- 7.1 P_min viability (G2 GO-CONDITIONAL → real GO-FULL evidence)
-- 7.2 P_equ functional ablation (G4 ablation results)
-- 7.3 H1 forgetting reduction
-- 7.4 H3 monotonic representational alignment
-- 7.5 H4 energy budget compliance
-- 7.6 H2 P_max equivalence (cycle 2 deferred, partial smoke test)
+- 7.1 P_min viability (G2, run_id `syn_g2_pmin_pipeline_v1`,
+  dump `docs/milestones/g2-pmin-report.md`)
+- 7.2 P_equ functional ablation (G4, run_id
+  `syn_s15_3_g4_synthetic_pipeline_v1`, dump
+  `docs/milestones/ablation-results.json`)
+- 7.3 H1 forgetting reduction (synthetic placeholder, G4 pilot)
+- 7.4 H3 monotonic representational alignment (synthetic
+  placeholder, G4 pilot)
+- 7.5 H4 energy budget compliance (synthetic placeholder, G4
+  pilot)
+- 7.6 H2 P_max equivalence (cycle 2 deferred, partial smoke
+  test)
 
 ---
 
@@ -112,9 +149,14 @@ Subsections :
 
 Subsections :
 - 8.1 Theoretical contribution : first executable formal framework
-  for dream-based consolidation
-- 8.2 Empirical contribution : ablation evidence on real linguistic
-  hierarchical model (kiki-oniric)
+  for dream-based consolidation. Each claim cites the relevant
+  axiom IDs (DR-0..DR-4) and invariant IDs (I1, I2, S1, S2, S3,
+  K1) from `docs/invariants/registry.md` and the spec sections
+  in `docs/specs/2026-04-17-dreamofkiki-framework-C-design.md`.
+- 8.2 Empirical contribution : pipeline-validation evidence
+  (synthetic placeholder, G2/G4 pilot ; real-data evidence
+  reported in Paper 2 via the matching DR-1/DR-2/DR-4 axiom
+  references and registered run_ids)
 - 8.3 Limitations : synthetic-data caveats, single-substrate
   validation cycle 1, P_max skeleton only
 - 8.4 Comparison with prior art (van de Ven, EWC, etc.)
@@ -148,9 +190,10 @@ Key citations to populate :
 
 ## Artifacts
 
-- Code : github.com/electron-rare/dream-of-kiki (MIT, frozen at
-  arXiv submission tag)
-- Models : huggingface.co/clemsail/kiki-oniric-{P_min,P_equ}
-- Data : Zenodo DOI (post-S18 finalization)
+- Code, models, dashboards, dataset pinning : reported in Paper 2
+  (substrate-specific). Paper 1 ships only the formal artifacts :
 - Pre-registration : OSF DOI (TBD post-upload)
-- Dashboard : dream.saillant.cc (public read-only)
+- Proofs : `docs/proofs/` (DR-2, DR-4, op-pair-analysis,
+  pivot-b-decision)
+- Run-registry contract : `harness/storage/run_registry.py`
+  (R1 ; framework version C-v0.5.0+STABLE)

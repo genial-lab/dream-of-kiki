@@ -1,4 +1,7 @@
 {
+  "run_id": "syn_s15_3_g4_synthetic_pipeline_v1",
+  "harness_version": "C-v0.5.0+STABLE",
+  "is_synthetic": true,
   "benchmark_size": 500,
   "benchmark_hash": "synthetic:c8a0712000b6411cb6f84d3cca361f83b262c6798cc110c96e122c73f5b0def7",
   "seeds": [

@@ -74,6 +74,19 @@ dreamOfkiki/
 - Length target ~1.5 pages markdown
 - Synthetic results caveats explicitly flagged
 - Cross-reference §7 Results values + §3 Background pillars
+- **Axiom / invariant ID checklist** : every claim in §8.1
+  (theoretical contribution) and §8.2 (empirical contribution)
+  must enumerate the axiom IDs (DR-0..DR-4) and invariant IDs
+  (I1, I2, S1, S2, S3, K1) it relies on, with the matching spec
+  line in
+  `docs/specs/2026-04-17-dreamofkiki-framework-C-design.md`. Use
+  the placeholder block below when drafting :
+  - §8.1 axiom IDs : <DR-...>
+  - §8.1 invariant IDs : <I.../S.../K...>
+  - §8.1 spec section : <§...>
+  - §8.2 axiom IDs : <DR-...>
+  - §8.2 invariant IDs : <I.../S.../K...>
+  - §8.2 spec section : <§...>
 - Commit subject: `docs(paper1): add discussion draft` (33 chars)
 
 ---
@@ -121,6 +134,15 @@ dreamOfkiki/
 - 5 subsections (§6.1-6.5 per outline.md)
 - Length target ~1.5 pages markdown
 - Cross-reference OSF pre-reg, statistics module, mega-v2 adapter, fmri-schema.yaml
+- **Hypothesis-axiom mapping** : annotate H1-H4 with canonical
+  IDs from `docs/glossary.md` and
+  `docs/invariants/registry.md` (no local synonyms) ; e.g. H1 →
+  DR-1, H2 → DR-4, H3 → DR-2, H4 → K1
+- **Synthetic-benchmark flag** : the mega-v2 adapter exposes
+  `is_synthetic` and `source` metadata
+  (`mega-v2-real` | `synthetic-placeholder`) ; cycle 1 reports
+  use `synthetic-placeholder` and the methodology must say so
+  explicitly
 - Commit subject: `docs(paper1): add methodology draft` (35 chars)
 
 ---
@@ -138,6 +160,13 @@ dreamOfkiki/
 - Length target ~1.5 pages markdown
 - Cross-reference op-pair-analysis.md for compositional gap
 - Cite all 4 pillar founders with proper bibtex IDs from references.bib
+- **Pillar-to-axiom mapping** : map each pillar (A, B, D, C) to
+  its canonical axiom IDs (DR-0..DR-4) plus the load-bearing
+  invariants used in the compositional gap argument :
+  - Pillar A (Walker/Stickgold replay) → DR-1, invariant I1
+  - Pillar B (Tononi SHY downscale) → DR-2, invariant S2
+  - Pillar D (Friston FEP restructure) → DR-3, invariant S3
+  - Pillar C (Hobson recombine) → DR-4, invariant I3 (WARN)
 - Commit subject: `docs(paper1): add background draft` (34 chars)
 
 ---

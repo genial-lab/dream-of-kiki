@@ -4,6 +4,10 @@
 **Benchmark** : mega-v2 synthetic placeholder
 **Items** : 500 (25 domains × 20)
 **Seeds** : 42, 123, 7
+**run_id** : `syn_s15_3_g4_synthetic_pipeline_v1`
+  (registered via `harness.storage.run_registry.RunRegistry`)
+**harness_version** : C-v0.5.0+STABLE
+**is_synthetic** : true
 
 ## Caveat
 

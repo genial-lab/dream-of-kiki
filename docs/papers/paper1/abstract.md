@@ -21,19 +21,23 @@ substrate-agnosticism via a Conformance Criterion, DR-4 profile
 chain inclusion). The framework defines 8 typed primitives (α, β,
 γ, δ inputs ; 4 output channels), 4 canonical operations (replay,
 downscale, restructure, recombine), and a 5-tuple Dream Episode
-ontology. We instantiate the framework as `kiki-oniric`, an MLX
-substrate on Apple Silicon, with three ablation profiles (P_min,
-P_equ, P_max) wired against a SHA-256 frozen retained benchmark.
+ontology. The framework admits multiple conformant substrates ;
+exemplar implementations validate the design and are reported
+separately (see Paper 2).
 
 Pre-registered hypotheses (OSF DOI : pending) are evaluated via
 Welch's t-test, TOST equivalence, Jonckheere-Terpstra trend, and
-one-sample t-test against compute budget. On a synthetic
-mega-v2-style placeholder, P_equ significantly reduces forgetting
-versus baseline (Welch one-sided p < 0.001) and the dream compute
-overhead remains within budget (ratio < 2.0, p = 0.01). Real
-mega-v2 ablation and fMRI representational similarity analysis
-follow in cycle 2. All code, models, and pre-registration are open
-under MIT/CC-BY-4.0.
+one-sample t-test against compute budget under Bonferroni
+correction.
+
+**Pipeline Validation (synthetic placeholder, G2 pilot).** The
+end-to-end measurement and statistical pipeline is exercised with
+mock predictors at scripted accuracy levels ; numbers are
+reported in §7 alongside their registered run_id and JSON dump
+under `docs/milestones/`. Real mega-v2 inference and any fMRI
+representational similarity analysis follow in cycle 2 (Paper 2).
+All code, specifications, and pre-registration are open under
+MIT/CC-BY-4.0.
 
 ---
 

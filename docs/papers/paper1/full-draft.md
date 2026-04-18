@@ -131,64 +131,60 @@ axis (EC) bump independently. Current : C-v0.5.0+STABLE
 
 ---
 
-## 5. Implementation — kiki-oniric
+## 5. Conformance Criterion validation approach
 
-⚠️ **Source** : `kiki_oniric/` Python package. Paper version is
-narrative of architecture per §5 outline.md.
+⚠️ **Substrate-agnostic by design.** Paper 1 confines itself to
+the abstract conformance contract any compliant implementation
+must satisfy. An empirical instantiation (the cycle-1 reference
+implementation) is reported in Paper 2.
 
-### 5.1 Substrate choice — MLX on Apple Silicon
+### 5.1 Deterministic compilation graph
 
-We selected MLX (Apple) as the cycle-1 substrate for its
-deterministic compilation graph, native Apple Silicon support,
-and Python-first ergonomics. Substrate-specific code is
-isolated in `kiki_oniric/dream/operations/*_mlx.py` variants
-(replay, downscale, restructure, recombine), with
-substrate-agnostic skeleton variants alongside for testing
-without GPU.
+A conformant substrate exposes a deterministic compilation graph
+for each of the four operations so that re-running with the same
+seed produces bit-stable outputs (R1 contract). This is the
+hardest pre-condition for the run registry to register a batch
+as reproducible.
 
-### 5.2 Runtime — DreamRuntime + swap protocol
+### 5.2 Single-threaded scheduler with handler registry
 
-`DreamRuntime` is a single-threaded scheduler with handler
-registry per Operation. DR-0 accountability is enforced by a
-try/except/finally pattern : every `execute()` call produces an
-`EpisodeLogEntry` even when a handler raises (logged with
-`completed=False` + error string + executed_ops_so_far).
+DR-0 accountability requires that every executed dream-episode
+produces an `EpisodeLogEntry` even on handler exception. A
+single-threaded scheduler with a per-Operation handler registry
+and a try/except/finally pattern is the canonical realization ;
+multi-threaded variants must demonstrate equivalent log
+guarantees.
 
-`swap_atomic` orchestrates the W_awake ← W_scratch promotion
-with S2 (finite) + S1 (retained non-regression) guards. S3
-(topology) guard is wired to the restructure operation output.
-`SwapAborted` is raised with a violated-invariant code on guard
-failure ; the swap is rolled back.
+### 5.3 Atomic swap with invariant guards
 
-### 5.3 Profiles wired
+The awake-state promotion must be atomic and must abort on any
+violated BLOCKING invariant (S1 retained non-regression, S2
+weight finiteness, S3 topology validity). Conformant substrates
+expose a `SwapAborted`-style escape hatch keyed by the violated
+invariant ID.
 
-P_min : replay + downscale handlers registered ; `swap_now()`
-method exposes the S1 retained-eval gating closure. Pilot G2
-results documented in `docs/milestones/g2-pmin-report.md`.
+### 5.4 Profile chain inclusion
 
-P_equ : replay + downscale + restructure + recombine_light
-handlers registered ; channels β+δ → 1+3+4. Ablation G4 results
-documented in `docs/milestones/g4-pequ-report.md`.
+DR-4 requires that any conformant set of profiles (P_min ⊆ P_equ
+⊆ P_max) inherit ops and channels by inclusion. The conformance
+test suite ships generic membership checks ; substrate-specific
+wiring is reported in Paper 2.
 
-P_max : skeleton with target metadata (target_ops,
-target_channels_out) for DR-4 chain test ; handlers deferred
-cycle 2.
+### 5.5 Reference implementation pointer
 
-### 5.4 Concurrent worker — Future API skeleton
+See Paper 2 for an empirical instantiation (cycle-1 MLX-based
+reference implementation). Paper 1 makes no claim about a
+specific implementation beyond the formal contract above.
 
-`ConcurrentDreamWorker` exposes a Future-based API (`submit()
--> Future`, `drain() -> list[EpisodeLogEntry]`) with sync
-execution under the hood for cycle 1. Cycle-2 swap to real
-asyncio/threading is forward-compatible by design.
+### 5.6 Proof sketches — DR-0..DR-4
 
-### 5.5 Open-source artifacts
-
-Code : `github.com/electron-rare/dream-of-kiki` (MIT, frozen at
-arXiv submission tag). Models : HuggingFace
-`clemsail/kiki-oniric-{P_min,P_equ}` (cycle 1) +
-`kiki-oniric-P_max` (cycle 2). Data : Zenodo DOI minted
-post-S20+. Pre-registration : OSF DOI (pending lock).
-Dashboard : `dream.saillant.cc` public read-only.
+DR-0 proven by handler-registry try/finally invariant ; DR-1
+proven by β-buffer drain accounting ; DR-2 proof draft in
+`docs/proofs/dr2-compositionality.md` ; DR-3 proven by
+Conformance Criterion (signature typing + axiom property tests +
+BLOCKING invariants enforceable) ; DR-4 proven in
+`docs/proofs/dr4-profile-inclusion.md` (chain inclusion of ops
+and channels).
 
 ---
 

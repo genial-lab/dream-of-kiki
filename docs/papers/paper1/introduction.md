@@ -1,4 +1,13 @@
+<!--
+SPDX-License-Identifier: CC-BY-4.0
+Authorship byline : dreamOfkiki project contributors
+License : Creative Commons Attribution 4.0 International (CC-BY-4.0)
+-->
+
 # Introduction (Paper 1, draft)
+
+**Authorship byline** : *dreamOfkiki project contributors*
+**License** : CC-BY-4.0
 
 **Target length** : ~1.5 pages markdown (≈ 1200 words)
 
@@ -69,28 +78,23 @@ In this paper we present **dreamOfkiki**, the first formal
 framework for dream-based consolidation in artificial cognitive
 systems with the following contributions :
 
-1. **Framework C** : 8 typed primitives, 4 canonical operations
-   forming a free semigroup, 4 OutputChannels, 5-tuple Dream
-   Episode ontology, axioms DR-0..DR-4 with executable
-   Conformance Criterion (§4).
-2. **Implementation** : `kiki-oniric` MLX substrate on Apple
-   Silicon, three ablation profiles (P_min, P_equ, P_max) with
-   profile chain inclusion verified by axiom test (DR-4) (§5).
-3. **Pre-registered ablation** : OSF-registered hypotheses H1-H4
-   evaluated via Welch / TOST / Jonckheere / one-sample t-test
-   with Bonferroni correction (§6, §7).
-4. **Open-science artifacts** : code (MIT), models, pre-
-   registration, raw data with deterministic run_id contract
-   (§5.5, Methods).
-5. **Roadmap to substrate generalization** (E-SNN
-   thalamocortical, cycle 2) and real fMRI representational
-   alignment (Studyforrest baseline locked G1, real lab
-   partnership pursued via T-Col outreach).
+1. **Framework C-v0.5.0+STABLE** : 8 typed primitives, 4 canonical
+   operations forming a free semigroup, 4 OutputChannels, 5-tuple
+   Dream Episode ontology, axioms DR-0..DR-4 with executable
+   Conformance Criterion (§4). Items 2–4 below are reported in
+   Paper 2 (empirical companion) ; Paper 1 confines itself to the
+   formal contributions and the conformance roadmap.
+2. **Roadmap** to substrate generalization (additional
+   substrates beyond cycle-1's reference implementation) and
+   real fMRI representational alignment (real lab partnership
+   pursued via T-Col outreach).
 
 The remainder of the paper is organized as follows : §3 reviews
-the four pillars in depth ; §4 develops Framework C with axioms
-and proofs ; §5 describes the kiki-oniric implementation ; §6
-details the methodology ; §7 reports ablation results ; §8
+the four pillars in depth ; §4 develops Framework
+C-v0.5.0+STABLE with axioms and proofs ; §5 sketches the
+Conformance Criterion validation approach (per-substrate
+empirical results live in Paper 2) ; §6 details the methodology ;
+§7 reports the synthetic pipeline-validation results ; §8
 discusses implications and limitations ; §9 outlines cycle-2
 future work.
 

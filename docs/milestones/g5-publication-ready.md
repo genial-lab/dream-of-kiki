@@ -9,8 +9,8 @@ DR-2 review pending**
 
 | Criterion | Status | Notes |
 |-----------|--------|-------|
-| coverage : 100% stratified cells in last MAJOR | ⚠️ PARTIAL | Synthetic ablation S15.3 PASS 3/4 ; real mega-v2 + real predictors deferred S20+ |
-| seeds_per_cell : ≥3 | ✅ MET | 3 seeds (42, 123, 7) used in pilot G2 + G4 ablation |
+| coverage : 100% stratified cells in last MAJOR | ⚠️ PARTIAL | Synthetic ablation S15.3 PASS 3/4 (run_id: `syn_s15_3_g4_synthetic_pipeline_v1`, dump: `docs/milestones/ablation-results.json`) ; real mega-v2 + real predictors deferred S20+ |
+| seeds_per_cell : ≥3 | ✅ MET | 3 seeds (42, 123, 7) used in pilot G2 (run_id: `syn_g2_pmin_pipeline_v1`, dump: `docs/milestones/g2-pilot-results.md`) + G4 ablation (run_id: `syn_s15_3_g4_synthetic_pipeline_v1`) |
 | retained_regression_max_pct : ≤1% | ⚠️ N/A | Skeleton swap_now ; real regression check needs MLX-real model S20+ |
 | consecutive_zero_blocking_days : 7 | ⚠️ N/A | No live deployment ; CI green continuously since repo public |
 | dualver_status : `+STABLE` | ✅ MET | C-v0.5.0+STABLE current |

@@ -68,7 +68,12 @@ dreamOfkiki/
 │   │   ├── test_p_max.py             ← S16.1
 │   │   └── test_p_max_partial.py     ← S16.2
 │   └── conformance/
-│       └── (no new conformance tests this phase)
+│       └── (S16.2 extends existing DR-4 conformance test
+│           test_dr4_profile_inclusion.py ;
+│           S13.1/S13.2 add restructure + recombine MLX
+│           conformance tests under
+│           tests/conformance/operations/ ;
+│           no other net-new conformance files)
 ├── docs/
 │   ├── milestones/
 │   │   ├── g4-pequ-report.md         ✅ existing → S15.3 update GO-FULL
@@ -100,9 +105,16 @@ dreamOfkiki/
 - TDD: 3 tests (add layer increases module count, remove decreases, reroute changes connectivity)
 - Implementation: `restructure_handler_mlx(state, model)` operates on `model.named_modules()` — for "add", appends new `nn.Linear`; for "remove", deletes named module; for "reroute", swaps two modules' positions in forward chain
 - Validate post-restructure topology via `topology.validate_topology()` (S10.2 guard)
+- **Conformance test required** : create
+  `tests/conformance/operations/test_restructure_mlx_conformance.py`
+  that invokes `restructure_handler_mlx(state, model)` for each
+  op type ("add", "remove", "reroute"), then calls
+  `topology.validate_topology(model)` and asserts post-change
+  topology integrity (S3 invariant). The test sits alongside
+  the unit tests and gates CI for invariant preservation.
 - Commit: `feat(mlx): add restructure handler MLX backend` (45 chars)
 
-Expected: 89 tests (86+3), coverage ≥90%.
+Expected: 89 tests (86+3) + 1 conformance test, coverage ≥90%.
 
 ---
 
@@ -118,9 +130,16 @@ Expected: 89 tests (86+3), coverage ≥90%.
 
 - TDD: 3 tests (sampled latent has correct dim, sampling diversity over N runs > threshold, deterministic with seed)
 - Implementation: `recombine_handler_mlx(state, encoder, decoder, rng)` — encode latents, sample from N(μ, σ), decode
+- **Conformance test required** : create
+  `tests/conformance/operations/test_recombine_mlx_conformance.py`
+  that imports `recombine_handler_mlx` and validates the
+  latent-dimension invariant, sampling diversity over multiple
+  runs, deterministic output for a fixed seed, and any
+  operation-level invariants preserved by the skeleton
+  `recombine_handler`. CI fails on regression.
 - Commit: `feat(mlx): add recombine handler MLX VAE` (40 chars)
 
-Expected: 92 tests (89+3), coverage ≥90%.
+Expected: 92 tests (89+3) + 1 conformance test, coverage ≥90%.
 
 ---
 
@@ -139,6 +158,14 @@ Expected: 92 tests (89+3), coverage ≥90%.
 - TDD: 4 tests (loads with mock dataset, stratification 20 items/domain × 25 = 500, hash check, RetainedBenchmark roundtrip)
 - Implementation: adapter reads JSONL/parquet, samples N items per domain (default 20), computes SHA-256, writes to `harness/benchmarks/mega_v2/items.jsonl` + `.sha256`
 - **Caveat real data**: if mega-v2 path not accessible, use **synthetic placeholder generator** that produces 500-item stratified set in same format. Document in adapter docstring.
+- **Synthetic-fallback metadata contract** : the adapter must
+  emit `metadata={"is_synthetic": bool, "source": "mega-v2-real"
+  | "synthetic-placeholder"}` on the produced
+  `RetainedBenchmark` ; the JSONL/.sha256 writer carries the
+  same fields so that downstream `ablation_g4.py` and the
+  reporting pipeline can filter synthetic-placeholder runs ;
+  `tests/unit/test_megav2_loader.py` asserts the flag and
+  source values for both branches.
 - Commit: `feat(bench): add mega-v2 loader (real or synth)` (47 chars)
 
 Expected: 96 tests (92+4), coverage ≥90%.
@@ -267,7 +294,7 @@ Expected: 112 tests (110+2), coverage ≥90%.
 
 # Task S17.1 — Paper 1 outline draft
 
-**Goal** : `papers/paper1/outline.md` avec structure complete : Abstract, Introduction, Background (4 piliers A/B/D/C), Framework (Conformance Criterion, axioms DR-0..DR-4 with proof refs), Implementation (kiki-oniric), Methodology (eval matrix, OSF pre-reg H1-H4), Results (ablation), Discussion, Future Work (E SNN cycle 2), References.
+**Goal** : `papers/paper1/outline.md` avec structure complete : Abstract, Introduction, Background (4 piliers A/B/D/C), Framework (Conformance Criterion, axioms DR-0..DR-4 with proof refs), Implementation (substrate-agnostic conformance approach), Methodology (eval matrix, OSF pre-reg H1-H4), Results (synthetic placeholder pipeline validation), Discussion, Future Work (additional substrates cycle 2), References.
 
 **Files:**
 - Create : `docs/papers/paper1/__init__.md` (index)
@@ -277,6 +304,15 @@ Expected: 112 tests (110+2), coverage ≥90%.
 
 - Outline conforme à Nature Human Behaviour template (8-10 pages main + 30-50 supp)
 - Cross-references vers all docs/proofs/* and docs/milestones/*
+- **DualVer contract** : every framework "C" reference must use
+  the full DualVer tag from CHANGELOG.md (format
+  `C-vX.Y.Z+{STABLE,UNSTABLE}`, e.g. `C-v0.5.0+STABLE`) — the
+  outline checklist verifies every framework citation in the
+  outline and cross-referenced docs (`docs/proofs/*`,
+  `docs/milestones/*`) matches the tag in `CHANGELOG.md`.
+- **Authorship** : byline `dreamOfkiki project contributors`,
+  no AI attribution in byline / acknowledgments / commit
+  trailer.
 - Commit: `docs(paper1): add outline draft` (32 chars)
 
 ---
@@ -325,6 +361,16 @@ Expected: 112 tests (110+2), coverage ≥90%.
 - 3 subsections: H1 forgetting (P_equ vs baseline t-test), H3 RSA monotonic, H4 energy ratio
 - Tables with synthetic data placeholder (real data filled when ablation runs)
 - Reference to OSF pre-reg + raw data Zenodo DOI placeholder
+- **Run-id citation contract** : every empirical claim must
+  cite the registered run_id from the G4 ablation (S15.3)
+  via `harness.storage.run_registry.RunRegistry`, plus a
+  table/text footnote pointing to the registry dump
+  (e.g. "Results from run_id=`<id>`, dump:
+  `docs/milestones/ablation-results.json`"). Synthetic
+  placeholders are flagged explicitly with
+  `(synthetic placeholder, G4 pilot)`. Authors pull numbers
+  only from registered G4 run dumps, never copy-paste from
+  ad-hoc notebooks.
 - Commit: `docs(paper1): add results section draft` (38 chars)
 
 ---

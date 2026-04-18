@@ -55,18 +55,21 @@ A real lab partnership would enable RSA on **task-controlled**
 linguistic stimuli rather than the narrative-comprehension
 fallback Studyforrest provides. This would strengthen H3
 (monotonic representational alignment) which reached only
-borderline significance in cycle 1.
+borderline significance in the cycle-1 synthetic pipeline
+validation (run_id `syn_s15_3_g4_synthetic_pipeline_v1`, dump
+`docs/milestones/ablation-results.json`).
 
 ## 9.4 Multi-substrate Conformance Criterion validation
 
-The strongest theoretical claim of Framework C — substrate-
-agnosticism via DR-3 Conformance Criterion — needs empirical
-validation across more than two substrates to be defensible at
-peer review. Cycle 2 establishes the validation matrix : for
-each candidate substrate (kiki-oniric ✅, E-SNN, hypothetical
-transformer-based instance), verify all three conformance
-conditions (signature typing, axiom property tests passing,
-BLOCKING invariants enforceable).
+The strongest theoretical claim of Framework C-v0.5.0+STABLE —
+substrate-agnosticism via DR-3 Conformance Criterion — needs
+empirical validation across more than two substrates to be
+defensible at peer review. Cycle 2 establishes the validation
+matrix : for each candidate substrate (cycle-1 reference
+implementation ✅, E-SNN, hypothetical transformer-based
+instance), verify all three conformance conditions (signature
+typing, axiom property tests passing, BLOCKING invariants
+enforceable).
 
 A reusable conformance test suite (drafted in cycle 1
 `tests/conformance/`) is the foundation. Cycle 2 will extend it
