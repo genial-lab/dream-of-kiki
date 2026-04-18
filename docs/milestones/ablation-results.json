@@ -1,0 +1,54 @@
+{
+  "benchmark_size": 500,
+  "benchmark_hash": "synthetic:c8a0712000b6411cb6f84d3cca361f83b262c6798cc110c96e122c73f5b0def7",
+  "seeds": [
+    42,
+    123,
+    7
+  ],
+  "accuracy": {
+    "baseline": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "p_min": [
+      0.7,
+      0.7,
+      0.7
+    ],
+    "p_equ": [
+      0.85,
+      0.85,
+      0.85
+    ]
+  },
+  "hypotheses": {
+    "H1_forgetting": {
+      "test_name": "Welch's t-test (one-sided)",
+      "p_value": 0.0,
+      "reject_h0": true,
+      "interpretation": "P_equ reduces forgetting vs baseline"
+    },
+    "H2_equivalence_self": {
+      "test_name": "TOST equivalence",
+      "p_value": 5.328595908988577e-08,
+      "reject_h0": true,
+      "interpretation": "smoke test, P_max not wired"
+    },
+    "H3_monotonic": {
+      "test_name": "Jonckheere-Terpstra trend",
+      "p_value": 0.024767306717813353,
+      "reject_h0": false,
+      "interpretation": "no significant trend"
+    },
+    "H4_energy_budget": {
+      "test_name": "one-sample t-test (upper bound)",
+      "p_value": 0.010102051443364369,
+      "reject_h0": true,
+      "interpretation": "energy ratio significantly < 2.0"
+    }
+  },
+  "gate_significant_count": 3,
+  "gate_pass": true
+}

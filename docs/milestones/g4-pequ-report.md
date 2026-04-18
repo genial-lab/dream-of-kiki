@@ -76,6 +76,21 @@ expected) :
   - **NO-GO-B** : Pivot A activated per master spec §7.3 (single-
     paper TMLR/ICLR workshop, framework deferred cycle 2)
 
+## Ablation results (S15.3)
+
+Synthetic ablation run (3 profiles × 3 seeds, mega-v2 fallback).
+See `ablation-results.md` for full table + JSON dump.
+
+**Hypothesis tests (Bonferroni α = 0.0125)** : 3/4 significant
+
+**Gate result** : **PASS** (criterion : ≥2 significant)
+
+**Decision update** : Branch GO-CONDITIONAL **maintained**
+(synthetic pipeline validated, real benchmark + real predictors
+pending S16+). Path to GO-FULL clear : when MLX inference + real
+mega-v2 are wired, re-run ablation. If gate passes on real data
+3 consecutive runs, flip to GO-FULL.
+
 ## Action
 
 S12 day end : adopt GO-CONDITIONAL (default). Document S13-S15
