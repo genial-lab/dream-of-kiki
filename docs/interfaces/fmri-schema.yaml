@@ -1,6 +1,16 @@
 # fMRI schema for M2.b RSA alignment
 # Locked at S4.1 based on G1 Branch A (Studyforrest)
 # Reference: docs/feasibility/studyforrest-rsa-note.md
+#
+# Version bump C-v0.5.0+STABLE → C-v0.6.0+PARTIAL (2026-04-19,
+# cycle-2 closeout). Schema itself unchanged — this is an aligned
+# DualVer bump consumed by harness code that cross-checks the
+# framework-C version against the schema header. Rationale for the
+# +PARTIAL stability tag: publication-track Phases 3-4 (cross-substrate
+# ablation using this schema for M2.b) are deferred per user scope
+# decision ; see CHANGELOG.md [C-v0.6.0+PARTIAL] and framework-C
+# spec §12.3 for full PARTIAL semantics. No schema field is breaking
+# or new.
 
 version: "C-v0.6.0+PARTIAL"
 data_source: studyforrest

@@ -18,6 +18,16 @@ from __future__ import annotations
 
 # Substrate identity
 MLX_SUBSTRATE_NAME = "mlx_kiki_oniric"
+# DualVer empirical axis `+PARTIAL` means : the substrate itself is
+# green against the current framework-C (DR-3 conformance all three
+# conditions pass on MLX, all BLOCKING invariants S1/S2/S3/I1 enforced,
+# 180 tests passing ≥90% coverage). What is incomplete is the
+# publication-track part of the cycle-2 evaluation matrix — Phase 3
+# (cross-substrate ablation MLX vs E-SNN, C2.9-C2.12) and Phase 4
+# (Paper 2 narrative C2.13-C2.16) are **scoped-deferred**. No contract
+# test is failing or skipped on MLX. See framework-C spec §12.3 for
+# formal PARTIAL semantics, CHANGELOG.md [C-v0.6.0+PARTIAL] for bump
+# rationale, and STATUS.md for gate G9 CONDITIONAL-GO/PARTIAL status.
 MLX_SUBSTRATE_VERSION = "C-v0.6.0+PARTIAL"
 
 

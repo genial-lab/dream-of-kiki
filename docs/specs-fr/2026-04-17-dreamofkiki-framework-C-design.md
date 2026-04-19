@@ -596,6 +596,13 @@ Les changements d'interface nécessitent un bump minor du DualVer des **deux** t
 ### 12.3 Axe EC (cohérence empirique)
 
 - **STABLE** : tous les résultats empiriques mesurés sous FC courant, cohérents avec les axiomes
+- **PARTIAL** : livrables d'ingénierie verts sous FC courant, mais une partie
+  de la matrice d'évaluation (ex. une phase du track publication, une ablation
+  cross-substrat) est **différée par décision de périmètre** et non en échec —
+  la couverture de la matrice stratifiée §8.2 est incomplète sans qu'aucun
+  axiome ne soit violé. Transitions autorisées : PARTIAL → STABLE (à la
+  re-clôture des cellules différées) ou PARTIAL → DIRTY (si une cellule
+  différée est exécutée plus tard et ne re-vérifie pas sous FC courant).
 - **DIRTY** : au moins un résultat est orphelin (mesuré sous un FC plus ancien, non re-vérifié)
 - **INVALIDATED** : un résultat publié/soumis est invalidé par un FC-MAJOR courant
 

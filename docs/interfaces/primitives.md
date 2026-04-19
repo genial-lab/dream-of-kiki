@@ -7,6 +7,37 @@
 Any substrate instantiating the dreamOfkiki framework MUST implement
 these 8 typed Protocols. Reference: `kiki_oniric/core/primitives.py`.
 
+## Changelog from C-v0.5.0
+
+- **Non-breaking** : 8 primitive Protocol signatures unchanged.
+  Cycle-1 substrate MLX remains conformant without code change.
+- **Non-breaking addition** : DR-3 Conformance Criterion now spans
+  the second substrate E-SNN thalamocortical (Phase 1 C2.1-C2.4,
+  G7 LOCKED). Protocols remain substrate-agnostic.
+- **Non-breaking addition** : P_max profile fully wires the 4 ops +
+  4 channels (Phase 2, G8 LOCKED) ; α-stream (`AlphaStreamProtocol`)
+  and attention_prior (canal-4) are activated — the Protocol
+  surface already existed from C-v0.5.0.
+- **Clarification** : DR-3 reframed as empirical/operational
+  criterion (`conforms(S)` is not a formal implication). See
+  framework-C spec §6.2.
+- **No API / behavior removed or renamed.**
+
+## PARTIAL stability
+
+`+PARTIAL` on the empirical axis means engineering deliverables on
+these Protocols are green, but part of the §8.2 stratified matrix
+(cross-substrate ablation + Paper 2 narrative) is scoped-deferred.
+Contract tests for the primitives currently pass on both substrates
+— **no contract test is failing or skipped**. See framework-C spec
+§12.3 for full PARTIAL semantics.
+
+Migration / test-status docs :
+- `STATUS.md` — gate G9 CONDITIONAL-GO/PARTIAL, 180 tests passing
+  at coverage ≥ 90 %
+- `CHANGELOG.md` §`[C-v0.6.0+PARTIAL]` — full bump log
+- `tests/conformance/axioms/` — all DR-* property tests green
+
 ---
 
 ## Awake → Dream primitives

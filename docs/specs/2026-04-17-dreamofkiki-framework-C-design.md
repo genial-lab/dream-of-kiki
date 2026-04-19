@@ -358,14 +358,21 @@ DR-2' (Compositionality with canonical ordering)
 
 This is weaker but sufficient for the canonical DE composition defined in 4.3.
 
-#### DR-3 (Substrate-agnosticism)
+#### DR-3 (Substrate-agnosticism — operational criterion)
 
 ```
 ∀ substrate S, if S satisfies the Conformance Criterion below,
-then DR-0, DR-1, DR-2 (or DR-2') hold on S.
+then DR-0, DR-1, DR-2 (or DR-2') are **empirically validated** on S
+(operational sense, see §6.2 "Operational statement" ; not a formal
+implication — DR-2 itself remains an unproven working axiom, §5.1).
 ```
 
-**Interpretation** : kiki-oniric and hypothetical E-SNN are both valid instantiations **iff they pass the Conformance Criterion**. Pure signature typing is **not** sufficient — behavioral conformance is required.
+**Interpretation** : kiki-oniric and hypothetical E-SNN are both valid
+instantiations **iff they pass the Conformance Criterion**. Pure signature
+typing is **not** sufficient — behavioral conformance is required. DR-3 is
+presented here as an **operational/empirical criterion** rather than a formal
+implication ; the formal epistemic status of each axiom is unchanged by
+`conforms(S)`.
 
 **Conformance Criterion (executable)** : a substrate S instantiates the framework iff all three conditions hold:
 
@@ -476,7 +483,7 @@ When dream signals `ready_to_commit`:
 | M3.a | FLOPs ratio | `FLOPs(dream) / FLOPs(awake)` over comparable window | MLX static profile |
 | M3.b | Offline gain | `Δ(M1.b, post-dream) - Δ(M1.b, no-dream)` normalized by FLOPs-equivalent wall-clock | Simulated wall-clock from FLOPs |
 | M3.c | Energy per episode | `energy_proxy = f(FLOPs, model_size, precision)` — calibrated function | Deterministic function |
-| M4.a | Recomb quality | Teacher scorer (Qwen3.5-9B Q4_K_M SHA-pinned — *SHA to be pinned at the benchmark v1.0 freeze ; see M4.a*) evaluates plausibility + diversity of latent samples | Scorer temp=0, seed=0 |
+| M4.a | Recomb quality | Teacher scorer (Qwen3.5-9B Q4_K_M — *SHA to be pinned at the benchmark v1.0 freeze, tracking target §8.4 SHA pinning*) evaluates plausibility + diversity of latent samples | Scorer temp=0, seed=0 |
 | M4.b | Structure discovery | Permutation test on learned hierarchy invariants vs baseline | Permutation seeded |
 
 ### 8.2 Stratified matrix
@@ -490,11 +497,27 @@ When dream signals `ready_to_commit`:
 
 ### 8.3 Reproducibility contracts
 
-**R1 (bit-exact)** : every `MetricResult` is bit-identical reproducible from `(c_version, profile, seed, run_id, commit_sha, benchmark_version)`. Applies to all 8 metrics via strategies in §8.1.
+**R1 (bit-exact)** : every `MetricResult` is bit-identical reproducible from
+`(c_version, profile, seed, run_id, commit_sha, benchmark_version)` **for the
+metrics whose external dependencies are SHA-pinned**. Scope currently covers
+M1.a, M1.b, M2.b, M3.a, M3.b, M3.c, M4.b. M4.a is **not R1-compliant** until
+the Teacher scorer SHA is pinned at the benchmark v1.0 freeze (see §8.4).
 
 **R3 (artifact addressability)** : all artifacts addressable by SHA-256 checksum stored in `metadata.yaml`, storage schema per master spec §5.4.
 
 (R2 suppressed — all metrics now deterministic.)
+
+### 8.4 SHA pinning (R1 scope completion)
+
+External dependencies that must be SHA-pinned before a metric enters the R1
+scope :
+
+| Metric | Dependency | Status |
+|--------|-----------|--------|
+| M4.a | Teacher scorer Qwen3.5-9B Q4_K_M GGUF | pinned at benchmark v1.0 freeze |
+
+Until the row is pinned, the corresponding metric is excluded from R1 and
+explicitly marked in its `MetricResult` metadata as `r1_scope=false`.
 
 ---
 
@@ -592,6 +615,12 @@ Interface changes require bump of **both** tracks' DualVer minor.
 ### 12.3 EC axis (empirical consistency)
 
 - **STABLE** : all empirical results measured under current FC, consistent with axioms
+- **PARTIAL** : engineering deliverables green on current FC, but part of the
+  evaluation matrix (e.g. a publication-track phase, a cross-substrate ablation)
+  is scoped-deferred rather than failing — coverage of §8.2 stratified matrix is
+  incomplete but no axiom is violated. Allowed transitions : PARTIAL → STABLE
+  (on re-closure of deferred cells) or PARTIAL → DIRTY (if a deferred cell is
+  later run and does not re-verify under current FC).
 - **DIRTY** : at least one result is orphan (measured under older FC, not re-verified)
 - **INVALIDATED** : a published/submitted result is invalidated by current FC-MAJOR
 
