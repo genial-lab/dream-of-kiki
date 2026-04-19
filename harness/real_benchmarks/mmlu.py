@@ -412,8 +412,13 @@ def evaluate_mmlu(
         tokens = mx.array([token_ids])
         mx.random.seed(0)
         logits = forward(tokens)
-        mx.eval(logits)
-        last = np.asarray(logits[0, -1, :])
+        # Cast to fp32 on the MLX side before numpy conversion :
+        # numpy has no bf16 dtype, so ``np.asarray(bf16_tensor)``
+        # raises ``RuntimeError: Item size 2 for PEP 3118 buffer
+        # format string B does not match the dtype B item size 1``.
+        last_fp32 = logits[0, -1, :].astype(mx.float32)
+        mx.eval(last_fp32)
+        last = np.asarray(last_fp32)
         letter_logits = last[letter_ids].astype(np.float32)
         pred = int(np.argmax(letter_logits))
         if pred == record.answer:

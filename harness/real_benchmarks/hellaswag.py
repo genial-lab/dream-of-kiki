@@ -372,8 +372,11 @@ def _continuation_logprob(
     tokens = mx.array([full])
     mx.random.seed(0)
     logits = model_callable(tokens)
-    mx.eval(logits)
-    logits_np = np.asarray(logits[0]).astype(np.float32)
+    # Cast to fp32 on the MLX side before numpy conversion :
+    # numpy has no bf16 dtype, so bf16 tensors must be widened.
+    logits_fp32 = logits[0].astype(mx.float32)
+    mx.eval(logits_fp32)
+    logits_np = np.asarray(logits_fp32).astype(np.float32)
     # Position i predicts token at i+1. The ending spans tokens
     # indices [len(ctx), len(ctx)+len(ending)-1] ; use positions
     # [len(ctx)-1, …, len(ctx)+len(ending)-2] to read the logits.

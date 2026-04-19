@@ -313,8 +313,10 @@ def _per_token_nll(
     tokens = mx.array([full])
     mx.random.seed(0)
     logits = model_callable(tokens)
-    mx.eval(logits)
-    logits_np = np.asarray(logits[0]).astype(np.float32)
+    # Widen bf16 → fp32 on the MLX side : numpy has no bf16 dtype.
+    logits_fp32 = logits[0].astype(mx.float32)
+    mx.eval(logits_fp32)
+    logits_np = np.asarray(logits_fp32).astype(np.float32)
     start = len(context_ids) - 1
     total = 0.0
     n = 0

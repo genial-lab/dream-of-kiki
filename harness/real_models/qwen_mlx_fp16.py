@@ -109,6 +109,10 @@ def _weights_bytes(model: Any) -> bytes:
                 _collect(v, acc)
         else:
             try:
+                # bf16 MLX arrays cannot be converted to numpy
+                # directly (numpy has no bf16 dtype) — widen first.
+                if hasattr(node, "astype"):
+                    node = node.astype(mx.float32)
                 arr = np.asarray(node)
                 acc.append(arr.tobytes())
             except Exception:  # pragma: no cover - defensive
