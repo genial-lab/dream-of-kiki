@@ -197,6 +197,12 @@ dreamOfkiki/
 
 ### C3.6 — ablation_cycle3.py — 1080-config runner
 
+> **Prerequisite** : requires C3.10 (DualVer bump
+> C-v0.6.0+STABLE → C-v0.7.0+PARTIAL) to be committed *before*
+> the 1080-config launch so every run_id is registered under the
+> new tag. Execution sequence is C3.5 → C3.10 → C3.6, not the
+> numeric C3.5 → C3.6 → … → C3.10.
+
 **Goal** : cartesian `scale ∈ {1.5B, 7B, 35B} × profile ∈ {P_min, P_equ, P_max} × benchmark ∈ {MMLU, HellaSwag, mega-v2} × seed ∈ 1..40` = 1080 runs. Idempotent resume, run-registry manifest per R1/R3, K4 matrix coverage gate.
 
 **Files** :
@@ -242,6 +248,14 @@ dreamOfkiki/
 **Commit** : `feat(gate): compute_gate_d + H1-H6 report` (41 chars)
 
 ### C3.10 — DualVer bump C-v0.6.0+STABLE → C-v0.7.0+PARTIAL
+
+> **Execution order note** : despite the C3.10 numeric label, this
+> task is a prerequisite of C3.6. The intended sequence is
+> **C3.5 → C3.10 → C3.6** so the 1080-config matrix runs under the
+> new tag. The numeric order reflects authoring sequence (DualVer
+> paperwork was spec'd after the launcher), not execution sequence.
+> C3.6 must not be launched until this bump is committed — see the
+> prerequisite note added to the C3.6 section above.
 
 **Goal** : FC minor bump (H6 adds a derived constraint surface per framework-C §12.2) + EC STABLE → PARTIAL (Phase 2 cells scoped-deferred until sem 6, §12.3). Performed *after* C3.5 lands and *before* C3.6 launches so the 1080-matrix runs under the new tag.
 
@@ -436,7 +450,7 @@ If Gate D = NO-GO → execute Pivot 4 (§5.1 R3) ; re-spec cycle 3 sem 4 onward 
 
 **4. Commit count** : 22 commits (10 Phase 1 + 12 Phase 2). Matches spec §3 "Total cycle 3 : 22 commits".
 
-**5. Validator risks** : tous subjects pré-vérifiés ≤50 chars (max = 50 on C3.6, C3.19, C3.21).
+**5. Validator risks** : all subjects pre-verified ≤50 chars (max = 50 on C3.6, C3.19, C3.21).
 
 **6. Critical-path dependencies** :
 - OSF pre-reg amendment — must file sem 1 day 1-3 before any C3.6 run

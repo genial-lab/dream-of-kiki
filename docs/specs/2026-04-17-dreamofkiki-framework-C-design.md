@@ -2,6 +2,31 @@
 
 **Version** : C-v0.7.0+PARTIAL
 **Date** : 2026-04-17 (initial) ; 2026-04-19 (cycle-2 closeout bump ; PARTIAL → STABLE after Phase 3+4 merge) ; 2026-04-19 (cycle-3 Phase 1 bump ; C-v0.6.0+STABLE → C-v0.7.0+PARTIAL, pre-C3.6 matrix launch)
+
+> **Bump rationale (2026-04-19, cycle-3 Phase 1)**
+>
+> FC minor (0.6.0 → 0.7.0) : H6 adds a derived-constraint surface
+> across substrates per §12.2 — the profile-ordering invariant
+> (P_max > P_equ > P_min) is now required to hold across MLX and
+> E-SNN substrates, not per substrate in isolation. No primitive
+> signature / axiom ID changed ; the new constraint is derived from
+> DR-3 condition 2 and §8.2.H6.
+>
+> EC STABLE → PARTIAL : the §8.2 evaluation matrix has cells
+> deferred pending cycle-3 Phase 2 closure. Deferred cells
+> (row × column) :
+>
+> - **Norse substrate × {P_min, P_equ, P_max} × {1.5B, 7B, 35B}** —
+>   depends on C3.11 Norse fallback wrapper, scheduled sem 4-5 (Phase 2b).
+> - **fMRI alignment × {P_min, P_equ, P_max}** — depends on C3.15
+>   Studyforrest BOLD loader + C3.16 state-alignment + C3.17 CCA,
+>   scheduled sem 5-6 (Phase 2c).
+> - **H6 cross-substrate meta-test** — aggregates the above, closes
+>   once both Phase 2 tracks land.
+>
+> Re-closure target : C3.22 DualVer bump EC PARTIAL → STABLE at
+> cycle-3 end (sem 6), gated by Gate G10 promotion
+> CONDITIONAL → FULL-GO/STABLE per §9.
 **Author** : Clement Saillant (L'Electron Rare)
 **Status** : Draft for user review
 **Companion** : `2026-04-17-dreamofkiki-master-design.md` (master vision)

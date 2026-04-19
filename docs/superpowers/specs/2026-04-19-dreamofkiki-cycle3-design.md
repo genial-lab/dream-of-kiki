@@ -216,24 +216,60 @@ Single-paper strategy (Q3 = C, Q4.a = α) : Paper 1 v2 absorbs Paper 1 v1 + cycl
 
 ---
 
-## 4. Hypotheses formalized — H1-H6 with Bonferroni α_per_test = 0.00625
+## 4. Hypotheses formalized — H1-H6 with Bonferroni families
 
-The hypothesis family operates **per cell** of the (profile × substrate) matrix — 6 cells total under cycle-3 = 3 profiles × 2 substrates (MLX baseline + Norse Phase 2 ; Phase-2c fMRI alignment is reported via M2.b, not as an additional substrate cell).
+The hypothesis family is split into two **statistical scopes** so the
+Bonferroni correction stays coherent with the data each test actually
+consumes :
 
-| ID | Statement | Test | Direction |
-|----|-----------|------|-----------|
-| H1 | post-dream M1.b > pre-dream M1.b | Welch t | one-sided (improvement) |
-| H2 | post-dream effect equivalent to replay-only baseline | TOST equivalence | bounded |
-| H3 | Profile chain ordering on M1.b : P_min < P_equ < P_max | Jonckheere-Terpstra | one-sided |
-| H4 | post-dream M1.b > null permutation distribution | one-sample t vs null | one-sided |
-| H5-I | Variance of Cohen's d invariant across 3 scales | Levene / Brown-Forsythe | two-sided |
-| H5-II | Cohen's d monotonic in scale N | Spearman ρ | **two-sided** (per OSF pre-reg amendment, no post-hoc claim) |
-| H5-III | Cohen's d follows power-law `d = c·N^α` | scipy `curve_fit` + bootstrap CI 95% on α | two-sided ; non-significant outcome publishable |
-| H6 | Profile ordering P_max > P_equ > P_min holds invariant across substrates | Jonckheere across (P_min, P_equ, P_max) per substrate, then meta-test for substrate invariance | two-sided |
+- **Per-cell tests** — H1, H2, H4, H5-I, H5-II, H5-III operate on
+  a single (scale, substrate) cell and are corrected **within that
+  cell's family**. Cycle-3 has 6 cells = 3 profiles × 2 substrates
+  (MLX baseline + Norse Phase 2). For the per-cell family,
+  `family_size_per_cell = 6`, `α_per_test = 0.05 / 6 ≈ 0.00833`.
+- **Cross-cell tests** — H3 and H6 cross cells by construction and
+  are corrected **in a separate group-level family** : H3 sweeps
+  profiles *within* a substrate (3 profiles), H6 sweeps substrates
+  *across* profiles. For the cross-cell family, `family_size_cross
+  = 2`, `α_per_test = 0.05 / 2 = 0.025`.
 
-**Family-wise correction** : Bonferroni per cell, `family_size = 8`, `α_per_test = 0.05 / 8 = 0.00625`.
+> **Redefinition** : "cell" = (scale, substrate). H1/H2/H4/H5-* are
+> per-cell tests ; H3 and H6 are cross-cell tests. The previous
+> wording "family of 8 per cell" conflated the two — H3 / H6 cannot
+> live in the per-cell Bonferroni family because their null uses
+> data from cells they are comparing.
 
-**Explicit non-correction across cells** : multiplying by 6 cells → α = 0.05/48 = 0.001 would be under-powered for the available seed budget (40 seeds at 35B). Cross-cell comparison is reported descriptively (effect size + CI), not adjusted.
+| ID | Scope | Statement | Test | Direction |
+|----|-------|-----------|------|-----------|
+| H1 | per-cell | post-dream M1.b > pre-dream M1.b | Welch t | one-sided (improvement) |
+| H2 | per-cell | post-dream effect equivalent to replay-only baseline | TOST equivalence | bounded |
+| H3 | cross-cell (profiles within substrate) | Profile chain ordering on M1.b : P_min < P_equ < P_max | Jonckheere-Terpstra | one-sided |
+| H4 | per-cell | post-dream M1.b > null permutation distribution | one-sample t vs null | one-sided |
+| H5-I | per-cell (scale family) | Variance of Cohen's d invariant across 3 scales | one-way ANOVA | two-sided |
+| H5-II | per-cell (scale family) | Cohen's d monotonic in scale N | Spearman ρ | **two-sided** (per OSF pre-reg amendment, no post-hoc claim) |
+| H5-III | per-cell (scale family) | Cohen's d follows power-law `d = c·N^α` | scipy `curve_fit` + bootstrap CI 95% on α | two-sided ; non-significant outcome publishable |
+| H6 | cross-cell (substrates) | Profile ordering P_max > P_equ > P_min holds invariant across substrates | Jonckheere across (P_min, P_equ, P_max) per substrate, then meta-test for substrate invariance | two-sided |
+
+**Family-wise correction** :
+- Per-cell family (H1, H2, H4, H5-I, H5-II, H5-III) : `family_size = 6`,
+  `α_per_test = 0.05 / 6 ≈ 0.00833`.
+- Cross-cell family (H3, H6) : `family_size = 2`, `α_per_test = 0.05 / 2 = 0.025`.
+
+> **Implementation note** : `kiki_oniric.eval.scaling_law.compute_h5`
+> currently uses `α_family = 0.00625` = `0.05 / 8`. This is the
+> legacy 8-test bar from the pre-split draft ; the per-cell family
+> is now 6 tests, so 0.00625 is **more conservative than required**.
+> The current code is still valid (rejection under 0.00625 implies
+> rejection under 0.00833) but the reported α can be relaxed to
+> 0.00833 per the split family. The relaxation will be applied in
+> C3.9 (`compute_gate_d.py`) with the pre-reg amendment reference.
+
+**Explicit non-correction across families** : the per-cell and
+cross-cell families are corrected independently because they test
+different nulls on disjoint data slices ; stacking them into a
+single Bonferroni family of 8 would be under-powered for the
+available seed budget (40 seeds at 35B). Effect sizes + CI are
+reported descriptively for cross-family comparison, not corrected.
 
 **Phase 1 stability bar (Gate D criterion)** : H1-H4 significant in **3/3 scales** AND H5 family Bonferroni-significant ⇒ **GO Phase 2**. (Bar deliberately high : Nature HB target.)
 

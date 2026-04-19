@@ -2,6 +2,32 @@
 
 **Version** : C-v0.7.0+PARTIAL
 **Date** : 2026-04-17 (initiale) ; 2026-04-19 (bump clôture cycle 2 ; PARTIAL → STABLE après merge Phase 3+4) ; 2026-04-19 (bump Phase 1 cycle 3 ; C-v0.6.0+STABLE → C-v0.7.0+PARTIAL, pré-lancement matrice C3.6)
+
+> **Justification du bump (2026-04-19, Phase 1 cycle 3)**
+>
+> FC mineur (0.6.0 → 0.7.0) : H6 ajoute une surface de contrainte
+> dérivée à travers les substrats selon §12.2 — l'invariant
+> d'ordonnancement des profils (P_max > P_equ > P_min) doit
+> désormais tenir à travers les substrats MLX et E-SNN, pas par
+> substrat isolément. Aucune signature de primitive / identifiant
+> d'axiome n'a changé ; la nouvelle contrainte est dérivée de
+> DR-3 condition 2 et §8.2.H6.
+>
+> EC STABLE → PARTIAL : la matrice d'évaluation §8.2 a des cellules
+> différées en attendant la clôture de la Phase 2 du cycle 3.
+> Cellules différées (ligne × colonne) :
+>
+> - **Substrat Norse × {P_min, P_equ, P_max} × {1.5B, 7B, 35B}** —
+>   dépend de C3.11 (wrapper Norse fallback), sem 4-5 (Phase 2b).
+> - **Alignement fMRI × {P_min, P_equ, P_max}** — dépend de C3.15
+>   (chargeur BOLD Studyforrest) + C3.16 (alignement d'états) +
+>   C3.17 (CCA), sem 5-6 (Phase 2c).
+> - **Méta-test H6 inter-substrats** — agrège les précédents,
+>   clôturé lorsque les deux pistes Phase 2 ont atterri.
+>
+> Cible de re-clôture : bump DualVer C3.22 EC PARTIAL → STABLE en
+> fin de cycle 3 (sem 6), conditionné par la promotion de la
+> porte G10 CONDITIONAL → FULL-GO/STABLE selon §9.
 **Auteur** : Clément Saillant (L'Electron Rare)
 **Statut** : Brouillon pour relecture utilisateur
 **Companion** : `2026-04-17-dreamofkiki-master-design.md` (vision maître)
