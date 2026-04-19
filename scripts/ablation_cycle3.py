@@ -73,7 +73,14 @@ from harness.storage.run_registry import RunRegistry  # noqa: E402
 HARNESS_VERSION = "C-v0.7.0+PARTIAL"
 
 # Axis values — materialised from the pre-cycle-3 real-data locks.
-SCALES: tuple[str, ...] = tuple(MODEL_REGISTRY.keys())
+# Cycle-3 C3.6 ablation matrix is the 3-scale Q4 ladder ; additional
+# FP16 scale slots live in the registry for C3.8 Phase A real-pilot
+# backprop but are explicitly excluded from the 1080-tuple enumeration
+# contract. When the FP16 pilot graduates to a full ablation run the
+# SCALES tuple bumps to 6 + a DualVer EC bump (see CHANGELOG).
+SCALES: tuple[str, ...] = tuple(
+    name for name in MODEL_REGISTRY if not name.endswith("-fp16")
+)
 PROFILES: tuple[str, ...] = ("p_min", "p_equ", "p_max")
 SUBSTRATES: tuple[str, ...] = (
     "mlx_kiki_oniric",

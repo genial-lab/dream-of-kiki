@@ -156,6 +156,91 @@ REGISTRY: dict[str, BaseModelPin] = {
             "scale per memory)."
         ),
     ),
+    # ------------------------------------------------------------------
+    # FP16 (bf16) scale slots — cycle-3 C3.8 Phase A.
+    # ------------------------------------------------------------------
+    # Unquantized bf16 weights are required for the real ablation
+    # pilot because gradient/backprop flows natively through the
+    # weights — dream ops (replay MSE SGD, downscale shrink,
+    # restructure reroute, recombine latent substitution) can
+    # genuinely mutate the model. The Q4 pins above remain useful
+    # for inference-only contexts (e.g. the MMLU logit-bias proxy
+    # on the Q4-quantised 1.5B adapter sanity pilot, kept for
+    # reference) but the C3.8 real pilot scoring path runs against
+    # these bf16 pins.
+    #
+    # Pin values recorded 2026-04-19 from HuggingFace API via
+    #   curl -s https://huggingface.co/api/models/{repo_id}
+    #   curl -s https://huggingface.co/api/models/{repo_id}/tree/main
+    # See commit message for verification transcript.
+    "qwen3p5-1p5b-fp16": BaseModelPin(
+        name="qwen3p5-1p5b-fp16",
+        scale_params=1_500_000_000,
+        repo_id="mlx-community/Qwen2.5-1.5B-Instruct-bf16",
+        revision_sha="4ae77cb209f06199b8df1c94e21ff341332a3a89",
+        file_sha256=(
+            "073400b311d049b6379b8f3f7ad5a0258268031dd009b99389"
+            "cfd4030144850a"
+        ),
+        quantization="bf16-mlx",
+        framework="mlx-lm",
+        approx_ram_gb=3.1,
+        notes=(
+            "Qwen2.5 fallback for Qwen3.5 slot ; single-shard "
+            "model.safetensors 3.09 GB bf16 ; license apache-2.0 "
+            "; backprop-capable through native bf16 weights — "
+            "used by scripts/pilot_cycle3_real.py for the C3.8 "
+            "Phase A real ablation pilot where dream ops must "
+            "mutate weights in-place."
+        ),
+    ),
+    "qwen3p5-7b-fp16": BaseModelPin(
+        name="qwen3p5-7b-fp16",
+        scale_params=7_000_000_000,
+        repo_id="mlx-community/Qwen2.5-7B-Instruct-bf16",
+        revision_sha="349a12f0e5f131c3914e3a66e78a3db71e9f9527",
+        file_sha256=(
+            "2d67034c181238a2978fead9169969328d016a7bc88c2cf75a"
+            "bf81ceb39452a6"
+        ),
+        quantization="bf16-mlx",
+        framework="mlx-lm",
+        approx_ram_gb=15.2,
+        notes=(
+            "Qwen2.5-7B bf16 fallback for Qwen3.5-7B slot ; "
+            "multi-shard 3x safetensors totalling 15.23 GB ; "
+            "file_sha256 pins shard 1/3 (model-00001-of-00003) ; "
+            "shards 2-3 oids : "
+            "e59a51540a99f1992d8a05ff263b042b869368d0082ac6e4dae"
+            "596e658eb3116, "
+            "d6b92aab8dd7e0d757bbb048cb814463ef992adb79d4e720ba5"
+            "d6c942885287b. "
+            "license apache-2.0 ; backprop-capable for dream ops."
+        ),
+    ),
+    "qwen3p5-35b-fp16": BaseModelPin(
+        name="qwen3p5-35b-fp16",
+        scale_params=32_500_000_000,
+        repo_id="mlx-community/Qwen2.5-32B-Instruct-bf16",
+        revision_sha="7d56aa0beaa00b8d7b07509e399f4272e38769d5",
+        file_sha256=(
+            "9b95cdf1b6350397fdeea670dfd55f8f6d60189980188d68694"
+            "b548e2449fe29"
+        ),
+        quantization="bf16-mlx",
+        framework="mlx-lm",
+        approx_ram_gb=65.0,
+        notes=(
+            "Qwen2.5-32B bf16 fallback for Qwen3.5-35B slot ; "
+            "multi-shard 13x safetensors totalling ~65.5 GB ; "
+            "file_sha256 pins shard 1/13 (model-00001-of-00013) ; "
+            "remaining shards 2-13 oids enumerated in the C3.8 "
+            "Phase A verification transcript (commit log). Fits "
+            "easily on Studio M3 Ultra 512 GB. license apache-2.0 "
+            "; practical structural concern : bf16-35B training "
+            "throughput at ~5-15 tok/s limits per-cell wall time."
+        ),
+    ),
 }
 
 
