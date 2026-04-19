@@ -1,0 +1,57 @@
+{
+  "synthetic_substitute": true,
+  "data_provenance": "synthetic data \u2014 no real cohort/HW. E-SNN rows use numpy LIF spike-rate skeleton, not Loihi-2.",
+  "matrix": {
+    "mlx_kiki_oniric": {
+      "C1": {
+        "status": "PASS",
+        "detail": "all 8 primitives declared as Protocols + registry complete",
+        "evidence": "tests/conformance/axioms/test_dr3_substrate.py"
+      },
+      "C2": {
+        "status": "PASS",
+        "detail": "DR-0, DR-1, DR-3, DR-4 axiom suites pass on MLX",
+        "evidence": "tests/conformance/axioms/"
+      },
+      "C3": {
+        "status": "PASS",
+        "detail": "S2 finite + S3 topology guards enforceable on MLX",
+        "evidence": "tests/conformance/invariants/"
+      }
+    },
+    "esnn_thalamocortical": {
+      "C1": {
+        "status": "PASS",
+        "detail": "4 op factories callable + core registry shared with MLX (spike-rate numpy LIF skeleton, synthetic substitute)",
+        "evidence": "tests/conformance/axioms/test_dr3_esnn_substrate.py"
+      },
+      "C2": {
+        "status": "PASS",
+        "detail": "DR-3 E-SNN conformance suite passes on numpy LIF skeleton (synthetic substitute \u2014 no Loihi-2 HW)",
+        "evidence": "tests/conformance/axioms/test_dr3_esnn_substrate.py"
+      },
+      "C3": {
+        "status": "PASS",
+        "detail": "S2 finite + S3 topology guards enforceable on LIFState (synthetic substitute \u2014 spike-rate numpy LIF)",
+        "evidence": "tests/conformance/axioms/test_dr3_esnn_substrate.py"
+      }
+    },
+    "hypothetical_cycle3": {
+      "C1": {
+        "status": "N/A",
+        "detail": "placeholder for cycle 3 \u2014 no third substrate implemented",
+        "evidence": "not yet implemented"
+      },
+      "C2": {
+        "status": "N/A",
+        "detail": "placeholder for cycle 3 \u2014 no third substrate implemented",
+        "evidence": "not yet implemented"
+      },
+      "C3": {
+        "status": "N/A",
+        "detail": "placeholder for cycle 3 \u2014 no third substrate implemented",
+        "evidence": "not yet implemented"
+      }
+    }
+  }
+}
