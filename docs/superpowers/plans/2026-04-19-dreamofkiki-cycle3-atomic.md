@@ -9,6 +9,16 @@
 via multi-scale real-data replication (Phase 1) + cross-substrate
 neuromorphic / fMRI validation (Phase 2).
 
+> **PLOS CB pivot (2026-04-20)** : Paper 1 retargeted PLOS
+> Computational Biology (commit `d6866f3`) ; H1–H4 + multi-scale
+> empirical cells **moved to Paper 2**. Tasks marked DEFERRED below
+> are scope-deferred to the future Paper 2 backlog. The 11 DONE
+> tasks remain authoritative ; sequencing is preserved for Paper 2
+> reactivation. See
+> `docs/milestones/cycle3-plan-adaptation-2026-04-20.md` for the
+> full adaptation matrix, Phase B 1.5B GO 3/3 highlight kept in
+> Paper 1 §7 pipeline-validation scope, and the Paper 2 backlog.
+
 **Architecture:** cf. `docs/superpowers/specs/2026-04-19-dreamofkiki-cycle3-design.md`.
 Waterfall with hard GATE D at sem 3 end (bar : H1-H4 sig 3/3 scales +
 H5 family Bonferroni + H6 profile ordering).
@@ -225,6 +235,12 @@ dreamOfkiki/
 
 ### C3.8 — Full ablation Studio launch
 
+> **PARTIAL — PLOS CB pivot (2026-04-20)** : 1.5B cell delivered as
+> Phase B sanity pilot (commit `22c58c9`, Verdict GO 3/3,
+> 46.75 min wall-clock on Studio). 7B + 35B cells **DEFERRED to
+> Paper 2** (multi-scale empirical claims removed from Paper 1
+> v0.2 PLOS CB scope per §8.3).
+
 **Goal** : background launch `ablation_cycle3.py` on Studio M3 Ultra after sanity GO ; ~10 days wall-clock budget per §7 ; partial results streamed for incremental Gate D dry-runs sem 3 mid.
 
 **Files** :
@@ -236,6 +252,11 @@ dreamOfkiki/
 **Commit** : `chore(ablation): cycle-3 Studio full launch sem 2` (49 chars)
 
 ### C3.9 — compute_gate_d.py — GATE D decision
+
+> **DEFERRED to Paper 2 (PLOS CB pivot 2026-04-20)** : Gate D
+> hinges on H1–H4 sig 3/3 *scales*, but only the 1.5B cell is
+> available post-pivot. Gate D moves to Paper 2 once C3.8 7B + 35B
+> cells are re-executed.
 
 **Goal** : reads run-registry full-ablation output, runs the 8-test Bonferroni family (C3.5) per cell, computes H5 trivariant (C3.4), emits per-hypothesis GO/NO-GO table, renders Gate D verdict. GO iff (H1-H4 sig 3/3 scales) ∧ (H5 family Bonferroni-significant) ∧ (H6 profile ordering P_max>P_equ>P_min).
 
@@ -304,6 +325,11 @@ If Gate D = NO-GO → execute Pivot 4 (§5.1 R3) ; re-spec cycle 3 sem 4 onward 
 
 ### C3.13 — Phase-2b cross-substrate pilot
 
+> **DEFERRED to Paper 2 (PLOS CB pivot 2026-04-20)** : sem-3 quota
+> interrupted execution. Driver `scripts/pilot_phase2b_neuromorph.py`
+> (624 LOC) preserved as-is with deferred-note header (commit
+> `ada3fc0`). Paper 2 reactivation entry point.
+
 **Goal** : Norse vs MLX cross-substrate pilot via `compute_gate_d.py` reused on the Norse cell (Bonferroni stays per-cell, **not** across substrates per spec §4). 3 substrates × 3 profiles × 4 ops conformance matrix update.
 
 **Files** :
@@ -315,6 +341,9 @@ If Gate D = NO-GO → execute Pivot 4 (§5.1 R3) ; re-spec cycle 3 sem 4 onward 
 **Commit** : `feat(pilot): Phase-2b Norse cross-substrate` (43 chars)
 
 ### C3.14 — G10a neuromorph milestone
+
+> **DEFERRED to Paper 2 (PLOS CB pivot 2026-04-20)** : depends on
+> C3.13 outputs ; reactivation tied to Paper 2 multi-scale sprint.
 
 **Goal** : milestone report : H6 (profile ordering invariant cross-substrate) verdict on the Norse cell ; feeds Paper 1 v2 §§ cross-substrate.
 
@@ -364,6 +393,12 @@ If Gate D = NO-GO → execute Pivot 4 (§5.1 R3) ; re-spec cycle 3 sem 4 onward 
 
 ### C3.18 — Phase-2c fMRI pilot + G10c milestone
 
+> **DEFERRED to Paper 2 (PLOS CB pivot 2026-04-20)** : C3.15
+> Studyforrest loader + C3.16 HMM + C3.17 CCA infra DONE in-tree
+> ; only the Phase-2c pilot driver and G10c milestone are
+> deferred. Paper 1 v0.2 §5.6 cross-substrate walkthrough already
+> cites the C3.16 + C3.17 infra without invoking the pilot run.
+
 **Goal** : Phase-2c pilot run (M2.b real-data cell) + milestone report ; feeds Paper 1 v2 §§ cognitive alignment.
 
 **Files** :
@@ -376,6 +411,11 @@ If Gate D = NO-GO → execute Pivot 4 (§5.1 R3) ; re-spec cycle 3 sem 4 onward 
 
 ### C3.19 — Paper 1 v2 outline
 
+> **REPLACED by Paper 1 v0.2 PLOS CB workflow (2026-04-20)** :
+> narrative authored directly in `docs/papers/paper1/` (single
+> tree, not `paper1-v2/`). The C3.19–C3.22 sequence now belongs
+> to a future Paper 2 narrative once Gate D verdict lands.
+
 **Goal** : outline merging v1 sections + Paper 2 v0.1 §§ cross-substrate (cycle-2) + cycle-3 §§ real-data + §§ cross-substrate Norse + §§ scaling laws + §§ fMRI alignment ; cites every G-gate, axiom, invariant.
 
 **Files** :
@@ -386,6 +426,11 @@ If Gate D = NO-GO → execute Pivot 4 (§5.1 R3) ; re-spec cycle 3 sem 4 onward 
 **Commit** : `docs(paper1-v2): outline merge v1+cycle-2+cycle-3` (49 chars)
 
 ### C3.20 — Paper 1 v2 methodology + results (EN + FR)
+
+> **REPLACED by Paper 1 v0.2 PLOS CB workflow (2026-04-20)** :
+> methodology + results sections live in `docs/papers/paper1/`
+> (W-series revisions, commit `d6866f3`). H1–H4 verdicts moved to
+> Paper 2.
 
 **Goal** : methodology covers 3 substrates (MLX + Norse + fMRI alignment cell) × 3 scales × 8-test Bonferroni family ; results table per cell with H1-H6 verdicts. Bilingual EN/FR mirrored per CLAUDE.md authorship policy.
 
@@ -401,6 +446,11 @@ If Gate D = NO-GO → execute Pivot 4 (§5.1 R3) ; re-spec cycle 3 sem 4 onward 
 
 ### C3.21 — Paper 1 v2 discussion + full-draft assembly
 
+> **REPLACED by Paper 1 v0.2 PLOS CB workflow (2026-04-20)** :
+> Paper 1 v0.2 full-draft already rendered to
+> `docs/papers/paper1/build/full-draft.pdf` (22 pages, 296 KB).
+> arXiv submission prep is the live critical path.
+
 **Goal** : discussion + future-work + full-draft assembly + pandoc tex render ; respects PUBLICATION-READY criteria framework-C §9.
 
 **Files** :
@@ -413,6 +463,11 @@ If Gate D = NO-GO → execute Pivot 4 (§5.1 R3) ; re-spec cycle 3 sem 4 onward 
 **Commit** : `docs(paper1-v2): discussion + full-draft assembly` (49 chars)
 
 ### C3.22 — DualVer bump C-v0.7.0+PARTIAL → C-v0.7.0+STABLE + G10 gate
+
+> **REPLACED / DEFERRED to Paper 2 (PLOS CB pivot 2026-04-20)** :
+> EC remains `+PARTIAL` through Paper 1 v0.2 PLOS CB submission.
+> Promotion to `+STABLE` deferred until Paper 2 closeout (Phase 2
+> deferred cells re-closed under §12.3 transition rule).
 
 **Goal** : EC PARTIAL → STABLE per §12.3 (Phase 2 deferred cells re-closed) ; Gate G10 promoted CONDITIONAL → FULL-GO/STABLE. Surgical-bump pattern per C3.10 / `139c4c5` reference.
 

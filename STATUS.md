@@ -1,14 +1,19 @@
 # dream-of-kiki — Status
 
-**As of** : 2026-04-19 cycle-3 Phase 1 launch (C3.6 runner +
-C3.10 bump)
+**As of** : 2026-04-20 PLOS CB pivot codified (cycle-3 plan adapted)
 **Version** : C-v0.7.0+PARTIAL
-**Phase** : cycle 3 Phase 1 in flight — real-data multi-scale
-ablation matrix enumerated (1080 configs), sanity pilot 1.5B
-scripted (C3.7). G10 cycle-3 gate D = CONDITIONAL-GO/PARTIAL,
-empirical cells not yet validated.
+**Phase** : Paper 1 v0.2 PLOS CB submission preparation. Cycle-3
+Phase 1 1.5B sanity GO 3/3 (commit `22c58c9`, 46.75 min Studio) ;
+Phase 2 multi-scale (7B + 35B) + Norse cross-substrate + fMRI
+pilot **deferred to Paper 2** per
+`docs/milestones/cycle3-plan-adaptation-2026-04-20.md` adaptation
+matrix.
+
+Active gate : **Paper 1 v0.2 PLOS CB submission preparation**
+(arXiv prep + DR-2 external review + PLOS CB cover letter).
 
 Public repo : https://github.com/electron-rare/dream-of-kiki
+Public org repo : https://github.com/genial-lab/dream-of-kiki
 
 ---
 
@@ -19,17 +24,23 @@ Cycle 2 calendar : all 5 phases delivered (Phase 1 E-SNN substrate,
 Phase 2 P_max wiring, Phase 3 cross-substrate ablation, Phase 4
 Paper 2 narrative, Phase 5 async worker + closeout) ;
 G9 = FULL-GO/STABLE
-Cycle 3 calendar : 6 weeks (S47-S52). Phase 1 in flight : pre-
-cycle-3 locks landed (SHA-pinned models + datasets + Studyforrest
-init + H5 trivariant + Bonferroni 8-test) ; C3.6 1080-config runner
-landed + C3.10 DualVer bump landed + C3.7 sanity pilot scripted.
-Active gate : **G10 cycle-3 Gate D (CONDITIONAL-GO / PARTIAL)**
+Cycle 3 calendar : 6 weeks (S47-S52) — **adapted 2026-04-20 for
+PLOS CB pivot**. Phase 1 sem 1-3 DONE (loaders + Qwen MLX wrappers
++ real ops + scaling law + Bonferroni + 1080-runner + 1.5B sanity
+GO 3/3 + DualVer +PARTIAL). Phase 2 sem 4-5 infra DONE (Norse
+wrapper + SNN ops + Studyforrest BOLD + HMM + CCA). Multi-scale
+empirical (7B + 35B), Gate D, Norse cross-substrate pilot, fMRI
+pilot, Paper 1 v2 narrative : **all deferred to Paper 2**. Paper 1
+v0.2 retargeted PLOS Computational Biology (commit `d6866f3`),
+draft rendered (`docs/papers/paper1/build/full-draft.pdf`,
+22 pages). Active gate : **Paper 1 v0.2 PLOS CB submission
+preparation** (G10 cycle-3 Gate D folded into Paper 2 backlog).
 
 ## Test suite
 
 ```
-240 tests passing
-coverage 91.13% (gate 90%)
+277 tests passing
+coverage 91.17% (gate 90%)
 ```
 
 ## DualVer status
@@ -37,9 +48,9 @@ coverage 91.13% (gate 90%)
 | Axis | Value | Meaning |
 |------|-------|---------|
 | FC   | v0.7.0 | MINOR bump (H6 profile-ordering derived constraint surface added per framework-C §12.2 ; scale-axis glossary entry ; cycle-3 cross-scale DR-3 formal feature add) |
-| EC   | PARTIAL | Phase 1 + 2 + 5 cycle-2 + pre-cycle-3 locks delivered, cycle-3 Phase 1 scripted but 1080-matrix not yet executed ; Phase 2 tracks (neuromorph + fMRI, C3.11-C3.22) scoped-deferred until sem 4-6. STABLE → PARTIAL per framework-C §12.3 transition rule |
+| EC   | PARTIAL | Cycle-3 Phase 1 sem 1-3 DONE (loaders + wrappers + real ops + scaling law + Bonferroni + 1080-runner + 1.5B sanity GO 3/3 + DualVer +PARTIAL bump). Cycle-3 Phase 2 sem 4-5 infra DONE (Norse wrapper + SNN ops + Studyforrest BOLD + HMM + CCA). Multi-scale empirical 7B + 35B, Gate D verdict, Norse cross-substrate pilot, fMRI pilot : deferred to Paper 2 per PLOS CB pivot 2026-04-20 (`docs/milestones/cycle3-plan-adaptation-2026-04-20.md`). STABLE → PARTIAL per framework-C §12.3 transition rule |
 
-Next target : C-v0.7.0+STABLE post-C3.22 (Gate D = FULL-GO, Phase 2 cells re-closed)
+Next target : C-v0.7.0+STABLE deferred to Paper 2 closeout (Phase 2 multi-scale cells re-closed). Paper 1 v0.2 PLOS CB submission does **not** trigger STABLE promotion (scope reframing only).
 
 ## Gates
 
@@ -55,7 +66,8 @@ Next target : C-v0.7.0+STABLE post-C3.22 (Gate D = FULL-GO, Phase 2 cells re-clo
 | G7 — E-SNN substrate conformance | cycle-2 Phase 1 | ✅ LOCKED |
 | G8 — P_max profile wired | cycle-2 Phase 2 | ✅ LOCKED |
 | G9 — cycle-2 publication-ready | cycle-2 closeout | ✅ FULL-GO/STABLE |
-| G10 — cycle-3 Gate D (H1-H6) | cycle-3 sem 3 | ⏳ CONDITIONAL-GO/PARTIAL (C3.6 runner + C3.7 sanity scripted, matrix execution pending) |
+| G10 — cycle-3 Gate D (H1-H6) | cycle-3 sem 3 | ⏸ DEFERRED to Paper 2 (PLOS CB pivot 2026-04-20 — only 1.5B cell available, multi-scale 7B+35B + Gate D moved to Paper 2 backlog) |
+| Paper 1 v0.2 PLOS CB | 2026-04-20 → submission | ▶ ACTIVE (draft rendered `docs/papers/paper1/build/full-draft.pdf` 22 pages 296 KB ; arXiv prep + DR-2 external review + cover letter pending) |
 
 ## Critical risks watched
 
