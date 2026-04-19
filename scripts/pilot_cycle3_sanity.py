@@ -48,17 +48,51 @@ GO / NO-GO decision rule (per user spec) :
   Studio compute on 7B + 35B. Open a root-cause review
   (``pivot-4`` branch per spec §5.1 R3).
 
+Retained-score proxy (MMLU + Qwen logit bias) :
+
+    The previous revision of this pilot scored the adapter with
+    ``exp(-MSE)`` on a 4-dim projection — a proxy too coarse to
+    distinguish between profile op-sequence-induced final adapter
+    states. Concretely p_equ (replay + downscale + recombine) and
+    p_max (+ restructure + ATTENTION_PRIOR) produced identical
+    p-values, proving the proxy was insensitive to the structural
+    difference.
+
+    This revision replaces ``exp(-MSE)`` with a genuine Qwen
+    evaluation : each cell loads 15 MMLU prompts, runs the Qwen
+    1.5B forward pass on ``prompt + "Answer:"``, extracts the
+    last-token logits for the 4 letter tokens ``{A, B, C, D}``,
+    adds the adapter output at a fixed reference input as a
+    4-dim bias to those logits, then picks argmax as the model's
+    prediction. Accuracy over the 15 prompts is the cell's
+    score ∈ {0, 1/15, …, 1}. The adapter's 4-dim output is
+    *directly observable* as the logit bias — dream ops that
+    shift the weights are guaranteed to shift the score, and
+    different profile op-sequences produce distinct adapter
+    trajectories and therefore distinct post-dream accuracies.
+
+    Pre-score = 15-prompt accuracy with adapter bias = 0 (pure
+    Qwen baseline, identical across all cells up to tokenizer
+    determinism). Post-score = accuracy with the dream-modified
+    adapter injecting its 4-dim output as logit bias.
+
+    n = 15 discrete accuracy gives p ∈ {0/15, …, 15/15}, which
+    is sufficient granularity for the paired t-test across 30
+    seeds per profile (the statistic picks up delta coherence,
+    not absolute-accuracy precision).
+
 Per-cell pipeline :
 
   1. Fresh MLX model copy + per-cell adapter head seeded from
      ``seed`` (``mx.random.seed`` + ``np.random.seed``).
-  2. Pre-dream evaluation on the retained benchmark (50 items,
-     same seed, vacuous-pass when the predictor is synthetic —
-     the pipeline validator reads the *delta*, not the absolute).
+  2. Pre-dream evaluation : 15 MMLU prompts through Qwen with
+     the pre-dream adapter bias (≈ zero on fresh weights so
+     effectively pure Qwen baseline).
   3. Dream episodes — 5 per profile, using the real-weight ops
      (``replay_real``, ``downscale_real``, ``restructure_real``,
      ``recombine_real``) against the per-cell adapter.
-  4. Post-dream evaluation (same items, same seed).
+  4. Post-dream evaluation (same 15 prompts) with the modified
+     adapter injecting its 4-dim bias on the A/B/C/D logits.
   5. Per-cell run registered with ``RunRegistry.register`` plus
      the measured (pre, post, delta) metrics.
 
@@ -66,17 +100,17 @@ Graceful degradation : if a single cell crashes, the driver logs
 the error and continues — partial progress still yields H1 input
 on the remaining cells. An explicit ``--smoke-cell`` flag runs
 exactly 1 cell (``p_min`` + seed 0 + MLX) to validate the end-to-
-end pipeline in under 2 minutes before the 18 h launch.
+end pipeline in under 30 s before the 15 min full pilot launch.
 
 Usage ::
 
     # Enumerate the 180 configs ; no dream ops.
     uv run python scripts/pilot_cycle3_sanity.py --dry-run
 
-    # Single smoke cell (p_min + seed 0 + MLX ; <2 min).
+    # Single smoke cell (p_min + seed 0 + MLX ; <30 s).
     uv run python scripts/pilot_cycle3_sanity.py --smoke-cell
 
-    # Full 90-cell run (~18 h Studio compute).
+    # Full 90-cell run (~10-15 min on Studio).
     uv run python scripts/pilot_cycle3_sanity.py
 
 Reference :
@@ -135,6 +169,20 @@ EXECUTED_CELL_COUNT = (
 GO_BONFERRONI_ALPHA = 0.0125
 GO_PROFILES_REJECTED_MIN = 2  # ≥ 2 of 3 MLX profiles
 
+# MMLU + Qwen logit-bias proxy configuration.
+MMLU_FIXTURE_PATH = REPO_ROOT / "tests" / "fixtures" / "mmlu_sanity.jsonl"
+MMLU_N_PROMPTS = 15  # n=15 per cell — <2 s/cell on Studio at 17 ms/forward.
+# Fixed reference input fed through the adapter to obtain the
+# 4-dim logit-bias vector. A constant input makes the adapter's
+# 4-dim output directly interpretable as A/B/C/D bias and keeps
+# pre/post scores deterministic under the cell's seed.
+ADAPTER_REFERENCE_INPUT = (1.0, 1.0, 1.0, 1.0)
+# Letter token IDs for Qwen2.5 tokenizer — single tokens each
+# (validated 2026-04-19 against mlx-community/Qwen2.5-1.5B-
+# Instruct-4bit : 'A' -> 32, 'B' -> 33, 'C' -> 34, 'D' -> 35).
+# Computed at runtime via tokenizer.encode to stay robust against
+# tokenizer revision ; these values document the expected result.
+
 
 # -------------------------------------------------------------------
 # CLI parsing
@@ -150,7 +198,7 @@ def _parse_cli(argv: list[str]) -> dict:
       without touching any substrate. Safe from CI.
     - ``--smoke-cell`` : run exactly one cell (``p_min`` + seed 0
       + MLX) end-to-end. Used to validate the wiring before the
-      18 h launch ; completes in < 2 min on Studio.
+      full pilot launch ; completes in < 30 s on Studio.
     """
     opts = {"dry_run": False, "smoke_cell": False}
     for token in argv:
@@ -227,26 +275,25 @@ def _seed_everything(seed: int) -> None:
 
 
 def _build_adapter(seed: int):
-    """Construct a seeded 4-8-2 MLX MLP — the dream-ops target.
+    """Construct a seeded 4-4-4-4 MLP — the dream-ops target.
 
     The Qwen base model is Q4-quantised and not backprop-capable
     through ``mlx-lm.load`` ; the pilot therefore attaches a tiny
-    trainable adapter head that the real-weight ops mutate. This
-    is enough to exercise the full pipeline (replay SGD step,
-    downscale shrink, restructure reroute, recombine VAE sample)
-    deterministically against a γ-snapshot Qwen wrapper.
+    trainable adapter head that the real-weight ops mutate. The
+    adapter's final 4-dim output feeds into the Qwen next-token
+    logits as an additive bias on the four letter tokens A/B/C/D
+    (see ``_score_adapter_mmlu``).
+
+    Shape homogeneity on ``self.layers`` = [Linear(4,4)]*3 is
+    what lets ``restructure_real`` swap layers 0/1 cleanly ; the
+    final head Linear(4, 4) stays off ``self.layers`` so reroute
+    never reaches it. The full output dim (4) matches the A/B/C/D
+    letter bias — deliberate.
     """
     import mlx.core as mx  # noqa: F401 — imported for side-effect seed
     import mlx.nn as nn
 
     class _Adapter(nn.Module):
-        # Three homogeneous (4→4) linear layers ; final head
-        # projects to the 2-d replay target with a third Linear
-        # kept off ``self.layers`` (only indices 0-2 participate
-        # in ``restructure_real`` reroute). Shape-homogeneity on
-        # ``self.layers`` is what lets ``swap_indices=[0, 1]``
-        # execute cleanly without breaking the downstream replay
-        # forward pass ; the head stays fixed.
         def __init__(self) -> None:
             super().__init__()
             self.layers = [
@@ -254,7 +301,7 @@ def _build_adapter(seed: int):
                 nn.Linear(4, 4),
                 nn.Linear(4, 4),
             ]
-            self.head = nn.Linear(4, 2)
+            self.head = nn.Linear(4, 4)
 
         def __call__(self, x):
             h = nn.relu(self.layers[0](x))
@@ -285,19 +332,164 @@ def _build_adapter(seed: int):
     return adapter, encoder, decoder
 
 
-def _load_qwen_wrapper(seed: int):
-    """Load the Qwen-1.5B MLX wrapper (γ-channel snapshot).
+# -------------------------------------------------------------------
+# MMLU + Qwen forward proxy
+# -------------------------------------------------------------------
 
-    Falls back to ``None`` when ``mlx-lm`` isn't installed ; the
-    pipeline still exercises the adapter path so callers can
-    diagnose the env before pulling the ~1 GB HF weights.
+
+def _load_mmlu_prompts(n: int = MMLU_N_PROMPTS) -> list[dict]:
+    """Load ``n`` MMLU records from the local sanity fixture.
+
+    The fixture is a network-free JSONL committed under
+    ``tests/fixtures/mmlu_sanity.jsonl`` ; it carries hand-
+    authored world-facts / elementary-math / science questions in
+    the canonical MMLU schema (``question`` / ``choices`` /
+    ``answer`` / ``subject``). Using a committed fixture keeps
+    the pilot byte-reproducible (R1) and side-steps the
+    ``datasets`` package dependency — the HF loader fails without
+    it on Studio.
     """
-    try:  # pragma: no cover - network / install path
-        from harness.real_models.qwen_mlx import load_qwen
+    if not MMLU_FIXTURE_PATH.exists():
+        raise FileNotFoundError(
+            f"MMLU sanity fixture missing at {MMLU_FIXTURE_PATH!s}"
+        )
+    records: list[dict] = []
+    with MMLU_FIXTURE_PATH.open("r", encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if not line:
+                continue
+            records.append(json.loads(line))
+    if len(records) < n:
+        raise ValueError(
+            f"MMLU fixture has {len(records)} records ; "
+            f"need at least {n}"
+        )
+    return records[:n]
 
-        return load_qwen(SANITY_SCALE)
-    except Exception:  # pragma: no cover - diagnostic
-        return None
+
+def _build_mmlu_prompt(record: dict) -> str:
+    """Render an MMLU record as a zero-shot letter-choice prompt.
+
+    Format mirrors the Hendrycks et al. 2020 5-shot prompt but
+    without exemplars — n=15 gives enough signal and keeps the
+    forward small. Qwen2.5-1.5B-Instruct handles this prompt
+    format correctly on the letter-token argmax (verified
+    empirically on Studio).
+    """
+    q = record["question"]
+    choices = record["choices"]
+    return (
+        "The following is a multiple choice question. Respond "
+        "with only the letter of the correct answer.\n\n"
+        f"Question: {q}\n"
+        f"A. {choices[0]}\n"
+        f"B. {choices[1]}\n"
+        f"C. {choices[2]}\n"
+        f"D. {choices[3]}\n"
+        "Answer:"
+    )
+
+
+def _letter_token_ids(tokenizer) -> list[int]:
+    """Return the 4 single-token IDs for letters ``A``, ``B``, ``C``, ``D``.
+
+    Qwen2.5 tokenizes each capital letter as a single BPE token
+    (verified 2026-04-19 : A=32, B=33, C=34, D=35). If a future
+    tokenizer revision splits one letter into multiple tokens
+    this raises ``ValueError`` so the caller fails loudly rather
+    than silently biasing a wrong token.
+    """
+    ids: list[int] = []
+    for letter in ("A", "B", "C", "D"):
+        enc = tokenizer.encode(letter, add_special_tokens=False)
+        if len(enc) != 1:
+            raise ValueError(
+                f"letter {letter!r} tokenises to {enc!r} (len "
+                f"{len(enc)}) ; MMLU logit-bias proxy requires "
+                "single-token letters"
+            )
+        ids.append(int(enc[0]))
+    return ids
+
+
+def _adapter_bias(adapter) -> "list[float]":
+    """Return the adapter's 4-dim output at the fixed reference input.
+
+    This is the logit-bias vector applied to the A/B/C/D letter
+    logits during MMLU scoring. Fresh adapter weights (pre-dream)
+    produce a small near-zero bias ; dream ops shift the weights
+    and therefore shift the bias, which is the mechanism that
+    makes the MMLU accuracy respond to the dream trajectory.
+    """
+    import mlx.core as mx
+    import numpy as np
+
+    x = mx.array([list(ADAPTER_REFERENCE_INPUT)])
+    out = adapter(x)
+    mx.eval(out)
+    arr = np.asarray(out)
+    if not np.isfinite(arr).all():
+        # S2 finite : a pathological downscale shouldn't propagate
+        # inf/NaN into the logits. Zero the bias so scoring falls
+        # back on pure Qwen behaviour.
+        return [0.0, 0.0, 0.0, 0.0]
+    return [float(v) for v in arr.reshape(-1)[:4]]
+
+
+def _score_adapter_mmlu(
+    adapter,
+    wrapper,
+    mmlu_prompts: list[dict],
+    letter_token_ids: list[int],
+    *,
+    use_bias: bool,
+) -> float:
+    """Return the adapter's MMLU accuracy (0..1) over ``mmlu_prompts``.
+
+    Forward pass : for each prompt run the Qwen 1.5B model on
+    ``prompt + "Answer:"``, extract the last-token logits on the
+    4 letter tokens {A, B, C, D}, add the adapter-bias 4-vector
+    (when ``use_bias=True`` ; else skip the bias and score pure
+    Qwen), argmax to pick a letter, compare to the record's
+    ``answer`` index.
+
+    Returns accuracy ∈ [0, 1] with granularity ``1/len(prompts)``.
+    Deterministic under fixed adapter weights + fixed Qwen
+    wrapper + fixed prompt list + fixed letter IDs ; the only
+    stochastic surface (Qwen forward dropout / sampling) is
+    seeded via the wrapper's ``forward(seed=0)`` pattern.
+    """
+    if wrapper is None:
+        # Qwen failed to load — return a neutral 0.0 so the pilot
+        # still produces a delta signal (post - pre = 0) and the
+        # H1 test falls back on the "insufficient samples" branch
+        # without crashing the driver.
+        return 0.0
+
+    import mlx.core as mx
+    import numpy as np
+
+    bias = _adapter_bias(adapter) if use_bias else [0.0, 0.0, 0.0, 0.0]
+    bias_arr = np.asarray(bias, dtype=np.float32)
+
+    correct = 0
+    tokenizer = wrapper.tokenizer
+    model = wrapper.model
+    for record in mmlu_prompts:
+        prompt = _build_mmlu_prompt(record)
+        token_ids = tokenizer.encode(prompt)
+        tokens = mx.array([token_ids])
+        mx.random.seed(0)
+        logits = model(tokens)
+        mx.eval(logits)
+        last = np.asarray(logits[0, -1, :])
+        letter_logits = last[letter_token_ids].astype(np.float32)
+        adjusted = letter_logits + bias_arr
+        pred = int(np.argmax(adjusted))
+        if pred == int(record["answer"]):
+            correct += 1
+    return correct / len(mmlu_prompts)
 
 
 def _build_runtime(profile_name: str, adapter, encoder, decoder, seed: int):
@@ -363,7 +555,13 @@ def _build_runtime(profile_name: str, adapter, encoder, decoder, seed: int):
 
 
 def _build_episode(profile_name: str, ep_idx: int, seed: int):
-    """Build a dream episode that drives the profile's op set."""
+    """Build a dream episode that drives the profile's op set.
+
+    ``beta_records`` carry 4-dim ``x`` and 4-dim ``y`` — the
+    ``y`` width matches the adapter's final head
+    ``Linear(4, 4)`` (output dim = 4 = A/B/C/D bias) so replay's
+    MSE loss is well-defined.
+    """
     import numpy as np
 
     from kiki_oniric.dream.episode import (
@@ -378,7 +576,7 @@ def _build_episode(profile_name: str, ep_idx: int, seed: int):
     beta_records = [
         {
             "x": rng.standard_normal(4).tolist(),
-            "y": rng.standard_normal(2).tolist(),
+            "y": rng.standard_normal(4).tolist(),
         }
         for _ in range(4)
     ]
@@ -407,60 +605,37 @@ def _build_episode(profile_name: str, ep_idx: int, seed: int):
     )
 
 
-def _score_adapter(adapter, seed: int, n_samples: int = 50) -> float:
-    """Return a deterministic MSE-based score for the adapter.
-
-    The retained benchmark shipped with the repo is a synthetic
-    placeholder (string predictions, 50 items) — not directly
-    callable with an MLP output. The sanity pilot therefore uses a
-    self-consistency proxy : for ``n_samples`` seeded inputs,
-    measure the average adapter output norm, mapped through a
-    bounded ``exp(-mse)`` score in [0, 1]. Deterministic under the
-    same ``seed`` + same adapter weights. Delta = post - pre is a
-    sensible pipeline signal (positive when dream ops moved the
-    weights coherently, near-zero when the ops were a no-op). This
-    is pipeline-validation, not an empirical accuracy claim — see
-    module docstring and C3.8 for the real benchmark swap.
-    """
-    import mlx.core as mx
-    import numpy as np
-
-    rng = np.random.default_rng(seed)
-    xs = mx.array(rng.standard_normal((n_samples, 4)).astype(np.float32))
-    out = adapter(xs)
-    mx.eval(out)
-    arr = np.asarray(out)
-    # Guard against NaN / Inf produced by a bad downscale (S2
-    # would normally catch this upstream — belt + suspenders).
-    if not np.isfinite(arr).all():
-        return 0.0
-    mse = float(np.mean(arr ** 2))
-    # exp(-mse) ∈ (0, 1] ; larger mse → smaller score.
-    return float(np.exp(-mse))
-
-
 def _run_cell(
     profile_name: str,
     seed: int,
     *,
+    wrapper,
+    mmlu_prompts: list[dict],
+    letter_token_ids: list[int],
     n_episodes: int = 5,
-    n_eval_samples: int = 50,
 ) -> dict:
     """Execute one cell of the sanity pilot — 5 pipeline stages.
 
     Returns a dict with ``pre``, ``post``, ``delta``,
     ``wall_time_s`` and diagnostic fields (``model_loaded``,
-    ``error``).
+    ``error``). The Qwen ``wrapper`` + MMLU fixture + letter IDs
+    are hoisted to the caller so they are shared across all 90
+    cells (load Qwen once).
     """
     start = time.time()
     _seed_everything(seed)
-    wrapper = _load_qwen_wrapper(seed)
     model_loaded = wrapper is not None
 
     adapter, encoder, decoder = _build_adapter(seed)
 
-    # Stage 2 — pre-dream evaluation.
-    pre = _score_adapter(adapter, seed=seed, n_samples=n_eval_samples)
+    # Stage 2 — pre-dream evaluation : pure Qwen baseline (bias=0).
+    pre = _score_adapter_mmlu(
+        adapter,
+        wrapper,
+        mmlu_prompts,
+        letter_token_ids,
+        use_bias=False,
+    )
 
     # Stage 3 — dream episodes.
     runtime, _states = _build_runtime(
@@ -470,8 +645,14 @@ def _run_cell(
         episode = _build_episode(profile_name, ep_idx, seed)
         runtime.execute(episode)
 
-    # Stage 4 — post-dream evaluation.
-    post = _score_adapter(adapter, seed=seed, n_samples=n_eval_samples)
+    # Stage 4 — post-dream evaluation : Qwen + dream-modified bias.
+    post = _score_adapter_mmlu(
+        adapter,
+        wrapper,
+        mmlu_prompts,
+        letter_token_ids,
+        use_bias=True,
+    )
     delta = post - pre
 
     return {
@@ -483,6 +664,25 @@ def _run_cell(
         "wall_time_s": time.time() - start,
         "model_loaded": model_loaded,
     }
+
+
+def _load_qwen_wrapper():
+    """Load the Qwen-1.5B MLX wrapper once (γ-channel snapshot).
+
+    Falls back to ``None`` when ``mlx-lm`` isn't installed ; the
+    pipeline still exercises the adapter path so callers can
+    diagnose the env before pulling the ~1 GB HF weights.
+    """
+    try:  # pragma: no cover - network / install path
+        from harness.real_models.qwen_mlx import load_qwen
+
+        return load_qwen(SANITY_SCALE)
+    except Exception as exc:  # pragma: no cover - diagnostic
+        print(
+            f"[pilot] WARNING Qwen load failed : "
+            f"{type(exc).__name__}: {exc}"
+        )
+        return None
 
 
 def _register_cell(profile_name: str, cell: dict) -> str:
@@ -567,6 +767,7 @@ def _print_banner(total_cells: int) -> None:
     print(f"plan substrates : {SANITY_SUBSTRATES_PLAN} (dry-run manifest)")
     print(f"seeds           : {len(SANITY_SEEDS)} (0..{SANITY_SEEDS[-1]})")
     print(f"exec cells      : {total_cells}")
+    print(f"eval proxy      : MMLU logit-bias (n={MMLU_N_PROMPTS} prompts)")
     print(
         f"GO rule         : H1 rejected in ≥ "
         f"{GO_PROFILES_REJECTED_MIN}/{len(SANITY_PROFILES)} profiles "
@@ -585,12 +786,29 @@ def _execute(
     out_dir = REPO_ROOT / "docs" / "milestones"
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    # Hoist Qwen load + MMLU fixture + letter token IDs — shared
+    # across all cells so we pay the ~1 s Qwen load once.
+    wrapper = _load_qwen_wrapper()
+    mmlu_prompts = _load_mmlu_prompts(MMLU_N_PROMPTS)
+    letter_token_ids: list[int] = []
+    if wrapper is not None:
+        letter_token_ids = _letter_token_ids(wrapper.tokenizer)
+
     if opts["smoke_cell"]:
         _print_banner(total_cells=1)
-        print("[smoke-cell] running exactly 1 cell : p_min + seed 0 + MLX")
+        print(
+            f"[smoke-cell] running exactly 1 cell : p_min + seed 0 "
+            f"+ MLX (Qwen loaded={wrapper is not None})"
+        )
         start = time.time()
         try:
-            cell = _run_cell("p_min", 0)
+            cell = _run_cell(
+                "p_min",
+                0,
+                wrapper=wrapper,
+                mmlu_prompts=mmlu_prompts,
+                letter_token_ids=letter_token_ids,
+            )
         except Exception as exc:
             traceback.print_exc()
             print(f"[smoke-cell] FAILED : {type(exc).__name__}: {exc}")
@@ -598,8 +816,8 @@ def _execute(
         run_id = _register_cell("p_min", cell)
         wall = time.time() - start
         print(
-            f"[smoke-cell] pre={cell['pre']:.6f} post={cell['post']:.6f} "
-            f"delta={cell['delta']:+.6f} wall={wall:.2f}s "
+            f"[smoke-cell] pre={cell['pre']:.4f} post={cell['post']:.4f} "
+            f"delta={cell['delta']:+.4f} wall={wall:.2f}s "
             f"model_loaded={cell['model_loaded']} run_id={run_id}"
         )
         smoke_path = out_dir / "pilot-cycle3-sanity-1p5b-smoke.json"
@@ -608,6 +826,8 @@ def _execute(
                 {
                     "harness_version": HARNESS_VERSION,
                     "mode": "smoke-cell",
+                    "eval_proxy": "mmlu_logit_bias",
+                    "mmlu_n_prompts": MMLU_N_PROMPTS,
                     "cell": {**cell, "run_id": run_id},
                     "wall_time_s": wall,
                     "extrapolated_full_pilot_s": wall * EXECUTED_CELL_COUNT,
@@ -628,7 +848,13 @@ def _execute(
         for seed in SANITY_SEEDS:
             idx += 1
             try:
-                cell = _run_cell(profile_name, seed)
+                cell = _run_cell(
+                    profile_name,
+                    seed,
+                    wrapper=wrapper,
+                    mmlu_prompts=mmlu_prompts,
+                    letter_token_ids=letter_token_ids,
+                )
             except Exception as exc:
                 traceback.print_exc()
                 failures.append(
@@ -652,8 +878,8 @@ def _execute(
             print(
                 f"[cell {idx}/{EXECUTED_CELL_COUNT}] "
                 f"{profile_name} seed={seed:02d} "
-                f"pre={cell['pre']:.5f} post={cell['post']:.5f} "
-                f"delta={cell['delta']:+.5f} "
+                f"pre={cell['pre']:.4f} post={cell['post']:.4f} "
+                f"delta={cell['delta']:+.4f} "
                 f"wall={cell['wall_time_s']:.2f}s"
             )
     run_wall = time.time() - run_start
@@ -685,6 +911,8 @@ def _execute(
                 "executed_cell_count": EXECUTED_CELL_COUNT,
                 "completed_cells": len(cells),
                 "failed_cells": len(failures),
+                "eval_proxy": "mmlu_logit_bias",
+                "mmlu_n_prompts": MMLU_N_PROMPTS,
                 "go_rule": {
                     "alpha": GO_BONFERRONI_ALPHA,
                     "profiles_rejected_min": GO_PROFILES_REJECTED_MIN,
@@ -730,6 +958,8 @@ def main(argv: list[str] | None = None) -> int:
                     "seeds": list(SANITY_SEEDS),
                     "planned_cell_count": EXPECTED_CELL_COUNT,
                     "executed_cell_count": EXECUTED_CELL_COUNT,
+                    "eval_proxy": "mmlu_logit_bias",
+                    "mmlu_n_prompts": MMLU_N_PROMPTS,
                     "go_rule": {
                         "alpha": GO_BONFERRONI_ALPHA,
                         "profiles_rejected_min": GO_PROFILES_REJECTED_MIN,

@@ -1,0 +1,15 @@
+{"question": "What is the capital of France?", "choices": ["London", "Paris", "Berlin", "Madrid"], "answer": 1, "subject": "world_facts"}
+{"question": "Which planet is closest to the Sun?", "choices": ["Venus", "Earth", "Mercury", "Mars"], "answer": 2, "subject": "astronomy"}
+{"question": "What is 7 multiplied by 8?", "choices": ["54", "56", "58", "64"], "answer": 1, "subject": "elementary_mathematics"}
+{"question": "Who wrote the play 'Romeo and Juliet'?", "choices": ["Charles Dickens", "Mark Twain", "William Shakespeare", "Jane Austen"], "answer": 2, "subject": "world_literature"}
+{"question": "What is the chemical symbol for gold?", "choices": ["Gd", "Go", "Au", "Ag"], "answer": 2, "subject": "chemistry"}
+{"question": "Which ocean is the largest?", "choices": ["Atlantic", "Indian", "Arctic", "Pacific"], "answer": 3, "subject": "world_facts"}
+{"question": "In which year did World War II end?", "choices": ["1943", "1944", "1945", "1946"], "answer": 2, "subject": "world_history"}
+{"question": "What is the square root of 144?", "choices": ["10", "11", "12", "13"], "answer": 2, "subject": "elementary_mathematics"}
+{"question": "Which gas do plants primarily absorb for photosynthesis?", "choices": ["Oxygen", "Nitrogen", "Carbon dioxide", "Hydrogen"], "answer": 2, "subject": "high_school_biology"}
+{"question": "What is the smallest prime number?", "choices": ["0", "1", "2", "3"], "answer": 2, "subject": "elementary_mathematics"}
+{"question": "Which instrument measures atmospheric pressure?", "choices": ["Thermometer", "Barometer", "Anemometer", "Hygrometer"], "answer": 1, "subject": "high_school_physics"}
+{"question": "What is the largest mammal on Earth?", "choices": ["African elephant", "Blue whale", "Giraffe", "Polar bear"], "answer": 1, "subject": "high_school_biology"}
+{"question": "Which language has the most native speakers worldwide?", "choices": ["English", "Spanish", "Hindi", "Mandarin Chinese"], "answer": 3, "subject": "world_facts"}
+{"question": "What is H2O commonly known as?", "choices": ["Salt", "Water", "Hydrogen peroxide", "Ammonia"], "answer": 1, "subject": "chemistry"}
+{"question": "Who painted the Mona Lisa?", "choices": ["Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci", "Claude Monet"], "answer": 2, "subject": "world_literature"}

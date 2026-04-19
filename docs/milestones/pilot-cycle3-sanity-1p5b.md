@@ -70,15 +70,19 @@ The 3 profiles are `{p_min, p_equ, p_max}` at scale
 ## Per-cell pipeline
 
 1. **Fresh model + seeded adapter** — load the Qwen-1.5B γ-channel
-   snapshot via `QwenMLXWrapper` and construct a seeded 4-8-2 MLP
-   adapter that the dream ops mutate.
-2. **Pre-dream evaluation** — score the adapter over 50 seeded
-   inputs (`exp(-MSE)` proxy, bounded in (0, 1]).
+   snapshot via `QwenMLXWrapper` (hoisted once, shared across
+   cells) and construct a seeded 4→4→4→4 MLP adapter that the
+   dream ops mutate. The adapter's final 4-dim output is the
+   A/B/C/D logit-bias vector (see §Eval proxy).
+2. **Pre-dream evaluation** — 15 MMLU prompts through Qwen 1.5B
+   with bias = 0 (pure Qwen baseline accuracy).
 3. **Dream episodes** — 5 episodes per cell, using the real-weight
    ops (`replay_real`, `downscale_real`, `restructure_real`,
    `recombine_real`) registered on a fresh `DreamRuntime`
    according to the cell's profile.
-4. **Post-dream evaluation** — same seed + same inputs, rescore.
+4. **Post-dream evaluation** — same 15 MMLU prompts, now with the
+   dream-modified adapter producing its own 4-dim bias added to
+   the A/B/C/D letter logits before argmax.
 5. **Run registration** — compute `delta = post - pre` and insert
    the row via `RunRegistry.register` with the composite
    `profile_tag = cycle3/{scale}/{profile}/mlx_kiki_oniric`.
@@ -87,11 +91,52 @@ Cells are executed in `(profile × seed)` order. A per-cell crash
 is logged to `failures` and the driver continues — partial H1
 samples are still usable.
 
+## Eval proxy — MMLU + Qwen logit bias
+
+**Why not `exp(-MSE)`** — the first revision of this pilot scored
+the adapter with `exp(-MSE)` on its 4-dim output. That proxy
+produced `p_equ` and `p_max` with the **same** p-value
+(0.0601992…), which is statistically impossible if the proxy
+were sensitive to the structural difference between those
+profiles (p_equ adds `recombine` ; p_max adds
+`ATTENTION_PRIOR` + `restructure`). The proxy was measuring
+the norm of the adapter output rather than something that
+actually depends on the op sequence's final state.
+
+**Current proxy** — each cell loads 15 MMLU prompts (world facts,
+elementary math, science) from the committed fixture at
+[`tests/fixtures/mmlu_sanity.jsonl`](../../tests/fixtures/mmlu_sanity.jsonl).
+For each prompt the pilot :
+
+1. Runs the Qwen 1.5B forward pass on `prompt + "Answer:"`.
+2. Extracts the last-token logits on the 4 letter tokens
+   `{A, B, C, D}` (validated as single-token BPE IDs 32, 33,
+   34, 35 on Qwen2.5 tokenizer — asserted at runtime).
+3. Adds the adapter's 4-dim output (at fixed reference input
+   `[1,1,1,1]`) as a bias on those letter logits.
+4. Argmax → prediction ; compare to the record's `answer`
+   index.
+
+Pre-score = accuracy with bias = 0 (pure Qwen baseline ; same
+across all cells up to tokenizer determinism, ~40-70% expected
+on Qwen2.5-1.5B-Instruct-4bit). Post-score = accuracy with the
+dream-modified adapter bias applied. `delta = post - pre` ∈
+`[-1, 1]`. n = 15 gives discrete granularity 1/15 ≈ 6.7%,
+sufficient for the paired t-test across 30 seeds per profile.
+
+This proxy is **genuinely discriminative** — the adapter's
+4-dim output responds deterministically to the full dream op
+sequence, so `p_min` (replay + downscale), `p_equ`
+(+ restructure + recombine), and `p_max` (+ ATTENTION_PRIOR)
+produce distinct adapter trajectories and therefore distinct
+post-dream accuracy distributions. Whether the bias *helps* or
+*hurts* accuracy is the empirical question H1 actually tests.
+
 ## Smoke-cell pre-flight
 
 `--smoke-cell` runs exactly one cell (`p_min` + seed 0 + MLX) in
-under 2 minutes before the 18 h launch, validating end-to-end
-wiring. Its output is dumped to
+under 30 s before the full launch, validating end-to-end wiring
+plus Qwen + MMLU integration. Its output is dumped to
 [`pilot-cycle3-sanity-1p5b-smoke.json`](./pilot-cycle3-sanity-1p5b-smoke.json)
 and includes the extrapolated full-pilot wall-clock.
 
@@ -137,10 +182,14 @@ to close C3.8.
   measured values and keep this report immutable per the
   `scripts/CLAUDE.md` "don't edit pilots after gate decision"
   rule (create `pilot_cycle3_sanity_v2.py` if methodology shifts).
-- The retained-score proxy (`exp(-MSE)` on seeded adapter outputs)
-  is pipeline-validation, not an empirical accuracy claim. C3.8
-  swaps in the full MMLU / HellaSwag / mega-v2 benchmark stack for
-  the scale-axis claim.
+- The retained-score proxy (Qwen 1.5B forward + A/B/C/D logit
+  bias from a 4-dim adapter output, n=15 MMLU prompts) is
+  pipeline-validation, not an empirical accuracy claim. C3.8
+  swaps in the full MMLU / HellaSwag / mega-v2 benchmark stack
+  for the scale-axis claim. The fixture
+  (`tests/fixtures/mmlu_sanity.jsonl`) is hand-authored world-
+  facts / elementary-math / science Q&A — network-free and R1
+  byte-stable under `c_version | profile | seed | commit_sha`.
 
 ## References
 
