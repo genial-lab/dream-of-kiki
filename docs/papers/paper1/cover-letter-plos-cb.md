@@ -4,7 +4,7 @@
 Framework for Dream-Based Knowledge Consolidation in Artificial
 Cognitive Systems*
 
-**Authors**: dreamOfkiki project contributors (corresponding
+**Authors**: Saillant, Clément (corresponding
 author: Clement Saillant, L'Electron Rare, France;
 clement@saillant.cc)
 
@@ -117,7 +117,7 @@ the reproducibility infrastructure.
 
 Sincerely,
 
-**dreamOfkiki project contributors**
+**Saillant, Clément**
 *Corresponding author* : Clement Saillant
 L'Electron Rare, France
 clement@saillant.cc

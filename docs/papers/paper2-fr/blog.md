@@ -216,6 +216,6 @@ mondial.
 *dreamOfkiki est un programme de recherche open-source mené
 par L'Electron Rare. Le code, les spécifications, les preuves
 et les brouillons d'articles sont publics sur
-github.com/electron-rare/dream-of-kiki. Le tableau de bord
+github.com/hypneum-lab/dream-of-kiki. Le tableau de bord
 public tourne sur dream.saillant.cc. Les hypothèses sont
 pré-enregistrées sur OSF, les artefacts archivés sur Zenodo.*

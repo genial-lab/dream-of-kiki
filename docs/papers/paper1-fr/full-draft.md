@@ -1,6 +1,6 @@
 ---
 title: "dreamOfkiki : un framework formel indépendant du substrat pour la consolidation mnésique basée sur le rêve dans les systèmes cognitifs artificiels"
-author: "contributeurs du projet dreamOfkiki"
+author: "Saillant, Clément"
 contact: "Clement Saillant <clement@saillant.cc>"
 affiliation: "L'Electron Rare, France"
 date: "2026"

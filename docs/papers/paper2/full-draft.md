@@ -1,6 +1,6 @@
 ---
 title: "dreamOfkiki Paper 2: Cross-substrate conformance of a dream-based knowledge consolidation framework (synthetic-substitute replication)"
-author: "dreamOfkiki project contributors"
+author: "Saillant, Clément"
 contact: "Clement Saillant <clement@saillant.cc>"
 affiliation: "L'Electron Rare, France"
 date: "2026"

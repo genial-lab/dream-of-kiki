@@ -27,5 +27,5 @@ Cognitive Science (Pivot B fallback)
 
 ## Authorship
 
-Byline : *dreamOfkiki project contributors*. See `CONTRIBUTORS.md`
+Byline : *Saillant, Clément*. See `CONTRIBUTORS.md`
 at repo root for the full list.

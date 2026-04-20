@@ -1,12 +1,12 @@
 <!--
 SPDX-License-Identifier: CC-BY-4.0
-Authorship byline : dreamOfkiki project contributors
+Authorship byline : Saillant, Clément
 License : Creative Commons Attribution 4.0 International (CC-BY-4.0)
 -->
 
 # Abstract (Paper 2, draft C2.13)
 
-**Authorship byline** : *dreamOfkiki project contributors*
+**Authorship byline** : *Saillant, Clément*
 **License** : CC-BY-4.0
 
 **Word count target** : ≤ 200 words

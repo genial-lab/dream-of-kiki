@@ -95,7 +95,7 @@ Every table and run_id in §7 round-trips to a repo artifact :
       inherited from Paper 1)
 - [ ] References.bib resolves all `\cite{}` calls (14
       entries cycle-1 + 5 engineering cycle-2)
-- [ ] Authorship byline `dreamOfkiki project contributors`
+- [ ] Authorship byline `Saillant, Clément`
 - [ ] Repo URL present
 - [ ] Paper 1 cross-references updated once arXiv ID locked
 - [ ] Zenodo DOI inserted for cycle-2 artifact bundle

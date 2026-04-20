@@ -1,12 +1,12 @@
 <!--
 SPDX-License-Identifier: CC-BY-4.0
-Authorship byline : dreamOfkiki project contributors
+Authorship byline : Saillant, Clément
 License : Creative Commons Attribution 4.0 International (CC-BY-4.0)
 -->
 
 # §6 Méthodologie (Article 2, brouillon C2.15)
 
-**Signataires** : *contributeurs du projet dreamOfkiki*
+**Signataires** : *Saillant, Clément*
 **Licence** : CC-BY-4.0
 
 **Cible de longueur** : ~1 page markdown (≈ 900 mots)

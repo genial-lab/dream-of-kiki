@@ -1,12 +1,12 @@
 <!--
 SPDX-License-Identifier: CC-BY-4.0
-Authorship byline : dreamOfkiki project contributors
+Authorship byline : Saillant, Clément
 License : Creative Commons Attribution 4.0 International (CC-BY-4.0)
 -->
 
 # §4 Le Critère de Conformité en pratique (Article 2, brouillon C2.14)
 
-**Signataires** : *contributeurs du projet dreamOfkiki*
+**Signataires** : *Saillant, Clément*
 **Licence** : CC-BY-4.0
 
 **Cible de longueur** : ~1,5 pages markdown (≈ 1300 mots)

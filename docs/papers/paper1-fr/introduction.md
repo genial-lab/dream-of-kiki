@@ -1,12 +1,12 @@
 <!--
 SPDX-License-Identifier: CC-BY-4.0
-Signataires : contributeurs du projet dreamOfkiki
+Signataires : Saillant, Clément
 Licence : Creative Commons Attribution 4.0 International (CC-BY-4.0)
 -->
 
 # Introduction (Paper 1, brouillon)
 
-**Signataires** : *contributeurs du projet dreamOfkiki*
+**Signataires** : *Saillant, Clément*
 **Licence** : CC-BY-4.0
 
 **Longueur cible** : ~1,5 page markdown (≈ 1200 mots)

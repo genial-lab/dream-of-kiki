@@ -1,6 +1,6 @@
 ---
 title: "Article 2 dreamOfkiki : conformité inter-substrats d'un framework de consolidation mnésique basée sur le rêve (réplication par substitution synthétique)"
-author: "contributeurs du projet dreamOfkiki"
+author: "Saillant, Clément"
 contact: "Clement Saillant <clement@saillant.cc>"
 affiliation: "L'Electron Rare, France"
 date: "2026"

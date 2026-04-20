@@ -260,4 +260,4 @@ formelle du framework C-v0.5.0+STABLE dans
 
 *Feedback, issues, pull requests, collaborations bienvenues.*
 
-*— L'équipe L'Electron Rare, avril 2026*
+*— Clément Saillant, L'Electron Rare, avril 2026*

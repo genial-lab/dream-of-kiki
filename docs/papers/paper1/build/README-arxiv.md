@@ -67,7 +67,7 @@ pandoc full-draft.md -o build/full-draft.tex \
 - [ ] All synthetic-data caveats explicit in §7 + §8
 - [ ] OSF DOI inserted in §6.1 (currently pending OSF lock)
 - [ ] References.bib resolves all `\cite{}` calls
-- [ ] Authorship byline `dreamOfkiki project contributors`
+- [ ] Authorship byline `Saillant, Clément`
 - [ ] Repo URL present in §5.5
 - [ ] HuggingFace model URLs present
 - [ ] Zenodo DOI inserted (post-mint)

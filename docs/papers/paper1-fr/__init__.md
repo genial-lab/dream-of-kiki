@@ -45,5 +45,5 @@ dépôt académique HAL + blog L'Electron Rare.
 
 ## Paternité
 
-Signataires : *contributeurs du projet dreamOfkiki*. Voir
+Signataires : *Saillant, Clément*. Voir
 `CONTRIBUTORS.md` à la racine du dépôt pour la liste complète.
