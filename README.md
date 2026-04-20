@@ -7,9 +7,17 @@ Research program producing two complementary papers:
 - **Paper 1** (Nature HB / PLoS Comp Bio target): formal framework **C** with axioms **DR-0..DR-4** and invariants families **I / S / K**.
 - **Paper 2** (NeurIPS / ICML / TMLR target): empirical ablation on the `kiki_oniric` substrate across profiles `P_min`, `P_equ`, `P_max`.
 
-**Status** — Cycle 1, released `paper-v0.4-draft` (2026-04-18). Next gate: **G5** (full ablation).
+**Status** — DualVer `C-v0.7.0+PARTIAL` (2026-04-20). Tag `v0.6.0` + 67 commits. Paper 1 **v0.2** frozen (22 p), primary submission target **PLOS Computational Biology** (retargeted from Nature Human Behaviour on 2026-04-20). Gates **G1, G7, G8, G9 LOCKED** (cycle 2 closed) ; **G10 deferred to Paper 2** per PLOS CB pivot. 277 tests / 91.17 % coverage. arXiv deposit ready, only web-UI walkthrough pending ; OSF DOI mint pending arXiv-ID lock.
 **Author** — Clément Saillant (L'Electron Rare), *dreamOfkiki* program author. Hypneum Lab.
 **License** — MIT (code) + CC-BY-4.0 (docs).
+
+---
+
+## Headline finding (2026-04-20)
+
+**`p_max` collapses 15 orders of magnitude between 1.5B and 7B substrates.** Phase-B pilot over three profiles (`p_min`, `p_equ`, `p_max`) × three benchmarks (MMLU, HellaSwag, mega_v2), 30 seeds × 3 profiles = 90 cells. 7B verdict : **GO (2/3)** — H1 p_min rejects H₀ at p = 1.4 × 10⁻²⁴, H1 p_equ at p = 6.2 × 10⁻²⁷ ; only H1 p_max (p = 0.055) fails to cross threshold.
+
+Micro-isolation of the four canonical operators (replay, downscale, **restructure**, recombine) reveals that three remain stable under scaling while **`restructure` alone exhibits the collapse** — seeding hypothesis **H7** for Paper 2 (NeurIPS / ICML / TMLR target). This is a strictly finer-grained finding than the aggregate-loss scaling laws (Kaplan 2020, Hoffmann 2022) or the discrete emergent-ability transitions (Wei 2022) in current literature ; see `docs/milestones/scaling-law-analysis-2026-04-20.md`.
 
 ---
 
