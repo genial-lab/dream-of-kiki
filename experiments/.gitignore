@@ -1,0 +1,21 @@
+# virtualenvs
+.venv/
+venv/
+env/
+
+# avalanche / torchvision data caches
+data/
+*/data/
+*.pt
+*.tar.gz
+
+# big logs (keep small summaries only)
+run_h1.log
+
+# python cruft
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# OS
+.DS_Store

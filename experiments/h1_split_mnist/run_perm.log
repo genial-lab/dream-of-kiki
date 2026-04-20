@@ -1,0 +1,28 @@
+/Users/electron/Documents/Projets/dream-of-kiki/experiments/h1_split_mnist/.venv/lib/python3.12/site-packages/avalanche/training/plugins/evaluation.py:94: UserWarning: No loggers specified, metrics will not be logged
+  warnings.warn("No loggers specified, metrics will not be logged")
+/Users/electron/Documents/Projets/dream-of-kiki/experiments/h1_split_mnist/.venv/lib/python3.12/site-packages/avalanche/training/plugins/replay.py:123: DeprecationWarning: Call to deprecated function update (removal in version 0.7: switch to pre_adapt and post_adapt)
+  self.storage_policy.update(strategy, **kwargs)
+/Users/electron/Documents/Projets/dream-of-kiki/experiments/h1_split_mnist/.venv/lib/python3.12/site-packages/avalanche/training/plugins/replay.py:123: DeprecationWarning: Call to deprecated function update (removal in version 0.7: switch to pre_adapt and post_adapt)
+  self.storage_policy.update(strategy, **kwargs)
+/Users/electron/Documents/Projets/dream-of-kiki/experiments/h1_split_mnist/.venv/lib/python3.12/site-packages/avalanche/training/plugins/replay.py:123: DeprecationWarning: Call to deprecated function update (removal in version 0.7: switch to pre_adapt and post_adapt)
+  self.storage_policy.update(strategy, **kwargs)
+/Users/electron/Documents/Projets/dream-of-kiki/experiments/h1_split_mnist/.venv/lib/python3.12/site-packages/avalanche/training/plugins/replay.py:123: DeprecationWarning: Call to deprecated function update (removal in version 0.7: switch to pre_adapt and post_adapt)
+  self.storage_policy.update(strategy, **kwargs)
+/Users/electron/Documents/Projets/dream-of-kiki/experiments/h1_split_mnist/.venv/lib/python3.12/site-packages/avalanche/training/plugins/replay.py:123: DeprecationWarning: Call to deprecated function update (removal in version 0.7: switch to pre_adapt and post_adapt)
+  self.storage_policy.update(strategy, **kwargs)
+/Users/electron/Documents/Projets/dream-of-kiki/experiments/h1_split_mnist/.venv/lib/python3.12/site-packages/avalanche/training/plugins/evaluation.py:94: UserWarning: No loggers specified, metrics will not be logged
+  warnings.warn("No loggers specified, metrics will not be logged")
+/Users/electron/Documents/Projets/dream-of-kiki/experiments/h1_split_mnist/.venv/lib/python3.12/site-packages/avalanche/training/plugins/replay.py:123: DeprecationWarning: Call to deprecated function update (removal in version 0.7: switch to pre_adapt and post_adapt)
+  self.storage_policy.update(strategy, **kwargs)
+/Users/electron/Documents/Projets/dream-of-kiki/experiments/h1_split_mnist/.venv/lib/python3.12/site-packages/avalanche/training/plugins/replay.py:123: DeprecationWarning: Call to deprecated function update (removal in version 0.7: switch to pre_adapt and post_adapt)
+  self.storage_policy.update(strategy, **kwargs)
+/Users/electron/Documents/Projets/dream-of-kiki/experiments/h1_split_mnist/.venv/lib/python3.12/site-packages/avalanche/training/plugins/replay.py:123: DeprecationWarning: Call to deprecated function update (removal in version 0.7: switch to pre_adapt and post_adapt)
+  self.storage_policy.update(strategy, **kwargs)
+/Users/electron/Documents/Projets/dream-of-kiki/experiments/h1_split_mnist/.venv/lib/python3.12/site-packages/avalanche/training/plugins/replay.py:123: DeprecationWarning: Call to deprecated function update (removal in version 0.7: switch to pre_adapt and post_adapt)
+  self.storage_policy.update(strategy, **kwargs)
+/Users/electron/Documents/Projets/dream-of-kiki/experiments/h1_split_mnist/.venv/lib/python3.12/site-packages/avalanche/training/plugins/replay.py:123: DeprecationWarning: Call to deprecated function update (removal in version 0.7: switch to pre_adapt and post_adapt)
+  self.storage_policy.update(strategy, **kwargs)
+condition       runtime  Exp0     Exp1     Exp2     Exp3     Exp4    
+baseline        37.0     0.9842   0.9842   0.9842   0.9842   0.9842  
+P_min           58.9     0.9842   0.9842   0.9842   0.9842   0.9842  
+P_equ           79.1     0.9842   0.9842   0.9842   0.9842   0.9842  

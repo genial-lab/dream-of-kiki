@@ -62,9 +62,15 @@ matched registry tuples. We additionally report cross-substrate
 portability measurements from the sibling Nerve-WML work (§7.4)
 that independently confirm substrate-agnosticism on linearly
 separable tasks (gap < 5 %) and disclose the non-linear regime
-gap (12.1 %) as an honest negative result. No continual-learning
-hypothesis decisions on H1–H4 are announced in this paper ;
-empirical evaluation of H1–H4 is reported in Paper 2.
+gap (12.1 %) as an honest negative result. A pilot run of the
+pre-registered pipeline on PermutedMNIST-5 (§7.5) produces
+Bonferroni-compliant statistics (t = 2.524, p = 0.01216 < α =
+0.0125) consistent with the pre-registered H1 signal direction
+and surfaces an unexpected pilot result for H2 (EWC proxy adds
+no measurable benefit over replay alone on this benchmark). No
+continual-learning hypothesis decisions on H1–H4 are announced
+in this paper ; confirmatory evaluation of H1–H4 on mega-v2 is
+reported in Paper 2.
 
 Pre-registration is locked on the Open Science Framework (DOI
 10.17605/OSF.IO/Q6JYN). All code, specifications, and
@@ -702,19 +708,83 @@ constitute H1–H4 evidence ; they constitute *methodological*
 evidence that the framework's agnosticism claim is operational
 rather than asserted.
 
-### 7.5 Summary
+### 7.5 Preliminary empirical pilot on a standard CL benchmark
 
-The §7 validation establishes four operational properties of the
+To confirm end-to-end operation of the pre-registered statistical
+pipeline on *non-scripted* data, we ran a pilot on
+PermutedMNIST-5 (avalanche-lib 0.6.0, SimpleMLP 784→512→10,
+5 epochs per experience, 3 seeds : 42 / 123 / 7) with three
+conditions matched to the pre-registered profile ladder :
+
+- `baseline` ≡ Naive (no replay, no regularization) ;
+- `P_min` ≡ ReplayPlugin(mem_size = 500) — `replay` primitive only ;
+- `P_equ` ≡ ReplayPlugin(mem_size = 500) + EWCPlugin(λ = 0.4) — `replay` + EWC as a proxy for `restructure`.
+
+All runs executed on CPU ; in the tested configuration the
+torch-2.11 MPS backend on Apple Silicon silently skipped weight
+updates (diagnosed by direct weight-drift inspection, documented
+in `experiments/h1_split_mnist/LAB_NOTEBOOK.md`). Raw
+per-experience results (3 seeds × 3 conditions × 5 experiences =
+45 rows) are archived at
+`experiments/h1_split_mnist/results_h1_v2.csv`.
+
+We measured **per-experience forgetting** =
+peak test accuracy − final test accuracy, aggregated over 3 seeds
+× 5 experiences :
+
+| Condition | Mean final acc (σ) | Mean forgetting (σ) | Max forgetting (Exp 0) |
+|-----------|--------------------|---------------------|------------------------|
+| baseline  | 0.887 (0.117)      | 0.0895 (0.117)      | 0.351                  |
+| P_min     | 0.959 (0.010)      | 0.0158 (0.010)      | 0.030                  |
+| P_equ     | 0.959 (0.009)      | 0.0157 (0.009)      | 0.028                  |
+
+A paired one-sided t-test on per-experience forgetting
+(baseline > P_equ) gives **t = 2.524, p = 0.01216** ; against
+the pre-registered Bonferroni-corrected threshold α =
+0.05 / 4 = 0.0125, this is below α. The paired comparison
+baseline > P_min gives t = 2.534, p = 0.01193.
+
+*Scope constraint.* PermutedMNIST-5 is **not** the pre-registered
+confirmatory benchmark (cf. OSF DOI
+[10.17605/OSF.IO/Q6JYN](https://doi.org/10.17605/OSF.IO/Q6JYN)) ;
+this is a pilot, not an H1 decision. The confirmatory evaluation
+on mega-v2 is Paper 2 scope. The pilot is reported here only as
+framework-level evidence that (i) the measurement pipeline
+produces interpretable statistics on real CL data rather than
+scripted accuracies, and (ii) the signal direction on a standard
+benchmark is consistent with the pre-registered prediction.
+
+*Unexpected pilot finding for H2.* To four decimals, `P_equ` and
+`P_min` produce the same mean forgetting (0.0157 vs 0.0158) on
+PermutedMNIST-5. The pre-registered H2 prediction — that the
+`restructure` primitive (proxied here by EWC regularization) adds
+value beyond `replay` alone — is not supported in this pilot.
+Three non-exclusive interpretations : (a) EWC λ = 0.4 is
+miscalibrated for this benchmark ; (b) EWC is an imperfect proxy
+for `restructure` as defined by DR-3 ; (c) PermutedMNIST's
+input-level permutations do not stress the representational
+geometry that `restructure` is designed to address. The
+confirmatory H2 decision is re-scoped to Paper 2 and will include
+an EWC-λ sweep (and alternative `restructure` proxies) as a
+sensitivity analysis.
+
+### 7.6 Summary
+
+The §7 validation establishes five operational properties of the
 framework : the pre-registered statistical pipeline executes
 correctly under Bonferroni correction ; the BLOCKING invariants
 S1–S3 enforce the expected abort behaviour under fault injection
 on both conformant substrates ; the R1 reproducibility contract
 produces deterministic `run_id` hashes at the required width ;
-and independent cross-substrate measurements in a sibling system
+independent cross-substrate measurements in a sibling system
 corroborate the substrate-agnosticism principle in regimes where
-it is measurable today. No continual-learning hypothesis
-decisions on H1–H4 are announced in Paper 1 ; those decisions
-are the scope of Paper 2.
+it is measurable today (§7.4) ; and a pilot run of the
+pre-registered pipeline on a standard CL benchmark (§7.5)
+produces interpretable, signed, Bonferroni-compliant statistics
+on non-scripted data and surfaces an unexpected pilot result for
+H2 that will inform the Paper 2 analysis plan. No continual-learning
+hypothesis decisions on H1–H4 are announced in Paper 1 ; those
+decisions are the scope of Paper 2.
 
 ---
 
@@ -958,11 +1028,22 @@ figures and supplementary material absorbing overflow.
 
 ## Notes for revision
 
+- **W6 added 2026-04-20** — §7.5 "Preliminary empirical pilot on
+  a standard CL benchmark" inserted before Summary, which became
+  §7.6. Abstract §1 updated to reflect the pilot. Raw data and
+  run log at `experiments/h1_split_mnist/` (PermutedMNIST-5,
+  avalanche-lib 0.6.0, 3 seeds, CPU device after MPS silent-fail
+  diagnosis). Pilot reports paired-t baseline > P_equ forgetting
+  t = 2.524, p = 0.01216 < Bonferroni α = 0.0125 ; H2 (EWC as
+  `restructure` proxy) not supported in pilot, re-scoped to
+  Paper 2 with EWC-λ sweep.
 - Render via `./ops/build-arxiv.sh` → bundle for arXiv submit
-  (v0.2 with the four W-series revisions applied 2026-04-19)
+  (v0.2 with the four W-series revisions applied 2026-04-19 ;
+  re-bundle needed after W6 2026-04-20)
 - Fill arXiv ID into §6.1 and CITATION.cff post-announcement
 - Add Figures (1 four-pillars conceptual, 2 swap-protocol state
   diagram with invariant guards, 3 profile-chain inclusion
-  P_min ⊆ P_equ ⊆ P_max, 4 cross-substrate conformance matrix)
+  P_min ⊆ P_equ ⊆ P_max, 4 cross-substrate conformance matrix,
+  5 §7.5 per-experience forgetting curves baseline / P_min / P_equ)
 - BibTeX render with proper `\cite{}` calls ; target ~35
   references for PLOS CB submission (W5 in cold review)
