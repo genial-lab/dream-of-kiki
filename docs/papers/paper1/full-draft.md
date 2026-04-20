@@ -662,13 +662,16 @@ hex characters in commit `df731b0` after a code-review flag on
 ### 7.4 Cross-substrate portability — independent corroboration
 
 A sibling project at `github.com/hypneum-lab/nerve-wml` (same
-byline, same Protocol-typing discipline) measures cross-
-substrate polymorphism on a separate Nerve interface with two
-concrete substrates : `MlpWML` (dense MLP) and `LifWML`
-(surrogate-gradient leaky-integrate-and-fire SNN). The nerve-wml
-Gate W measurement is a test of the same *substrate-agnosticism*
-principle articulated here as DR-3. We summarise the reported
-numbers — full details in the cited preprint.
+byline, same Protocol-typing discipline ; archived release
+**v1.1.2, Zenodo DOI
+[10.5281/zenodo.19656354](https://doi.org/10.5281/zenodo.19656354)**)
+measures cross-substrate polymorphism on a separate Nerve
+interface with two concrete substrates : `MlpWML` (dense MLP)
+and `LifWML` (surrogate-gradient leaky-integrate-and-fire SNN).
+The nerve-wml Gate W measurement is a test of the same
+*substrate-agnosticism* principle articulated here as DR-3. We
+summarise the reported numbers — full details in the cited
+preprint and the archived Zenodo record.
 
 **Linearly separable task (FlowProxyTask 4-class, N = 4 pool,
 multi-seed).** `MlpWML` and `LifWML` pools both saturate at
