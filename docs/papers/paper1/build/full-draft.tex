@@ -75,7 +75,7 @@
   % set entry spacing
   \setlength{\itemsep}{#2\baselineskip}}}
  {\end{list}}
-\usepackage{calc}
+% \usepackage{calc} — already loaded above (see line 41); duplicate removed
 \newcommand{\CSLBlock}[1]{\hfill\break\parbox[t]{\linewidth}{\strut\ignorespaces#1\strut}}
 \newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
 \newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
@@ -642,8 +642,9 @@ substrate-agnostic properties verified once at the framework level ;
 each conformant substrate inherits them by construction.
 
 \textbf{Interpretation.} Both substrates pass the Conformance Criterion
-under 9 axiom-property and invariant-enforcement tests each (27
-assertions total). The criterion is therefore non-vacuous in the minimal
+under 9 axiom-property and invariant-enforcement tests each (\textasciitilde27
+assertions total: 18 substrate-paired tests \texttimes{} an average of 1.5
+underlying \texttt{assert} statements per test). The criterion is therefore non-vacuous in the minimal
 sense --- it distinguishes conformant implementations from
 non-conformant ones (confirmed by fault-injection experiments reported
 in §7.2). The criterion remains a \emph{necessary} test of framework

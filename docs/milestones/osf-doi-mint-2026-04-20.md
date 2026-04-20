@@ -13,8 +13,12 @@ peer-review-grade artifact pointer Paper 2 will cross-cite.
 
 ## Project setup checklist
 
-- [ ] Create OSF project under namespace `dreamofkiki` (or attach
-      to existing `genial-lab` group if one is set up at OSF)
+- [ ] Create OSF project under namespace `dreamofkiki`. Decision
+      rule: if the `genial-lab` group already exists on OSF at
+      project-creation time, attach the project to that group
+      instead of creating a standalone namespace project. Default
+      to the standalone `dreamofkiki` project if no `genial-lab`
+      group is present.
 - [ ] Project title : `dreamOfkiki — substrate-agnostic formal
       framework for dream-based knowledge consolidation`
 - [ ] Description : 2-paragraph abstract from
@@ -58,19 +62,26 @@ The DOI is minted **after** both of the following are true :
    2026-04-20 entry for the corresponding arXiv tracker.
 2. **Paper 1 v0.2 frozen.** The repo is tagged `arxiv-v0.2` at
    the commit that produced
-   `docs/papers/paper1/build/full-draft.pdf` (currently
-   `22784f8` ; will be re-tagged if a final stylistic pass lands
-   before arXiv deposit).
+   `docs/papers/paper1/build/full-draft.pdf` (provisional anchor
+   `22784f8`, subject to final freeze: if a stylistic pass lands
+   before arXiv deposit the tag is moved to that commit and this
+   line is updated with the final hash).
 
 Once both conditions hold, the OSF "Mint DOI" workflow is
 triggered through the OSF web UI (Project Settings →
 Identifiers → Mint DOI). The minted DOI is then :
 
 - **Inserted** into `docs/papers/paper1/full-draft.md` §1
-  Abstract and §6.1 Methodology, replacing the preregistration
-  DOI placeholder `10.17605/OSF.IO/Q6JYN` if a fresh DOI is
-  issued (the project already has a slot reserved at this
-  identifier).
+  Abstract and §6.1 Methodology. Decision workflow performed by
+  the corresponding author at mint time:
+  - **Mint path**: a fresh DOI is issued by OSF. The placeholder
+    `10.17605/OSF.IO/Q6JYN` is *replaced* in the paper sources
+    and re-rendered before arXiv v2 upload.
+  - **Confirm path**: the reserved slot at
+    `10.17605/OSF.IO/Q6JYN` is the one that gets activated. The
+    placeholder is *kept verbatim*; only the "Minted DOI" block
+    below is updated to record the confirmation (no source-text
+    replacement, no re-render needed).
 - **Cross-cited** in Paper 2 at
   `docs/papers/paper2/full-draft.md` (preregistration handle for
   the H1–H4 evaluation).

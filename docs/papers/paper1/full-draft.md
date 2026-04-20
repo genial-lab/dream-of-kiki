@@ -461,8 +461,9 @@ are substrate-agnostic properties verified once at the framework
 level ; each conformant substrate inherits them by construction.
 
 **Interpretation.** Both substrates pass the Conformance Criterion
-under 9 axiom-property and invariant-enforcement tests each (27
-assertions total). The criterion is therefore non-vacuous in the
+under 9 axiom-property and invariant-enforcement tests each (~27
+assertions total: 18 substrate-paired tests × an average of 1.5
+underlying `assert` statements per test). The criterion is therefore non-vacuous in the
 minimal sense — it distinguishes conformant implementations from
 non-conformant ones (confirmed by fault-injection experiments
 reported in §7.2). The criterion remains a *necessary* test of

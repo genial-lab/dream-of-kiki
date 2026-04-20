@@ -469,7 +469,8 @@ If Gate D = NO-GO → execute Pivot 4 (§5.1 R3) ; re-spec cycle 3 sem 4 onward 
 > Promotion to `+STABLE` deferred until Paper 2 closeout (Phase 2
 > deferred cells re-closed under §12.3 transition rule).
 
-**Goal** : EC PARTIAL → STABLE per §12.3 (Phase 2 deferred cells re-closed) ; Gate G10 promoted CONDITIONAL → FULL-GO/STABLE. Surgical-bump pattern per C3.10 / `139c4c5` reference.
+**Goal (deferred to Paper 2 per the §12.3 transition rule above)** :
+*Planned* — EC `+PARTIAL` → `+STABLE` (Phase 2 deferred cells re-closed) ; Gate G10 *would be* promoted CONDITIONAL → FULL-GO/STABLE on the same surgical-bump pattern as C3.10 / `139c4c5`. Until Paper 2 closeout, EC stays at `+PARTIAL` and Gate G10 stays CONDITIONAL ; the C3.10 / `139c4c5` reference is retained as the canonical bump template for that future commit.
 
 **Files** :
 - Modify : framework-C spec banner (FR + EN), `STATUS.md`, `CHANGELOG.md`, substrate version constants
