@@ -28,3 +28,7 @@ Thumbs.db
 .env.local
 *.key
 *.pem
+
+# Local-only ephemera
+.remember/
+docs/papers/**/build/
