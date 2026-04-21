@@ -1,5 +1,9 @@
 # OSF Pre-registration Amendment — 2026-04-19
 
+**Amendment #1 OSF DOI** : `10.17605/OSF.IO/TPM5S` (DataCite-minted 2026-04-21, filed as Open-Ended Registration linked to parent Q6JYN)
+**Amendment URL** : https://osf.io/tpm5s/
+**Published** : 2026-04-21
+
 Cycle-3 Bonferroni family correction.
 
 ## Paste into OSF amendment field
@@ -58,7 +62,7 @@ Nature HB statistical discipline without unnecessary power loss.
 
 **References** :
 - Primary pre-reg : `10.17605/OSF.IO/Q6JYN` (DataCite-minted on OSF publish 2026-04-19T00:28:05Z ; this amendment set #1 drafted same-day).
-  **Important open issue** : OSF registrations are immutable ; this amendment exists only as a repo markdown. Per COS guidance, amendments before data collection should be filed as a **new OSF registration** linked to the original. A reviewer opening Q6JYN will see only the original H1-H4 family. TODO before PLOS CB submit : file amendment as a new linked registration, or document the primary analysis under the original α = 0.0125 and treat the restructured family as secondary.
+  **Filed** : 2026-04-21 as Open-Ended Registration at DOI `10.17605/OSF.IO/TPM5S` (https://osf.io/tpm5s/), linked to the original Q6JYN per COS guidance. A reviewer opening Q6JYN will see the amendment via OSF's Related Registrations link.
 - Spec : `docs/superpowers/specs/2026-04-19-dreamofkiki-cycle3-design.md` §4 (updated in commit `85e62fc`)
 - Finding trail : CodeRabbit cycle-12 finding #26 on `docs/superpowers/specs/2026-04-19-dreamofkiki-cycle3-design.md`
 
