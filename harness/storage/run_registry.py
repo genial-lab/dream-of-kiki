@@ -23,6 +23,14 @@ class RunRegistry:
                     created_at TEXT NOT NULL DEFAULT (datetime('now'))
                 )
             """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS run_output_hashes (
+                    run_id TEXT PRIMARY KEY,
+                    output_hash TEXT NOT NULL,
+                    recorded_at TEXT NOT NULL DEFAULT (datetime('now')),
+                    FOREIGN KEY (run_id) REFERENCES runs(run_id)
+                )
+            """)
 
     def _compute_run_id(
         self, c_version: str, profile: str, seed: int, commit_sha: str
@@ -64,3 +72,61 @@ class RunRegistry:
             if row is None:
                 raise KeyError(f"run_id not found: {run_id}")
             return dict(row)
+
+    def register_output_hash(self, run_id: str, output_hash: str) -> None:
+        """Record the SHA-256 hash of the canonical op output for ``run_id``.
+
+        Idempotent on exact match — calling twice with the same
+        ``(run_id, output_hash)`` is a silent no-op. Recording a
+        *different* hash for the same ``run_id`` raises :
+        the registry is the source of truth for R1 and a conflict is
+        an empirical-axis violation signal that must surface to the
+        caller (so the pilot / gate script can register the failure).
+
+        Raises:
+            KeyError: ``run_id`` is not registered in the ``runs`` table.
+            ValueError: a different hash is already recorded for
+                ``run_id`` — message includes the R1 tag and the
+                offending ``run_id`` so the caller can log both.
+        """
+        with closing(sqlite3.connect(self.db_path)) as conn, conn:
+            exists = conn.execute(
+                "SELECT 1 FROM runs WHERE run_id = ?", (run_id,)
+            ).fetchone()
+            if exists is None:
+                raise KeyError(f"run_id not found: {run_id}")
+            existing = conn.execute(
+                "SELECT output_hash FROM run_output_hashes WHERE run_id = ?",
+                (run_id,),
+            ).fetchone()
+            if existing is not None:
+                if existing[0] != output_hash:
+                    raise ValueError(
+                        f"R1 violation: output_hash conflict for run_id "
+                        f"{run_id!r}: recorded={existing[0]!r} "
+                        f"attempted={output_hash!r}"
+                    )
+                return
+            conn.execute(
+                "INSERT INTO run_output_hashes (run_id, output_hash) "
+                "VALUES (?, ?)",
+                (run_id, output_hash),
+            )
+
+    def get_output_hash(self, run_id: str) -> str:
+        """Return the recorded output hash for ``run_id``.
+
+        Raises:
+            KeyError: no hash has been recorded for ``run_id`` (either
+                the run itself is unknown, or no
+                ``register_output_hash`` call has landed for it yet).
+        """
+        with closing(sqlite3.connect(self.db_path)) as conn:
+            row = conn.execute(
+                "SELECT output_hash FROM run_output_hashes WHERE run_id = ?",
+                (run_id,),
+            ).fetchone()
+            if row is None:
+                raise KeyError(f"output_hash not found for run_id: {run_id}")
+            hash_value: str = row[0]
+            return hash_value

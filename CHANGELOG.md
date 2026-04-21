@@ -15,6 +15,25 @@ see `docs/specs/2026-04-17-dreamofkiki-framework-C-design.md` §12).
 Cycle-3 Phase 1 launch bump. FC MINOR (+0.1.0) because cycle 3
 adds a new derived constraint surface on the formal axis :
 
+### Added — R1 output-hash API (additive, no-migration)
+
+- `RunRegistry.register_output_hash(run_id, output_hash)` +
+  `RunRegistry.get_output_hash(run_id)` — second half of R1 now
+  enforceable from the caller (recorded op output hash is stable
+  for a registered tuple, conflicts raise with an R1 tag).
+- New sibling table `run_output_hashes(run_id PK, output_hash,
+  recorded_at)` created additively by `_ensure_schema` ; `runs`
+  schema is untouched so `run_id` computation and the existing DB
+  rows remain bit-stable.
+- `tests/reproducibility/test_r1_run_registry_contract.py` —
+  `test_r1_registry_output_hash_contract` flipped from `xfail` to
+  passing ; docstring + module preamble rewritten to describe the
+  enforced contract rather than the blocker.
+- 5 new unit tests in `tests/unit/test_run_registry.py` covering
+  roundtrip, idempotence on exact match, conflict → `ValueError`
+  (with R1 tag + run_id), unknown run_id → `KeyError`, and missing
+  hash → `KeyError`.
+
 - **H6 profile-ordering** (`P_max > P_equ > P_min` on retained
   accuracy after consolidation) is a new derived constraint per
   framework-C §12.2. Exercised by the cycle-3 Gate D decision

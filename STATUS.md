@@ -43,6 +43,12 @@ preparation** (G10 cycle-3 Gate D folded into Paper 2 backlog).
 coverage 91.17% (gate 90%)
 ```
 
+R1 output-hash API landed (`register_output_hash` /
+`get_output_hash` on `RunRegistry` ; sibling table
+`run_output_hashes`). The `test_r1_registry_output_hash_contract`
+contract test is no longer `xfail` — second half of R1 is now
+caller-enforceable.
+
 ## DualVer status
 
 | Axis | Value | Meaning |
