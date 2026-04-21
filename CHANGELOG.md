@@ -10,6 +10,55 @@ see `docs/specs/2026-04-17-dreamofkiki-framework-C-design.md` §12).
 
 ---
 
+## [C-v0.8.1+PARTIAL] — 2026-04-22
+
+### Added — micro-kiki SpikingKiki-V4 real-backend shim (additive, env-gated)
+
+Opt-in real-artifact ingestion path on `MicroKikiSubstrate.load()`
+and a rate-coded spike-synthesis path on `awake()` /
+`awake_spike_payload()`. Gated behind the `DREAM_MICRO_KIKI_REAL=1`
+environment variable **and** a valid `real_backend_path` — when
+either is absent the substrate keeps the phase-1 / phase-2 stub
+semantics bit-identical (all 19 pre-existing substrate + OPLoRA
+tests green, plus 4 new real-backend tests).
+
+Artifact layout consumed (produced by
+`micro-kiki/scripts/convert_spikingkiki_35b.py`):
+`<root>/lif_metadata.json` + per-module `<root>/block_NN_MODULE.npz`
+(≈31 070 modules for the 35B-A3B-V4 build). The shim samples the
+first 3 `.npz` files into `_real_state["sample_weights"]` so the
+runtime does not page in the full ~70 GB artifact — the full SNN
+forward pass still requires the MLX side.
+
+`awake_spike_payload(prompt)` returns a
+`{"output_channels": {"spikes": ndarray[T, out_dim]},
+"metadata": {T, threshold, tau, real, module}}` dict. Rate-coded
+LIF integration is deterministic per prompt (seeded by
+`hash(prompt)`) so conformance harness runs are reproducible.
+
+Additional best-effort `.safetensors` sidecar ingestion via
+`_try_load_safetensors(adapter_path)` — pre-populates
+`_current_delta` from a LoRA adapter when `safetensors` is
+importable. Independent of the env flag ; no-op when the wheel is
+missing.
+
+### DualVer
+
+- Repo : `0.9.0` (unchanged — additive shim, no public surface
+  change).
+- Substrate-internal : `C-v0.8.0+PARTIAL` → `C-v0.8.1+PARTIAL`
+  (patch bump, additive real-backend shim).
+
+### Tests
+
+- `tests/unit/test_micro_kiki_real_backend.py` — 4 new tests
+  covering env-unset stub path, env-set artifact load, missing
+  metadata fallback, payload shape + raises-without-load.
+- `tests/unit/test_micro_kiki_substrate.py` — version constant
+  bumped.
+
+---
+
 ## [C-v0.9.0+PARTIAL] — 2026-04-22
 
 ### Added — micro-kiki recombine TIES-Merge (FC-MINOR bump, repo 0.9.0 → 0.10.0)

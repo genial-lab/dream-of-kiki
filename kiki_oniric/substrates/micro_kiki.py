@@ -39,7 +39,9 @@ Phase boundaries (explicit) :
 """
 from __future__ import annotations
 
+import json
 import logging
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable
@@ -51,13 +53,35 @@ from numpy.typing import NDArray
 _LOG = logging.getLogger(__name__)
 
 
-# DualVer C-v0.9.0+PARTIAL — recombine (TIES-Merge, arXiv 2306.01708)
-# wired in ; all 4 handlers now backed. Retained ``+PARTIAL`` until
-# Phase-4 conformance harness confirms DR-2 / DR-4 across the
-# 3-substrate matrix. Aligned to the sibling cycle-3 substrates
-# (``esnn_thalamocortical`` + ``esnn_norse``).
+# DualVer C-v0.9.1+PARTIAL — TIES-Merge recombine (arXiv
+# 2306.01708) wired in ; all 4 handlers now backed. Adds
+# SpikingKiki-V4 real-backend shim behind DREAM_MICRO_KIKI_REAL=1
+# env flag (additive, env-unset behaviour unchanged). Retained
+# ``+PARTIAL`` until Phase-4 conformance harness confirms DR-2
+# / DR-4 across the 3-substrate matrix.
 MICRO_KIKI_SUBSTRATE_NAME = "micro_kiki"
-MICRO_KIKI_SUBSTRATE_VERSION = "C-v0.9.0+PARTIAL"
+MICRO_KIKI_SUBSTRATE_VERSION = "C-v0.9.1+PARTIAL"
+
+
+# Env flag gating the real SpikingKiki-35B-A3B-V4 backend. Default
+# OFF — on CI (Linux, no SpikingKiki artifact, no mlx_lm) the
+# substrate runs in pure-stub mode. On Mac Studio with the
+# artifact cloned and ``DREAM_MICRO_KIKI_REAL=1`` exported,
+# :meth:`load` reads ``lif_metadata.json`` + 3 sample ``.npz``
+# modules to populate a minimal real-state dict that
+# :meth:`awake` subsequently rate-codes.
+_REAL_BACKEND_ENV_VAR = "DREAM_MICRO_KIKI_REAL"
+
+
+def _real_backend_enabled() -> bool:
+    """Return True when the real-backend env flag is set truthy.
+
+    Accepts ``1``, ``true``, ``yes``, ``on`` (case-insensitive).
+    Separated as a helper so tests can monkeypatch
+    ``os.environ`` without touching a frozen constant.
+    """
+    raw = os.environ.get(_REAL_BACKEND_ENV_VAR, "").strip().lower()
+    return raw in {"1", "true", "yes", "on"}
 
 
 # -----------------------------------------------------------------
@@ -412,6 +436,46 @@ except ImportError:  # pragma: no cover - branch depends on env
     _MLX_LM_AVAILABLE = False
 
 
+def _try_load_safetensors(
+    adapter_path: str | Path,
+) -> dict[str, NDArray] | None:
+    """Best-effort load of a LoRA ``.safetensors`` via numpy.
+
+    Returns ``None`` when :mod:`safetensors` is missing or the
+    path does not resolve. The successful path uses
+    ``safetensors.numpy.load_file`` so the returned tensors are
+    plain :class:`numpy.ndarray` — the dream runtime is numpy-
+    only, so we never need a torch/mlx round-trip here.
+
+    Accepts either a direct file path or a directory containing
+    ``adapters.safetensors`` (matches the layout produced by
+    ``mlx_lm lora --adapter-path <dir>``).
+    """
+    try:
+        # Lazy import — safetensors is a light wheel but still
+        # opt-in so the module stays importable on bare-bones CI.
+        from safetensors.numpy import load_file  # type: ignore[import-not-found]
+    except ImportError:
+        return None
+
+    path = Path(adapter_path)
+    if path.is_dir():
+        candidate = path / "adapters.safetensors"
+        if not candidate.is_file():
+            return None
+        path = candidate
+    if not path.is_file():
+        return None
+    try:
+        return load_file(str(path))
+    except Exception as exc:  # noqa: BLE001 — ingestion guard
+        _LOG.warning(
+            "safetensors load failed for %s (%s) ; returning None",
+            path, exc,
+        )
+        return None
+
+
 @dataclass
 class MicroKikiSubstrate:
     """micro-kiki framework-C substrate (Qwen MoE + LoRA).
@@ -448,12 +512,22 @@ class MicroKikiSubstrate:
 
     base_model_path: str | None = None
     adapter_path: str | None = None
+    real_backend_path: str | Path | None = None
     num_layers: int = 20
     rank: int = 16
     seed: int = 0
     mlx_lm_available: bool = field(default=_MLX_LM_AVAILABLE, init=False)
     _model: Any = field(default=None, init=False, repr=False)
     _tokenizer: Any = field(default=None, init=False, repr=False)
+    # Real SpikingKiki backend state. Populated by :meth:`load`
+    # only when DREAM_MICRO_KIKI_REAL=1 + a valid real_backend_path
+    # are set. Shape ::= ``{"lif_metadata": dict, "module_count": int,
+    # "sample_weights": {module_name -> NDArray}, "adapter_weights":
+    # Optional[{key -> NDArray}]}``. ``None`` elsewhere keeps stub
+    # semantics wire-compatible with phase-1 callers.
+    _real_state: dict[str, Any] | None = field(
+        default=None, init=False, repr=False,
+    )
     # Accumulator for the in-flight weight delta produced by the
     # replay / downscale handlers. Stored as a plain ``dict`` keyed
     # by the adapter weight-path (matches the shape emitted by
@@ -495,49 +569,277 @@ class MicroKikiSubstrate:
     def load(self) -> None:
         """Load the base model + LoRA adapter via ``mlx_lm``.
 
-        No-op in stub mode (``base_model_path is None``). When
-        ``mlx_lm`` is unavailable we also short-circuit to stub
-        mode — this keeps the module importable on CI without an
-        Apple Silicon wheel. The real code path runs on Mac Studio
-        M3 Ultra where Qwen3.5-35B-A3B + LoRA adapter fit in the
-        460 GB Metal memory budget (see ``micro-kiki/CLAUDE.md``).
-        """
-        if self.base_model_path is None:
-            return
-        if not self.mlx_lm_available:  # pragma: no cover - env-gated
-            return
-        # pragma: no cover - env-gated (Apple Silicon only)
-        from mlx_lm import load as mlx_load
-        self._model, self._tokenizer = mlx_load(self.base_model_path)
-        if self.adapter_path is not None:
-            from mlx_lm.tuner.utils import (                load_adapters,
-            )
+        Two code paths, both opt-in :
 
-            self._model = load_adapters(self._model, self.adapter_path)
+        1. **mlx_lm path** (``base_model_path`` set + ``mlx_lm``
+           importable). Runs on Mac Studio M3 Ultra.
+        2. **SpikingKiki path** (``DREAM_MICRO_KIKI_REAL=1`` +
+           ``real_backend_path`` set). Reads
+           ``lif_metadata.json`` + a 3-module ``.npz`` sample +
+           (optionally) a sidecar ``adapters.safetensors``. The
+           outcome is a minimal ``_real_state`` dict that
+           :meth:`awake` rate-codes — the full 35B forward pass
+           still requires MLX ; this shim is the minimum viable
+           real-artifact ingestion needed by the conformance
+           harness.
+
+        Both paths are independent. When neither is eligible, the
+        method is a no-op and the substrate stays in stub mode.
+        """
+        # ---- Path 1 : mlx_lm base-model load (existing) ----
+        if self.base_model_path is not None and self.mlx_lm_available:
+            # pragma: no cover - env-gated (Apple Silicon only)
+            from mlx_lm import load as mlx_load  # type: ignore[import-not-found]
+
+            self._model, self._tokenizer = mlx_load(self.base_model_path)
+            if self.adapter_path is not None:
+                from mlx_lm.tuner.utils import (  # type: ignore[import-not-found]
+                    load_adapters,
+                )
+
+                self._model = load_adapters(
+                    self._model, self.adapter_path,
+                )
+
+        # ---- Path 2 : SpikingKiki-V4 real-backend shim ----
+        if _real_backend_enabled() and self.real_backend_path is not None:
+            try:
+                self._real_state = self._load_spiking_backend()
+            except Exception as exc:  # noqa: BLE001 — ingestion guard
+                _LOG.warning(
+                    "micro_kiki real-backend load failed (%s) ; "
+                    "falling back to stub mode",
+                    exc,
+                )
+                self._real_state = None
+
+        # ---- Path 2b : safetensors adapter sidecar (best-effort) ----
+        # Independent of real_backend — may also fire in stub mode
+        # to pre-populate the accumulator delta for subsequent
+        # replay / downscale handler calls on a real adapter.
+        if self.adapter_path is not None:
+            weights = _try_load_safetensors(self.adapter_path)
+            if weights is not None:
+                # Merge into _current_delta so the snapshot path
+                # sees the real tensors (small ones — LoRA
+                # adapters are megabyte-scale on 35B bases).
+                self._current_delta.update(weights)
+
+    def _load_spiking_backend(self) -> dict[str, Any]:
+        """Ingest the SpikingKiki-35B-A3B-V4 artifact layout.
+
+        Expected directory (produced by
+        ``micro-kiki/scripts/convert_spikingkiki_35b.py``) :
+        ``<root>/lif_metadata.json`` + ``<root>/block_NN_MODULE.npz``
+        per-module spiking weights. We sample 3 modules (the first
+        three by ``sorted`` order) and store their ``weight`` field
+        — sufficient for :meth:`awake` to synthesise a rate-coded
+        spike train without loading all 31 070 modules (the V4
+        artifact is ~70 GB ; full ingestion is MLX-side, not
+        runtime-side).
+
+        Raises
+        ------
+        FileNotFoundError
+            ``real_backend_path`` does not exist or
+            ``lif_metadata.json`` is missing.
+        ValueError
+            ``lif_metadata.json`` is not valid JSON.
+        """
+        root = Path(self.real_backend_path)  # type: ignore[arg-type]
+        if not root.exists():
+            raise FileNotFoundError(
+                f"real_backend_path does not exist: {root}"
+            )
+        meta_path = root / "lif_metadata.json"
+        if not meta_path.is_file():
+            raise FileNotFoundError(
+                f"SpikingKiki artifact missing lif_metadata.json at "
+                f"{meta_path}"
+            )
+        with meta_path.open() as handle:
+            metadata = json.load(handle)
+
+        npz_files = sorted(root.glob("*.npz"))
+        sample_weights: dict[str, NDArray] = {}
+        for npz in npz_files[:3]:
+            try:
+                data = np.load(npz, allow_pickle=False)
+                if "weight" in data.files:
+                    w = np.asarray(data["weight"])
+                    # Normalise to 2-D (out_dim, in_dim). A 1-D
+                    # weight vector is the degenerate
+                    # single-output-neuron case ; awake_spike_payload
+                    # requires W @ x where x is a vector, so
+                    # shape must be 2-D.
+                    if w.ndim == 1:
+                        w = w.reshape(1, -1)
+                    sample_weights[npz.stem] = w
+                else:
+                    # Some modules are passthrough (no weight
+                    # field, e.g. linear_attn.norm). Record the
+                    # module name with a zero-shape sentinel so
+                    # awake() can count the real module surface.
+                    sample_weights[npz.stem] = np.zeros(0, dtype=np.float32)
+            except Exception as exc:  # noqa: BLE001 — per-file guard
+                _LOG.warning(
+                    "skip malformed npz %s (%s)", npz.name, exc,
+                )
+
+        return {
+            "lif_metadata": metadata,
+            "module_count": len(npz_files),
+            "sample_weights": sample_weights,
+            "root": str(root),
+        }
 
     # ----- awake-side generation -----
 
     def awake(self, prompt: str, max_tokens: int = 32) -> str:
         """Awake forward pass — returns generated text.
 
-        Stub path : returns ``f"[stub awake] {prompt}"`` so unit
-        tests can assert type + shape without an MLX wheel. Real
-        path (env-gated) dispatches to ``mlx_lm.generate`` with
-        the loaded model + tokenizer.
+        Three code paths, selected in priority order :
+
+        1. **mlx_lm path** — model + tokenizer loaded, dispatches
+           to ``mlx_lm.generate`` (Apple Silicon only).
+        2. **SpikingKiki rate-coded path** — ``_real_state`` is
+           populated (env flag + artifact present), returns a
+           synthetic spike-count string threshold-crossed on the
+           first real weight matrix. Not a full SNN forward pass
+           (that requires MLX) ; this is the minimum-viable
+           signal proving the real weights reach the handler
+           surface. See :meth:`awake_spike_payload` for the raw
+           array form that the conformance harness consumes.
+        3. **Stub path** — returns ``f"[stub awake] {prompt}"``.
         """
-        if self._model is None or self._tokenizer is None:
-            return f"[stub awake] {prompt}"
-        # pragma: no cover - env-gated (Apple Silicon only)
-        from mlx_lm import generate
-        return str(
-            generate(
-                self._model,
-                self._tokenizer,
-                prompt=prompt,
-                max_tokens=max_tokens,
-                verbose=False,
+        # Path 1 : mlx_lm
+        if self._model is not None and self._tokenizer is not None:
+            # pragma: no cover - env-gated (Apple Silicon only)
+            from mlx_lm import generate  # type: ignore[import-not-found]
+
+            return str(
+                generate(
+                    self._model,
+                    self._tokenizer,
+                    prompt=prompt,
+                    max_tokens=max_tokens,
+                    verbose=False,
+                )
             )
-        )
+
+        # Path 2 : SpikingKiki rate-coded synthesis
+        if self._real_state is not None:
+            payload = self.awake_spike_payload(prompt)
+            n_spikes = int(payload["output_channels"]["spikes"].sum())
+            T = payload["metadata"]["T"]
+            module = payload["metadata"]["module"]
+            return (
+                f"[spiking awake T={T} module={module} spikes={n_spikes}] "
+                f"{prompt}"
+            )
+
+        # Path 3 : stub
+        return f"[stub awake] {prompt}"
+
+    def awake_spike_payload(self, prompt: str) -> dict[str, Any]:
+        """Rate-coded spike-count payload for the real backend.
+
+        Returns a dict of shape ::
+
+            {
+                "output_channels": {"spikes": ndarray[T, out_dim]},
+                "metadata": {
+                    "T": int, "threshold": float, "tau": float,
+                    "real": True, "module": str,
+                },
+            }
+
+        Raises
+        ------
+        RuntimeError
+            :meth:`load` has not populated ``_real_state`` — call
+            it first (or leave ``DREAM_MICRO_KIKI_REAL`` unset to
+            stay on :meth:`awake` stub path).
+        """
+        if self._real_state is None:
+            raise RuntimeError(
+                "awake_spike_payload requires the SpikingKiki "
+                "real backend loaded ; call load() with "
+                f"{_REAL_BACKEND_ENV_VAR}=1 and a valid "
+                "real_backend_path first"
+            )
+        meta = self._real_state["lif_metadata"]
+        # lif_metadata may be global (single dict) or per-module
+        # (dict keyed by module name). Normalise to scalars —
+        # uniform-param Phase D metadata uses T=128 / thresh=0.0625
+        # / tau=1.0 globally, so .get() with a default is safe.
+        if isinstance(meta, dict) and "T" in meta:
+            T = int(meta.get("T", 128))
+            threshold = float(meta.get("threshold", 0.0625))
+            tau = float(meta.get("tau", 1.0))
+        else:
+            # per-module metadata — read the first entry.
+            first = next(iter(meta.values())) if meta else {}
+            T = int(first.get("T", 128)) if isinstance(first, dict) else 128
+            threshold = (
+                float(first.get("threshold", 0.0625))
+                if isinstance(first, dict) else 0.0625
+            )
+            tau = (
+                float(first.get("tau", 1.0))
+                if isinstance(first, dict) else 1.0
+            )
+
+        # Take the first non-empty sample weight as the "module"
+        # under test.
+        module_name = ""
+        W: NDArray | None = None
+        for name, tensor in self._real_state["sample_weights"].items():
+            if tensor.size > 0:
+                module_name = name
+                W = tensor
+                break
+        if W is None:
+            # All sampled modules were passthrough — emit a
+            # zero-spike payload so the handler surface still
+            # completes without error.
+            W = np.zeros((1, 1), dtype=np.float32)
+            module_name = "<passthrough>"
+
+        # Synthetic input driven by a stable sha256 of the prompt.
+        # ``builtins.hash()`` is randomised per process since
+        # Python 3.3 (``PYTHONHASHSEED`` defaults to random), so it
+        # would only be stable within a single invocation — the
+        # conformance harness re-runs the substrate across runs
+        # and needs cross-process reproducibility.
+        import hashlib
+        digest = hashlib.sha256(prompt.encode("utf-8")).hexdigest()[:8]
+        prompt_seed = int(digest, 16)
+        rng = np.random.default_rng(prompt_seed)
+        x = rng.standard_normal(W.shape[-1]).astype(np.float32)
+
+        # Rate-coded LIF over T steps : membrane potential
+        # integrates ``W @ x`` each step, resets on threshold
+        # crossing. Decay ``tau`` scales the integrated drive.
+        drive = (W @ x).astype(np.float32)
+        spikes = np.zeros((T, drive.shape[0]), dtype=np.float32)
+        v = np.zeros_like(drive)
+        for t in range(T):
+            v = v + (drive / max(tau, 1e-6))
+            fire = v > threshold
+            spikes[t] = fire.astype(np.float32)
+            v = np.where(fire, 0.0, v)
+
+        return {
+            "output_channels": {"spikes": spikes},
+            "metadata": {
+                "T": T,
+                "threshold": threshold,
+                "tau": tau,
+                "real": True,
+                "module": module_name,
+            },
+        }
 
     # ----- Protocol-contract factories (mirror esnn_* substrates) -----
 

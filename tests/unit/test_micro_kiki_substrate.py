@@ -29,7 +29,7 @@ def test_module_manifest_matches_substrate_pattern() -> None:
     the sibling ``esnn_*`` substrates (DR-3 condition 1).
     """
     assert MICRO_KIKI_SUBSTRATE_NAME == "micro_kiki"
-    assert MICRO_KIKI_SUBSTRATE_VERSION == "C-v0.9.0+PARTIAL"
+    assert MICRO_KIKI_SUBSTRATE_VERSION == "C-v0.9.1+PARTIAL"
 
     components = micro_kiki_substrate_components()
     expected = {
