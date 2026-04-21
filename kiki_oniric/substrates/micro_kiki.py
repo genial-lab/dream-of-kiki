@@ -666,7 +666,15 @@ class MicroKikiSubstrate:
             try:
                 data = np.load(npz, allow_pickle=False)
                 if "weight" in data.files:
-                    sample_weights[npz.stem] = np.asarray(data["weight"])
+                    w = np.asarray(data["weight"])
+                    # Normalise to 2-D (out_dim, in_dim). A 1-D
+                    # weight vector is the degenerate
+                    # single-output-neuron case ; awake_spike_payload
+                    # requires W @ x where x is a vector, so
+                    # shape must be 2-D.
+                    if w.ndim == 1:
+                        w = w.reshape(1, -1)
+                    sample_weights[npz.stem] = w
                 else:
                     # Some modules are passthrough (no weight
                     # field, e.g. linear_attn.norm). Record the
@@ -798,9 +806,15 @@ class MicroKikiSubstrate:
             W = np.zeros((1, 1), dtype=np.float32)
             module_name = "<passthrough>"
 
-        # Synthetic input driven by the prompt hash — deterministic
-        # per prompt so unit tests can assert the spike count.
-        prompt_seed = abs(hash(prompt)) % (2**32)
+        # Synthetic input driven by a stable sha256 of the prompt.
+        # ``builtins.hash()`` is randomised per process since
+        # Python 3.3 (``PYTHONHASHSEED`` defaults to random), so it
+        # would only be stable within a single invocation — the
+        # conformance harness re-runs the substrate across runs
+        # and needs cross-process reproducibility.
+        import hashlib
+        digest = hashlib.sha256(prompt.encode("utf-8")).hexdigest()[:8]
+        prompt_seed = int(digest, 16)
         rng = np.random.default_rng(prompt_seed)
         x = rng.standard_normal(W.shape[-1]).astype(np.float32)
 
