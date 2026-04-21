@@ -45,8 +45,12 @@ Any code referencing an invariant MUST cite its code and version here.
 - **DR-0** Accountability — every dream output is traceable to a DE
   with finite budget.
 - **DR-1** Episodic conservation — formalizes I1 as axiom.
-- **DR-2** Compositionality (TO BE PROVEN) — or fallback DR-2' with
-  canonical order (replay < downscale < restructure < recombine).
+- **DR-2** Compositionality (proved 2026-04-21, v0.2 under precondition
+  `¬(∃ i<j : π_i=RESTRUCTURE ∧ π_j=REPLAY)`) — see
+  `docs/proofs/dr2-compositionality.md` (n-ary permutation form +
+  generator-irreducibility sub-theorem §7). Fallback DR-2' retained
+  with canonical order (replay < downscale < restructure < recombine)
+  as stricter contract for P_min/P_equ/P_max profiles.
 - **DR-3** Substrate-agnosticism — holds for any substrate satisfying
   Conformance Criterion: signature typing + axiom tests pass +
   BLOCKING invariants enforceable (S1, S2, S3, I1).

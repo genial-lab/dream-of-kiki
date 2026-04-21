@@ -53,7 +53,7 @@ L'ordre A→B→D est thermodynamiquement justifié (dissipation progressive : c
 | Tononi SHY | Downscaling pendant sommeil | Axiomatisé dans framework C (opération downscale) |
 | Friston FEP | Minimisation énergie libre | Opération restructure |
 
-**Différentiation** : le framework C est le premier (à notre connaissance) à **axiomatiser** formellement l'ensemble des opérations oniriques comme un monoïde d'opérations composables avec budget borné (DR-2 compositionnalité).
+**Différentiation** : le framework C est le premier (à notre connaissance) à **axiomatiser** formellement l'ensemble des opérations oniriques comme un **semi-groupe non-commutatif** d'opérations composables avec budget borné (DR-2 compositionnalité affaiblie 2026-04-21, preuve v0.2 sous précondition `¬(RESTRUCTURE ≺ REPLAY)` ; irréductibilité sémantique du 4ᵉ générateur `recombine` établie §7 de `docs/proofs/dr2-compositionality.md`).
 
 ---
 
@@ -61,7 +61,7 @@ L'ordre A→B→D est thermodynamiquement justifié (dissipation progressive : c
 
 ### 2.1 Scope cycle 1 (6-7 mois, S1-S28)
 
-- **Track C** : framework formel (40-80 pages) avec axiomes DR-0..DR-4 formalisés strictement, preuve compositionnalité DR-2 (ou fallback DR-2')
+- **Track C** : framework formel (40-80 pages) avec axiomes DR-0..DR-4 formalisés strictement, preuve compositionnalité DR-2 affaiblie (précondition empirique 2026-04-21, v0.2 rédigée 2026-04-21) avec fallback DR-2' canonique en réserve
 - **Track A** : implémentation 3 profils (P_min, P_equ, P_max) sur fork `kiki-oniric` avec runtime async swap worktree
 - **Track T-Ops** : infrastructure CI/CD, eval harness stratifié, dashboard public, scorer teacher gelé, reproducibilité bit-exact
 - **Track T-Col** : outreach fMRI labs (Gallant/Norman/Huth), fallback Studyforrest pré-locké, pre-submission network
@@ -117,7 +117,7 @@ ROADMAP cycle 2 (2027+) :
 
 | Track | Durée | Livrables clés | Owner responsabilité |
 |-------|-------|---------------|---------------------|
-| **C** (framework) | S1-S8 | `framework-C-v1.0.md`, axiomes DR formalisés, preuve DR-2, eval protocol | Vous |
+| **C** (framework) | S1-S8 | `framework-C-v1.0.md`, axiomes DR formalisés, preuve DR-2 affaiblie (v0.2 2026-04-21, précondition empirique `¬(RESTRUCTURE ≺ REPLAY)`), eval protocol | Vous |
 | **A** (kiki-oniric) | S1-S12 | Fork `kiki-oniric`, Story 0 expose-primitives, 3 profils P_min/P_equ/P_max, runtime swap worktree | Vous + sub-agents |
 
 ### 3.3 Tracks services transverses
@@ -133,7 +133,7 @@ ROADMAP cycle 2 (2027+) :
 |-------|----------|----------------------|
 | **Setup** | S1-S2 | T-Col fallback lock, T-Ops infra, C kickoff, A Story 0 expose-primitives |
 | **Formalization + Foundation** | S3-S6 | C v0.3→v0.5, A P_min fonctionnel, OSF pre-registration H1-H4 |
-| **Core implementation** | S7-S12 | C v0.7→v0.9, A P_equ, milestone G2 (P_min viable S8), G3 (DR-2 preuve S8), G4 (P_equ fonctionnel S12) |
+| **Core implementation** | S7-S12 | C v0.7→v0.9, A P_equ, milestone G2 (P_min viable S8), G3 (DR-2 preuve sous précondition — v0.2 disponible 2026-04-21, external review S6-S8), G4 (P_equ fonctionnel S12) |
 | **Ablation + Experiments** | S13-S18 | C v1.0, A P_max, full E3+E4 eval, gate G5 PUBLICATION-READY S18 |
 | **Paper 1 submission** | S18-S20 | Paper 1 arXiv S18, pre-submission review T-Col.4, submit Nature HB S20 |
 | **Paper 2 draft + buffer** | S20-S24 | Paper 2 draft complet S24 (gelé en attente acceptation Paper 1), business L'Electron Rare launch |
@@ -274,7 +274,7 @@ and AI Collaborators³ (acknowledged separately)
 |----|-------------|------------|
 | R-EXT-01 | fMRI lab outreach échoue | Fallback Studyforrest pré-locké S2 |
 | R-CHA-01 | Charge cognitive > 15h/sem | Cut-gate 2 sem, délégation agressive |
-| R-FRM-01 | DR-2 preuve échoue | Fallback DR-2' ordre canonique |
+| R-FRM-01 | DR-2 preuve v0.2 rejetée par reviewers externes | Fallback DR-2' ordre canonique (activation critères dans `docs/milestones/g3-decision-log.md`) |
 | R-IMP-01 | Swap guards trop stricts | Seuils configurables, permissif au début |
 | R-CAL-01 | Paper 1 reject chronique | Fallback PLoS CB / Cognitive Science |
 
@@ -284,7 +284,7 @@ and AI Collaborators³ (acknowledged separately)
 |------|---|----------|------------|
 | G1 | S2 | T-Col fallback locked | Adapter Studyforrest testé |
 | G2 | S8 | P_min viable | Accuracy ≥ baseline − 2%, runtime stable 48h |
-| G3 | S8 | DR-2 preuve OK | Preuve complétée et peer-reviewed interne |
+| G3 | S8 | DR-2 preuve OK | Preuve v0.2 (affaiblie avec précondition empirique) complétée et peer-reviewée externe |
 | G4 | S12 | P_equ fonctionnel | > P_min sur ≥2 métriques significatives, invariants green 7j |
 | G5 | S18 | PUBLICATION-READY | Tous critères Section 4.6 spec framework |
 | G6 | S28 | Amorcer cycle 2 | Paper 1 submitted, bandwidth dispo |

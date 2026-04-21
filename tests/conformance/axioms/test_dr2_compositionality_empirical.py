@@ -1,8 +1,12 @@
 """Empirical test of DR-2 (weakened form, 2026-04-21). Verifies compositionality under the precondition ¬(∃ i<j : π_i=RESTRUCTURE ∧ π_j=REPLAY).
 
-**This does NOT constitute a proof of DR-2.** The spec explicitly
-labels DR-2 an *unproven working axiom* (see
-``docs/specs/2026-04-17-dreamofkiki-framework-C-design.md`` §6.2).
+DR-2 is proved in ``docs/proofs/dr2-compositionality.md`` v0.2
+(2026-04-21) under the precondition implemented by this harness.
+The present tests provide the empirical evidence for the
+precondition-satisfying class (12 of 24 permutations pass closure,
+budget additivity, and effect chaining) and the xfail witnesses
+for the falsified class (12 of 24 raise ValueError during the
+REPLAY step).
 The canonical-order fallback DR-2' is covered by
 :mod:`tests.conformance.axioms.test_dr2_prime_canonical_order`.
 

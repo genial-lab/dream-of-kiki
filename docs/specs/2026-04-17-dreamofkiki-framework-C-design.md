@@ -394,7 +394,9 @@ This is weaker but sufficient for the canonical DE composition defined in 4.3.
 ∀ substrate S, if S satisfies the Conformance Criterion below,
 then DR-0, DR-1, DR-2 (or DR-2') are **empirically validated** on S
 (operational sense, see §6.2 "Operational statement" ; not a formal
-implication — DR-2 itself remains an unproven working axiom, §6.2).
+implication — DR-2 is proved in `docs/proofs/dr2-compositionality.md`
+v0.2 (2026-04-21) under precondition `¬(∃ i<j : π_i=RESTRUCTURE ∧
+π_j=REPLAY)` ; DR-2' remains the fallback canonical-order contract).
 ```
 
 **Interpretation** : kiki-oniric and hypothetical E-SNN are both valid
@@ -455,7 +457,7 @@ Each axiom must be **empirically testable** via mechanical test:
 |-------|-----------|-------|-----------|
 | DR-0 | Query all output deltas → trace to DE with finite budget | T-Ops property test | CI nightly |
 | DR-1 | Query β records → all consumed within τ_max | I1 hourly cron | Runtime |
-| DR-2 | Property test : random op pairs, verify composition types + additivity | T-Ops CI | Each PR |
+| DR-2 | Property test : random n-ary permutations, verify precondition [P] + composition types + additivity | T-Ops CI | Each PR |
 | DR-3 | For each substrate, run full invariant suite → all pass | T-Ops | Per substrate |
 | DR-4 | Compare ops/channels sets → inclusion holds | T-Ops contract test | Each profile change |
 

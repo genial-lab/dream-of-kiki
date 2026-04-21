@@ -1,7 +1,9 @@
 """DR-2' Canonical-order compositionality — determinism conformance test.
 
-DR-2' (fallback, DR-2 unproven — see
-docs/specs/2026-04-17-dreamofkiki-framework-C-design.md §6.2) states
+DR-2' (fallback contract — DR-2 is now proved under precondition,
+see docs/proofs/dr2-compositionality.md v0.2 (2026-04-21) ; DR-2'
+retained as stricter canonical-order contract for
+P_min/P_equ/P_max profiles) states
 that operations applied in the canonical order are compositional
 within the operation set :
 
