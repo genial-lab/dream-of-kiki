@@ -15,6 +15,30 @@ see `docs/specs/2026-04-17-dreamofkiki-framework-C-design.md` §12).
 Cycle-3 Phase 1 launch bump. FC MINOR (+0.1.0) because cycle 3
 adds a new derived constraint surface on the formal axis :
 
+### Added — R1 output-hash API multi-artifact extension (issue #2)
+
+- ``run_output_hashes`` schema extended from single-hash-per-run to
+  N-hashes-per-run keyed on ``(run_id, artifact_name)``. Required
+  for Paper 2 (ablation) where each run may register multiple
+  artifacts (per-checkpoint, per-metric bundle, per-profile snapshot).
+- New API, kwargs-only on the new parameters for backward-compat :
+  ``register_output_hash(run_id, output_hash, *, artifact_name='canonical',
+  hash_type='sha256')``,
+  ``get_output_hash(run_id, *, artifact_name='canonical') -> str``,
+  ``list_output_hashes(run_id) -> dict[str, str]``.
+- ``_ensure_schema`` is idempotent over three states (fresh DB,
+  legacy v1 single-hash schema, already-new schema). Legacy rows
+  migrate to ``artifact_name='canonical'`` via a transactional
+  rename / create / copy / drop. No action required on existing DBs.
+- 9 new unit tests covering backward-compat, multi-artifact
+  coexistence, exact-match idempotence, hash conflict, hash_type
+  conflict, empty-list semantics, and migration idempotence /
+  preservation.
+- No DualVer bump : R1 contract is semantically preserved
+  (``(run_id, artifact_name) -> hash`` is bit-stable ; the
+  single-artifact case is still addressable verbatim via the
+  ``canonical`` default). No change to ``run_id`` computation.
+
 ### Added — R1 output-hash API (additive, no-migration)
 
 - `RunRegistry.register_output_hash(run_id, output_hash)` +

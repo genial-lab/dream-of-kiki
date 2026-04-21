@@ -47,7 +47,9 @@ R1 output-hash API landed (`register_output_hash` /
 `get_output_hash` on `RunRegistry` ; sibling table
 `run_output_hashes`). The `test_r1_registry_output_hash_contract`
 contract test is no longer `xfail` — second half of R1 is now
-caller-enforceable.
+caller-enforceable. Multi-artifact support landed (issue #2) :
+schema keyed on `(run_id, artifact_name)`, idempotent migration
+from the v1 single-hash layout, plus `list_output_hashes(run_id)`.
 
 ## DualVer status
 
