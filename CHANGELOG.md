@@ -32,6 +32,30 @@ see `docs/specs/2026-04-17-dreamofkiki-framework-C-design.md` §12).
   snapshot round-trip, and the phase-2 `NotImplementedError`
   surface.
 
+### Added — micro-kiki substrate: OPLoRA restructure wired (phase-2)
+
+- `micro_kiki` substrate: OPLoRA (arXiv 2510.13003, Du et al.) wired
+  into `restructure_handler_factory`; projects new adapter deltas
+  onto the orthogonal complement of the prior subspace via numpy
+  SVD. Replaces the phase-1 `NotImplementedError` stub.
+- New `_oplora_projector(prior_deltas, rank_thresh=1e-4) -> ndarray`
+  module-level helper. Guards: empty priors reject (caller handles
+  no-op leg via handler), shape-mismatch across priors raises,
+  rank collapse falls back to identity projector with a warning.
+- New `MicroKikiRestructureState` dataclass exposed read-only via
+  `MicroKikiSubstrate.restructure_state`, records DR-0 completion
+  flag + operation label and DR-1 `episode_id` stamps.
+- 9 new unit tests in `tests/unit/test_micro_kiki_restructure.py`
+  cover projector algebra (orthogonality, idempotence, symmetry,
+  rank-collapse fallback, shape-mismatch guard) and handler
+  contract (DR-0 counters, DR-1 stamping, op-vocabulary guard,
+  missing-key guard, projector shape guard). `test_micro_kiki_substrate`
+  retires the phase-1 `NotImplementedError` gate in favour of an
+  OPLoRA-wired assertion.
+- Phase-2 `recombine_handler_factory` (TIES merge) remains
+  `NotImplementedError` — follow-up PR once the 32-expert
+  curriculum stabilises.
+
 ## [C-v0.8.0+PARTIAL] — 2026-04-21
 
 ### Added — kiki_oniric.axioms public API (FC-MINOR bump)

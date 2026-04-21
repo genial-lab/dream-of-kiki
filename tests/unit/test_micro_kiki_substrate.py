@@ -100,18 +100,41 @@ def test_downscale_preserves_shape_and_rejects_invalid_factor() -> None:
         handler(weights, factor=1.5)
 
 
-def test_restructure_raises_phase_2() -> None:
-    """TDD-4 — restructure factory returns a callable that raises
-    ``NotImplementedError`` with an explicit phase-2 / OPLoRA
-    citation. The gate is deliberately visible so the cycle-3
-    conformance run surfaces it as a known-missing branch rather
-    than silently no-opping.
+def test_restructure_handler_oplora_wired() -> None:
+    """TDD-4 (phase-2) — restructure factory returns an OPLoRA-
+    backed callable (arXiv 2510.13003). Empty ``prior_deltas``
+    is a DR-0-credited no-op ; the full algebra is exercised in
+    ``tests/unit/test_micro_kiki_restructure.py``.
+
+    The phase-1 ``NotImplementedError`` gate is retired here in
+    favour of an assertion that the op is *wired* ; the gate is
+    now covered by the dedicated OPLoRA test module so the DR-3
+    conformance harness sees the real surface, not a stub.
     """
     substrate = MicroKikiSubstrate()
     handler = substrate.restructure_handler_factory()
     assert callable(handler)
-    with pytest.raises(NotImplementedError, match="OPLoRA"):
-        handler({}, "activate", "layers.0.q_proj")
+
+    adapter: dict = {
+        "layers.0.q_proj_B": np.zeros((4, 2), dtype=np.float32),
+        "prior_deltas": [],  # empty → no-op projection leg
+        "episode_id": "ep-restruct-0",
+    }
+    out = handler(adapter, "oplora", "layers.0.q_proj_B")
+    # No priors → adapter entry unchanged ; state still bumped.
+    np.testing.assert_array_equal(
+        out["layers.0.q_proj_B"], np.zeros((4, 2), dtype=np.float32),
+    )
+    state = substrate.restructure_state
+    assert state.total_episodes_handled == 1
+    assert state.total_projections_applied == 0
+    assert state.last_completed is True
+    assert state.last_operation == "restructure"
+    assert state.last_episode_id == "ep-restruct-0"
+
+    # Unsupported op still rejected — DR-3 visibility.
+    with pytest.raises(ValueError, match="unsupported op"):
+        handler(adapter, "activate", "layers.0.q_proj_B")
 
 
 def test_recombine_raises_phase_2() -> None:
