@@ -525,6 +525,16 @@ Four hypotheses were pre-registered on the Open Science Framework
 Collection template. Pre-registration was locked at S3 of the
 cycle (calendar reference) ; the OSF DOI is cited in the paper
 front matter and resolves to an immutable timestamp record.
+A single amendment (Amendment #1, Bonferroni family restructure
+for cycle-3 multi-scale hypotheses) was filed 2026-04-21 before
+any data collection at OSF DOI `10.17605/OSF.IO/TPM5S`
+(https://osf.io/tpm5s/), as an Open-Ended Registration linked
+to the parent Q6JYN. The primary analysis reported here uses the
+original α = 0.00625 as the strictly more conservative of the
+two bounds ; the restructured family (α = 0.00833 per-cell,
+0.025 cross-cell) is provided as a secondary analysis. Both
+registrations are accessible via the parent OSF project page
+https://osf.io/q6jyn.
 
 - **H1 — Forgetting reduction** : `mean(forgetting_P_equ) <
   mean(forgetting_baseline)`. Test : Welch's t-test, one-sided.
