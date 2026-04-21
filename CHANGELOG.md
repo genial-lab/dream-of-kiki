@@ -29,6 +29,22 @@ see `docs/specs/2026-04-17-dreamofkiki-framework-C-design.md` §12).
   change to existing axioms). EC axis unchanged.
 - Closes issue #5.
 
+### Infrastructure
+
+- **OSF DOI registered** (2026-04-19T00:28:05Z) — DataCite DOI
+  `10.17605/OSF.IO/Q6JYN` auto-minted when OSF registration was
+  made public. OSF convention : DOI string is a deterministic
+  derivation of the registration GUID (`10.17605/OSF.IO/<GUID>`
+  uppercased), so paper drafts could reference it before publish
+  without re-render. No "reserve-then-activate" semantics on OSF
+  (prior project documentation using that language has been
+  corrected 2026-04-21 post-audit). Project URL
+  https://osf.io/q6jyn ; registration is now immutable per OSF
+  policy. No DualVer bump (infrastructure event, no formal or
+  empirical axis change). See
+  `docs/milestones/osf-doi-mint-2026-04-20.md` (filename reflects
+  checklist-creation date, not mint date).
+
 ---
 
 ## [C-v0.7.1+PARTIAL] — 2026-04-21

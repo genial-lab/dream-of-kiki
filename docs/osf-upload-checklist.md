@@ -1,5 +1,13 @@
 # OSF Pre-Registration Upload Checklist
 
+**Status** : EXECUTED 2026-04-19 — OSF DOI
+`10.17605/OSF.IO/Q6JYN` auto-minted by DataCite on registration
+publish ; project at https://osf.io/q6jyn. Individual checkboxes
+below retained as historical template (execution confirmed by
+`api.osf.io/v2/registrations/q6jyn/`, `date_registered`
+`2026-04-19T00:28:05Z`, and by paper sources citing the live
+DOI in §1 Abstract and §6.1 Methodology).
+
 This is a **human action checklist** for the S3 OSF pre-registration.
 
 Source document : `docs/osf-preregistration-draft.md`

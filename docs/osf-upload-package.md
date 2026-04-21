@@ -1,5 +1,11 @@
 # OSF Upload Package — Ready to Paste
 
+**Status** : EXECUTED 2026-04-19 — OSF project created,
+pre-registration made public (immutable after publish per OSF
+semantics), DataCite DOI `10.17605/OSF.IO/Q6JYN` auto-registered
+on publish, project URL `https://osf.io/q6jyn`. This file is
+retained as historical record of the upload payload.
+
 Use this file during the OSF upload procedure.
 Follow `docs/osf-upload-checklist.md` step-by-step.
 Copy-paste content below into OSF web forms.

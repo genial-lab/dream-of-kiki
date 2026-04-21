@@ -57,7 +57,8 @@ Nature HB statistical discipline without unnecessary power loss.
   conservative than α = 0.00833).
 
 **References** :
-- Primary pre-reg : OSF DOI pending (2026-04-19 amendment set #1)
+- Primary pre-reg : `10.17605/OSF.IO/Q6JYN` (DataCite-minted on OSF publish 2026-04-19T00:28:05Z ; this amendment set #1 drafted same-day).
+  **Important open issue** : OSF registrations are immutable ; this amendment exists only as a repo markdown. Per COS guidance, amendments before data collection should be filed as a **new OSF registration** linked to the original. A reviewer opening Q6JYN will see only the original H1-H4 family. TODO before PLOS CB submit : file amendment as a new linked registration, or document the primary analysis under the original α = 0.0125 and treat the restructured family as secondary.
 - Spec : `docs/superpowers/specs/2026-04-19-dreamofkiki-cycle3-design.md` §4 (updated in commit `85e62fc`)
 - Finding trail : CodeRabbit cycle-12 finding #26 on `docs/superpowers/specs/2026-04-19-dreamofkiki-cycle3-design.md`
 

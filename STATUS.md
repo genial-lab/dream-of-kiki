@@ -91,9 +91,16 @@ Next target : C-v0.7.0+STABLE deferred to Paper 2 closeout (Phase 2 multi-scale 
 
 ## Outstanding human actions
 
-1. **OSF upload** — follow `docs/osf-upload-checklist.md`,
-   lock H1-H4 pre-registration before S5 experiments.
-   Blocking : pre-reg confirmatory status for S5+ results.
+1. **OSF upload** — DONE 2026-04-19 : project made public,
+   DataCite DOI `10.17605/OSF.IO/Q6JYN` auto-registered
+   (timestamp `2026-04-19T00:28:05Z` via OSF API ; see
+   `docs/milestones/osf-doi-mint-2026-04-20.md` — filename
+   reflects checklist-creation date, not mint date). Paper 2
+   H1-H4 confirmatory status unlocked for S5+ runs.
+   **Open issue** : Bonferroni amendment (2026-04-19) lives only
+   as repo markdown ; per COS guidance should be filed as a new
+   linked OSF registration before PLOS CB submit, otherwise the
+   amendment is invisible to any reviewer opening Q6JYN.
 2. **Emails T-Col fMRI labs** — Huth, Norman, Gallant outreach
    using `ops/formal-reviewer-email-template.md` adapted.
 3. **Formal reviewer recruitment** — Q_CR.1 b, 3 candidates from
@@ -102,7 +109,7 @@ Next target : C-v0.7.0+STABLE deferred to Paper 2 closeout (Phase 2 multi-scale 
 ## Open science artifacts (planned)
 
 - [x] Repo public GitHub `electron-rare/dream-of-kiki`
-- [ ] OSF project + pre-registration DOI (S3 human action)
+- [x] OSF project + pre-registration DOI `10.17605/OSF.IO/Q6JYN` (DataCite-minted 2026-04-19T00:28:05Z on OSF publish)
 - [ ] HuggingFace models `clemsail/kiki-oniric-{P_min,P_equ,P_max}` (S22)
 - [ ] Zenodo DOI for harness (S22)
 - [ ] Zenodo DOI for models (S22)

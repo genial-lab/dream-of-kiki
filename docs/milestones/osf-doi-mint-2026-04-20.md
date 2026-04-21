@@ -2,7 +2,16 @@
 
 **Date** : 2026-04-20
 **Cycle** : 1 closeout / cycle 3 setup
-**Status** : **PENDING — checklist below, mint after arXiv ID lock**
+**Status** : **MINTED 2026-04-19T00:28:05Z** — DataCite DOI
+`10.17605/OSF.IO/Q6JYN` auto-registered at the moment the OSF
+registration was made public (OSF convention : DOI string is a
+deterministic derivation of the registration GUID, prefix
+`10.17605/OSF.IO/` + uppercased GUID, so paper drafts could
+cite it pre-publish without re-render). Confirmed via
+`api.osf.io/v2/registrations/q6jyn/identifiers/`. Note : OSF
+does **not** offer "reserve-then-activate" DOI semantics — this
+file's earlier "Confirm path" / "reserved slot" language has
+been corrected post-audit (2026-04-21).
 
 This file tracks the OSF (Open Science Framework) project setup
 and DOI mint workflow for Paper 1 v0.2 under the PLOS
@@ -87,14 +96,21 @@ Identifiers → Mint DOI). The minted DOI is then :
   the H1–H4 evaluation).
 - **Recorded** in this file under "Minted DOI" below.
 
-## Minted DOI (fill after mint)
+## Minted DOI (filled 2026-04-19, corrected 2026-04-21 post-audit)
 
-- **OSF DOI** : TBD (currently reserved as
-  `10.17605/OSF.IO/Q6JYN`)
-- **Mint date** : TBD
-- **OSF project URL** : TBD
-- **Linked arXiv ID** : TBD (cross-reference to
-  `docs/milestones/arxiv-submit-log.md`)
+- **OSF DOI** : `10.17605/OSF.IO/Q6JYN` (auto-minted by DataCite
+  when OSF registration was made public ; DOI string is a
+  deterministic derivation of the registration GUID — this is
+  standard OSF behaviour, not a "reserve-then-activate" workflow)
+- **Mint date** : 2026-04-19T00:28:05Z (OSF API `date_registered`)
+- **OSF project URL** : https://osf.io/q6jyn (resolves via
+  `https://doi.org/10.17605/OSF.IO/Q6JYN` 302 redirect)
+- **Registration immutability** : per OSF policy, this
+  registration cannot be edited. Any amendment (e.g.,
+  `docs/osf-amendment-bonferroni-cycle3.md`) must be filed as a
+  new linked OSF registration before it is reviewer-visible.
+- **Linked arXiv ID** : TBD (filled after arXiv v0.2 deposit ;
+  cross-reference to `docs/milestones/arxiv-submit-log.md`)
 - **Linked Zenodo DOI (artifacts)** : TBD (separate mint for the
   code + benchmark snapshot, planned post-G5)
 

@@ -4,8 +4,8 @@
 **PI** : Clement Saillant (L'Electron Rare)
 **Date drafted** : 2026-04-17 (S3)
 **Lock date target** : S3 before experiments begin
-**OSF URL** : https://osf.io/XXXX (fill after upload)
-**DOI** : 10.17605/OSF.IO/XXXX (fill after upload)
+**OSF URL** : https://osf.io/q6jyn
+**DOI** : 10.17605/OSF.IO/Q6JYN (auto-minted by DataCite 2026-04-19 on OSF publish)
 
 ## 1. Study design
 
