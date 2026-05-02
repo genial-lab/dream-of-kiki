@@ -72,6 +72,17 @@ class EffectSizeTarget:
         """
         return self.ci_low <= observed <= self.ci_high
 
+    def distance_from_target(self, observed: float) -> float:
+        """Signed distance ``observed - hedges_g`` (positive = above).
+
+        Use the sign to decide whether an observation overshoots
+        (positive : larger consolidation gain than the meta-analytic
+        point estimate) or undershoots (negative : smaller gain).
+        Magnitude has no statistical interpretation by itself —
+        combine with :meth:`is_within_ci` for a verdict.
+        """
+        return observed - self.hedges_g
+
 
 # ----------------------------------------------------------------------
 # Hu et al. 2020 TMR meta-analysis (Psychological Bulletin)

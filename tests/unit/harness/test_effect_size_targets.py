@@ -160,3 +160,19 @@ def test_is_within_ci_property(observed: float) -> None:
     result = HU_2020_OVERALL.is_within_ci(observed)
     expected = HU_2020_OVERALL.ci_low <= observed <= HU_2020_OVERALL.ci_high
     assert result is expected
+
+
+def test_distance_from_target_zero_at_point_estimate() -> None:
+    assert HU_2020_OVERALL.distance_from_target(HU_2020_OVERALL.hedges_g) == 0.0
+
+
+def test_distance_from_target_signed() -> None:
+    """observed - hedges_g, signed (positive = above target)."""
+    assert HU_2020_OVERALL.distance_from_target(0.40) == pytest.approx(
+        0.40 - HU_2020_OVERALL.hedges_g
+    )
+    assert HU_2020_OVERALL.distance_from_target(0.10) == pytest.approx(
+        0.10 - HU_2020_OVERALL.hedges_g
+    )
+    # negative when observed below target
+    assert HU_2020_OVERALL.distance_from_target(0.0) < 0.0
