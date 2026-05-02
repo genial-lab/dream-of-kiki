@@ -5,6 +5,7 @@ Hedges' g and 95% CIs. Every constant must be immutable and resolve
 to a real BibTeX key in docs/papers/paper1/references.bib.
 """
 from dataclasses import FrozenInstanceError
+from pathlib import Path
 
 import pytest
 from hypothesis import given, settings
@@ -14,6 +15,9 @@ from harness.benchmarks.effect_size_targets import (
     HU_2020_OVERALL,
     EffectSizeTarget,
 )
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+REFERENCES_BIB = REPO_ROOT / "docs" / "papers" / "paper1" / "references.bib"
 
 
 def test_target_constructs_with_all_fields() -> None:
@@ -176,3 +180,37 @@ def test_distance_from_target_signed() -> None:
     )
     # negative when observed below target
     assert HU_2020_OVERALL.distance_from_target(0.0) < 0.0
+
+
+def _bibtex_keys(bib_path: Path) -> set[str]:
+    """Extract @…{KEY, entries from a BibTeX file."""
+    import re
+
+    text = bib_path.read_text(encoding="utf-8")
+    # Matches: @article{key, OR @misc{key, etc.
+    pattern = re.compile(r"^@[A-Za-z]+\{([A-Za-z0-9_:-]+),", re.MULTILINE)
+    return set(pattern.findall(text))
+
+
+def test_references_bib_exists() -> None:
+    assert REFERENCES_BIB.is_file(), (
+        f"references.bib not found at {REFERENCES_BIB} — "
+        "either the file moved or REPO_ROOT parents level is wrong"
+    )
+
+
+def test_all_target_keys_resolve_in_references_bib() -> None:
+    """Every EffectSizeTarget.source_bibtex_key must appear in references.bib."""
+    from harness.benchmarks.effect_size_targets import (
+        HU_2020_NREM2,
+        HU_2020_SWS,
+        JAVADI_2024_OVERALL,
+    )
+
+    keys = _bibtex_keys(REFERENCES_BIB)
+    for target in (HU_2020_OVERALL, HU_2020_NREM2, HU_2020_SWS, JAVADI_2024_OVERALL):
+        assert target.source_bibtex_key in keys, (
+            f"target {target.name!r} cites bibtex key "
+            f"{target.source_bibtex_key!r} but it is not in "
+            f"{REFERENCES_BIB}"
+        )
