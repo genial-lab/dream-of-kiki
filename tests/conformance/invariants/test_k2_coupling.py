@@ -12,6 +12,8 @@ from typing import Protocol, runtime_checkable
 
 import numpy as np
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 from kiki_oniric.core.observables import PhaseCouplingObservable
 from kiki_oniric.dream.guards.coupling import (
@@ -21,6 +23,12 @@ from kiki_oniric.dream.guards.coupling import (
 from tests.conformance.invariants._synthetic_phase_coupling import (
     SyntheticPhaseCouplingSubstrate,
 )
+
+# Empirical anchor: eLife 2025 Bayesian meta-analysis
+# (BibTeX `elife2025bayesian`). 95 % CI on coupling strength.
+K2_CI_LOW: float = 0.27
+K2_CI_HIGH: float = 0.39
+K2_N_SAMPLES: int = 8192  # >= 32 SO cycles at fs=256 Hz, f_SO=1 Hz.
 
 
 def _is_protocol(cls: type) -> bool:
@@ -137,3 +145,38 @@ def test_estimator_one_for_perfect_coupling() -> None:
     amp = np.ones(n, dtype=np.float32)
     mvl = _mean_vector_length(phase, amp)
     assert abs(mvl - 1.0) < 1e-6
+
+
+@given(seed=st.integers(min_value=0, max_value=2**31 - 1))
+@settings(deadline=None, max_examples=50)
+def test_k2_property_synthetic_in_window(seed: int) -> None:
+    """K2: synthetic substrate's MVL falls inside eLife 2025 95 % CI.
+
+    Reference: docs/invariants/registry.md (K2),
+    docs/proofs/k2-coupling-evidence.md, BibTeX `elife2025bayesian`.
+    """
+    sub = SyntheticPhaseCouplingSubstrate()
+    phase, amp, _fs = sub.emit_phase_coupling_signal(
+        n_samples=K2_N_SAMPLES, seed=seed
+    )
+    mvl = _mean_vector_length(phase, amp)
+    check_coupling_in_window(mvl, ci_low=K2_CI_LOW, ci_high=K2_CI_HIGH)
+
+
+def test_k2_property_smoke_known_seed() -> None:
+    """Determinism check: seed=7 yields a known MVL bucket.
+
+    This anchors the synthetic generator's calibration: if a future
+    edit to the generator drifts the MVL outside [0.30, 0.36], the
+    coverage of the property test against the empirical CI degrades
+    silently. This smoke-test catches that.
+    """
+    sub = SyntheticPhaseCouplingSubstrate()
+    phase, amp, _fs = sub.emit_phase_coupling_signal(
+        n_samples=K2_N_SAMPLES, seed=7
+    )
+    mvl = _mean_vector_length(phase, amp)
+    assert 0.30 < mvl < 0.36, (
+        f"calibration drift detected: seed=7 MVL={mvl:.4f} "
+        f"outside [0.30, 0.36]"
+    )

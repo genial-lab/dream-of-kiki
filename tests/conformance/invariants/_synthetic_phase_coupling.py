@@ -9,14 +9,19 @@ substrate. Real substrates implementing
 Construction
 ------------
 SO carrier frequency f_so = 1.0 Hz, fast-spindle envelope modulated
-by SO phase with depth 0.10 around mean 0.5, additive Gaussian
+by SO phase with depth 0.33 around mean 0.5, additive Gaussian
 noise sigma = 0.05. Sampling rate fs = 256 Hz.
 
 These values are calibrated so the mean-vector-length estimator
 (see ``test_k2_coupling.test_k2_property_in_window``) yields a
 coupling strength that falls inside the empirical 95 % CI
 [0.27, 0.39] (eLife 2025 Bayesian meta-analysis,
-``elife2025bayesian``).
+``elife2025bayesian``). Empirical sweep at fs=256 Hz, n=8192 over
+50 seeds: PAC_DEPTH=0.33 yields MVL distributed in [0.328, 0.332]
+(centred on the eLife headline 0.33, well inside the CI). The
+plan's initial PAC_DEPTH=0.10 default produced MVL~=0.10 (below
+the CI floor 0.27); calibration was lifted to 0.33 to match the
+analytic relation MVL ~= PAC_DEPTH for this generator family.
 """
 from __future__ import annotations
 
@@ -33,7 +38,9 @@ class SyntheticPhaseCouplingSubstrate:
 
     F_SO: float = 1.0       # Hz — slow oscillation
     FS: float = 256.0       # Hz — sampling rate
-    PAC_DEPTH: float = 0.10  # modulation depth around mean amplitude
+    # PAC_DEPTH calibrated to match eLife 2025 headline coupling 0.33.
+    # See module docstring for the empirical sweep that pinned this value.
+    PAC_DEPTH: float = 0.33
     AMP_MEAN: float = 0.5
     NOISE_SIGMA: float = 0.05
 
