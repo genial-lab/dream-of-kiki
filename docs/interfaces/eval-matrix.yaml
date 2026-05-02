@@ -1,8 +1,8 @@
 # Eval matrix stratification rules
 # Referenced by harness/config/eval_matrix.py
-# Version: C-v0.7.0+PARTIAL
+# Version: C-v0.12.0+PARTIAL
 
-version: "C-v0.7.0+PARTIAL"
+version: "C-v0.12.0+PARTIAL"
 
 bump_rules:
   PATCH:
@@ -106,3 +106,21 @@ metrics:
     family: emergence
     determinism: permutation_test_seeded
     topology_sensitive: false
+
+# Published-baseline registry (FC-MINOR additive, 2026-05-03).
+# Each baseline row scores on a subset of `metrics:` keys.
+# Reference: docs/specs/2026-04-17-dreamofkiki-framework-C-design.md §12.2
+#            (FC-MINOR : addition of new optional primitive)
+baselines:
+  wake_sleep_cl:
+    name: wake_sleep_consolidated_learning
+    bibkey: alfarano2024wakesleep
+    arxiv: "2401.08623"
+    venue: "IEEE TNNLS"
+    year: 2024
+    variant: c  # Set by plan Task 0.5 ; one of {a, b, c}
+    scores_on:
+      - M1.a   # forgetting_rate
+      - M1.b   # avg_accuracy
+    determinism: published_reference  # variant c — variant a uses seeded_rng
+    paper2_role: primary_ablation_comparator
