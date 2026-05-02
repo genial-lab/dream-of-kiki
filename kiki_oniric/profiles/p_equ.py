@@ -55,6 +55,9 @@ class PEquProfile:
         default_factory=RecombineOpState
     )
     rng: random.Random = field(default_factory=random.Random)
+    # Sharon et al. 2025 healthy-older anchor (factor = 1.0 = intact SO
+    # coherence baseline). See docs/papers/paper1/methodology.md §6.6.
+    so_trough_amplitude_factor: float = 1.0
 
     def __post_init__(self) -> None:
         self.runtime.register_handler(

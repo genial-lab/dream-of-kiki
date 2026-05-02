@@ -94,6 +94,11 @@ class PMaxProfile:
             OutputChannel.ATTENTION_PRIOR,
         }
     )
+    # Sharon et al. 2025 — intact-substrate anchor (factor = 1.0). P_max
+    # is healthy-young by spec §3.1; numerically equal to P_equ on this
+    # axis (the SO-trough gradient saturates at "healthy"; richer
+    # channels/ops differentiate P_max above the SO biomarker).
+    so_trough_amplitude_factor: float = 1.0
 
     def __post_init__(self) -> None:
         self.runtime.register_handler(

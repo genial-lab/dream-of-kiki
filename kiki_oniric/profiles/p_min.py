@@ -10,6 +10,7 @@ substrate-agnostic swap_atomic API. Full MLX-native swap lands
 S13+ alongside the concurrent dream worker.
 
 Reference: docs/specs/2026-04-17-dreamofkiki-framework-C-design.md §3.1
+Calibration: docs/papers/paper1/methodology.md §6.6 (Sharon 2025 SO-trough)
 """
 from __future__ import annotations
 
@@ -43,6 +44,13 @@ class PMinProfile:
     downscale_state: DownscaleOpState = field(
         default_factory=DownscaleOpState
     )
+    # Sharon et al. 2025 (sharon2025alzdementia, hd-EEG N=55) — qualitative
+    # SO-trough amplitude / frontocentral synchronization gradient across
+    # healthy-older / aMCI / AD groups. P_min is anchored on the aMCI
+    # midpoint as an informed placeholder; absolute µV not extractable from
+    # publication. Final empirical value lands at G2 P_min pilot
+    # (scripts/pilot_g2.py). See docs/papers/paper1/methodology.md §6.6.
+    so_trough_amplitude_factor: float = 0.45
 
     def __post_init__(self) -> None:
         self.runtime.register_handler(
