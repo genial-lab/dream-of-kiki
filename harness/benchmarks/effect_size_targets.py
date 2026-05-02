@@ -62,6 +62,16 @@ class EffectSizeTarget:
                 f"{self.name!r}"
             )
 
+    def is_within_ci(self, observed: float) -> bool:
+        """Return True iff ``observed`` lies within the 95 % CI (inclusive).
+
+        Used by future G4 pilots to decide whether an observed
+        empirical effect size from a registered run sits inside the
+        published meta-analytic interval — i.e. is empirically
+        consistent with the published anchor.
+        """
+        return self.ci_low <= observed <= self.ci_high
+
 
 # ----------------------------------------------------------------------
 # Hu et al. 2020 TMR meta-analysis (Psychological Bulletin)

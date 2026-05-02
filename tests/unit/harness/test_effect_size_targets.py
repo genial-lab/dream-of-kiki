@@ -7,8 +7,13 @@ to a real BibTeX key in docs/papers/paper1/references.bib.
 from dataclasses import FrozenInstanceError
 
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
-from harness.benchmarks.effect_size_targets import EffectSizeTarget
+from harness.benchmarks.effect_size_targets import (
+    HU_2020_OVERALL,
+    EffectSizeTarget,
+)
 
 
 def test_target_constructs_with_all_fields() -> None:
@@ -134,3 +139,24 @@ def test_javadi2024_overall_matches_published() -> None:
     # P_min : sleep restriction = degraded substrate decrement floor
     assert JAVADI_2024_OVERALL.profile_target == "P_min"
     assert JAVADI_2024_OVERALL.stratum is None
+
+
+def test_is_within_ci_inclusive_at_bounds() -> None:
+    assert HU_2020_OVERALL.is_within_ci(HU_2020_OVERALL.ci_low) is True
+    assert HU_2020_OVERALL.is_within_ci(HU_2020_OVERALL.ci_high) is True
+    assert HU_2020_OVERALL.is_within_ci(HU_2020_OVERALL.hedges_g) is True
+
+
+def test_is_within_ci_outside_returns_false() -> None:
+    assert HU_2020_OVERALL.is_within_ci(0.0) is False
+    assert HU_2020_OVERALL.is_within_ci(0.5) is False
+    assert HU_2020_OVERALL.is_within_ci(-1.0) is False
+
+
+@given(observed=st.floats(min_value=-5.0, max_value=5.0, allow_nan=False))
+@settings(max_examples=200, derandomize=True)
+def test_is_within_ci_property(observed: float) -> None:
+    """For any observed in [-5, 5], is_within_ci agrees with bounds check."""
+    result = HU_2020_OVERALL.is_within_ci(observed)
+    expected = HU_2020_OVERALL.ci_low <= observed <= HU_2020_OVERALL.ci_high
+    assert result is expected
