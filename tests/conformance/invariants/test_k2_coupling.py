@@ -180,3 +180,26 @@ def test_k2_property_smoke_known_seed() -> None:
         f"calibration drift detected: seed=7 MVL={mvl:.4f} "
         f"outside [0.30, 0.36]"
     )
+
+
+def test_estimator_rejects_shape_mismatch() -> None:
+    """Estimator must guard against array length mismatch."""
+    phase = np.zeros(10, dtype=np.float32)
+    amp = np.zeros(11, dtype=np.float32)
+    with pytest.raises(ValueError, match="identical shapes"):
+        _mean_vector_length(phase, amp)
+
+
+def test_estimator_zero_amplitude_returns_zero() -> None:
+    """All-zero amplitude defines MVL = 0 (no division by zero)."""
+    n = 256
+    phase = np.linspace(-np.pi, np.pi, n, dtype=np.float32)
+    amp = np.zeros(n, dtype=np.float32)
+    assert _mean_vector_length(phase, amp) == 0.0
+
+
+def test_synthetic_substrate_rejects_zero_samples() -> None:
+    """n_samples=0 must raise (per fixture contract)."""
+    sub = SyntheticPhaseCouplingSubstrate()
+    with pytest.raises(ValueError, match="n_samples"):
+        sub.emit_phase_coupling_signal(n_samples=0, seed=0)
