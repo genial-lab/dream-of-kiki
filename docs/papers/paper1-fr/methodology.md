@@ -141,6 +141,17 @@ nouveau-hippocampique + familier-cortical, voir
 résultat d'entrelacement up-state SWS de [bioRxiv 2025
 thalamocorticale].
 
+Les ancres numériques de [@hu2020tmr] (global, NREM2, SWS) et
+[@javadi2024sleeprestriction] sont encodées comme constantes
+typées et figées dans `harness.benchmarks.effect_size_targets`
+(`HU_2020_OVERALL`, `HU_2020_NREM2`, `HU_2020_SWS`,
+`JAVADI_2024_OVERALL`) afin qu'un futur pilote G4 compare les
+tailles d'effet observées aux IC 95 % publiés de façon
+déterministe (`is_within_ci`, `distance_from_target`). Aucun
+bump empirique (EC) n'est impliqué : ces constantes encodent
+des nombres externes publiés, pas des sorties de runs
+enregistrés.
+
 ---
 
 ## Notes pour révision

@@ -128,6 +128,15 @@ familiar-cortical replay, see `docs/specs/amendments/`) inherits
 its biological grounding from the SWS up-state interleaving
 result of [@biorxiv2025thalamocortical].
 
+The numerical anchors of [@hu2020tmr] (overall, NREM2, SWS) and
+[@javadi2024sleeprestriction] are encoded as typed, frozen
+constants in `harness.benchmarks.effect_size_targets` (`HU_2020_OVERALL`,
+`HU_2020_NREM2`, `HU_2020_SWS`, `JAVADI_2024_OVERALL`) so a future
+G4 pilot compares observed effect sizes against the published 95 %
+CIs deterministically (`is_within_ci`, `distance_from_target`).
+No empirical (EC) bump is implied : these constants encode external
+published numbers, not registered run outputs.
+
 ---
 
 ## Notes for revision
