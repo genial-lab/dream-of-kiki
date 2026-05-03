@@ -1,6 +1,6 @@
 # dream-of-kiki — Status
 
-**As of** : 2026-05-03 G4-ter pilot (HP sweep + richer substrate, 420 cells) — H1+H2 reject H0, H_DR4-ter inconclusive, EC stays PARTIAL
+**As of** : 2026-05-03 G5 cross-substrate pilot (E-SNN thalamocortical, 20 cells) — within-substrate spectator mirror G4-bis, cross-substrate divergence at absolute retention, EC stays PARTIAL
 **Version** : C-v0.12.0+PARTIAL
 **Phase** : Paper 1 v0.2 PLOS CB submission preparation. Cycle-3
 Phase 1 1.5B sanity GO 3/3 (commit `22c58c9`, 46.75 min Studio) ;
@@ -79,6 +79,7 @@ Next target : C-v0.12.0+STABLE deferred to Paper 2 closeout (Phase 2 multi-scale
 | G10 — cycle-3 Gate D (H1-H6) | cycle-3 sem 3 | ⏸ DEFERRED to Paper 2 (PLOS CB pivot 2026-04-20 — only 1.5B cell available, multi-scale 7B+35B + Gate D moved to Paper 2 backlog) |
 | Paper 1 v0.2 PLOS CB | 2026-04-20 → submission | ▶ ACTIVE (draft rendered `docs/papers/paper1/build/full-draft.pdf` 22 pages 296 KB ; arXiv prep + DR-2 external review + cover letter pending) |
 | G6 — micro-kiki real LLM CL stream | 2026-05-03 → milestone | 🔶 PARTIAL (Path B inference-only, M1 Max ; pre-reg amended for G4-bis g_h1=-2.31 ; spectator pattern observed across 4 arms ; H_NEW reformulated as exploratory infrastructure validation per `docs/osf-prereg-g6-pilot.md` §0 + §2 ; Path A Studio = future work, blocking STABLE promotion per pre-reg §6) |
+| G5-pilot — cross-substrate DR-3 empirical | 2026-05-03 → milestone | 🔶 PARTIAL (E-SNN thalamocortical, numpy LIF, 20 cells, 4 min M1 Max ; within-substrate spectator pattern reproduces G4-bis (P_min ≡ P_equ ≡ P_max retention 0.5119) ; cross-substrate Welch vs MLX rejects H0 at α/4=0.0125 (baseline g=9.98, dream arms g=3.49) ; absolute retention diverges, qualitative spectator pattern matches ; no DR-3 evidence upgrade at absolute level ; G5-bis with G4-ter richer head = future work) |
 
 ## Critical risks watched
 

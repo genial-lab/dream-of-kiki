@@ -12,6 +12,35 @@ see `docs/specs/2026-04-17-dreamofkiki-framework-C-design.md` §12).
 
 ## [Unreleased]
 
+### Empirical (G5 cross-substrate, 2026-05-03)
+
+- G5 cross-substrate pilot on E-SNN thalamocortical (numpy LIF
+  fallback, no `norse` dep). 20 cells × 4 arms × 5 seeds, 4 min
+  wall time on M1 Max. Pre-reg `docs/osf-prereg-g5-cross-substrate.md`
+  locked at commit `1411228` before pilot run at `5fb36f0`.
+  Milestones : `docs/milestones/g5-cross-substrate-2026-05-03.{json,md}`
+  (within-substrate) + `g5-cross-substrate-aggregate-2026-05-03.{json,md}`
+  (cross-substrate Welch verdict).
+- Within-substrate finding (E-SNN) : `g_h1 = 0`, `g_h3 = 0`,
+  `H_DR4` trivially monotonic (P_min = P_equ = P_max = 0.5119) —
+  spectator pattern reproduced on E-SNN, mirroring G4-bis (binary
+  MLP) null.
+- Cross-substrate aggregate vs G4-bis MLX milestone :
+  `dr3_cross_substrate_consistency_ok = False`. baseline
+  g_mlx_minus_esnn = 9.98 (p = 5.2e-05); dream arms g = 3.49
+  (p = 3.5e-03). All 4 arms reject H0 at α/4 = 0.0125.
+- Honest reading : same qualitative spectator pattern on both
+  substrates → DR-3 axioms (DR-0/1/2'/4) hold on both. Absolute
+  retention diverges (E-SNN uniformly lower than MLX), so the
+  pre-registered consistency-on-absolute-retention test rejects.
+  No upgrade to `docs/proofs/dr3-substrate-evidence.md` at the
+  absolute-retention level. EC axis : **PARTIAL** (kept). G5-bis
+  follow-up : port G4-ter richer head (g_h2 = +2.77) to a
+  hierarchical E-SNN classifier and re-test whether the dream
+  effect itself transfers across substrates.
+- 20 run_ids under `(C-v0.12.0+PARTIAL, g5/<arm>, seed)`
+  registered with R1 bit-stable run_ids.
+
 ### Empirical (G4-ter)
 
 - G4-ter pilot completed 2026-05-03 — confirmatory N≥30 follow-up to
