@@ -155,3 +155,75 @@ Provenance :
 - Aggregate verdict : `docs/milestones/g4-quater-aggregate-2026-05-03.{json,md}`
 - Step 3 H4-C milestone : `docs/milestones/g4-quater-step3-2026-05-03.{json,md}`
 - Paper 2 §7.1.6 : `docs/papers/paper2/results.md` + `docs/papers/paper2-fr/results.md`
+
+---
+
+## Empirical-evidence amendment — G4-quinto (2026-05-03)
+
+**v0.4 (2026-05-03 G4-quinto addendum)** — extends the
+G4-quater amendment from a single-benchmark to a
+**two-benchmark × two-substrate** scope.
+
+The structural inclusions `ops(P_min) ⊆ ops(P_equ) ⊆ ops(P_max)`
+and `channels(P_min) ⊆ channels(P_equ) ⊆ channels(P_max)` remain
+proven. Lemma DR-4.L (capacity-monotone metrics non-decrease)
+remains formally true under its construction proof above —
+within-arm differences across all G4-quinto cells stay within
+±0.001 (a tie, not a regression).
+
+What G4-quinto positively establishes is that the DR-4
+*prediction* "richer profile retains more on capacity-monotone
+metrics" is **empirically vacuous** for the RECOMBINE channel
+across **both** benchmarks tested in the escalation ladder :
+
+- Split-FMNIST × 3-layer MLX MLP (G4-quater H4-C, N = 95) :
+  Welch p = 0.989, Hedges' g = 0.002, mean P_max(mog) = 0.7007
+  vs mean P_max(none) = 0.7006.
+- Split-CIFAR-10 × small CNN (G4-quinto H5-C, N = 30) :
+  Welch p = 0.9918, Hedges' g = -0.0026,
+  mean P_max(mog) = 0.9842 vs mean P_max(none) = 0.9845.
+- Step 1 (5-layer MLP-on-CIFAR) and Step 2 (small CNN
+  baseline) Jonckheere tests are both monotonic_observed = True
+  in mean retention but reject_h0 = False (p = 0.4646 and
+  p = 0.4823) ; the predicted DR-4 ordering exists in mean but
+  not at statistical significance at this N.
+
+Under the H5-C confirmation
+(`docs/osf-prereg-g4-quinto-pilot.md` §6 row 4), the
+framework-C claim "richer ops yield richer consolidation at
+this scale" is therefore **partially refuted across two
+benchmarks**, not just one : the RECOMBINE channel is
+empirically empty on both Split-FMNIST 3-layer MLP **and**
+Split-CIFAR-10 small CNN. The H5-A and H5-B nulls strengthen
+this : even when the substrate widens (256-128-64-32 MLP) or
+gains hierarchical conv structure (G4SmallCNN), the predicted
+ordering does not statistically recover at N = 30. The
+universality flag (`h4c_to_h5c_universality = True` in
+`docs/milestones/g4-quinto-aggregate-2026-05-03.json`) is now
+the dominant DR-4 evidence — overriding any single-benchmark
+escape clause.
+
+This amendment does **not** weaken the inclusion proof itself
+nor invalidate Lemma DR-4.L. It scopes the empirical
+prediction more strictly than the G4-quater addendum : the
+channel inclusion is formally true across all profiles, but
+the empirically observed *gain* from the richer channels is
+within statistical noise on **both benchmarks tested so far**.
+Future work pre-registered in
+`docs/osf-prereg-g4-quinto-pilot.md` §6 row 6 — testing
+ImageNet, transformer heads, hierarchical E-SNN — could in
+principle restore the empirical prediction at higher capacity ;
+until then, no STABLE promotion of the framework-C "richer
+ops yield richer consolidation" claim can occur, and the
+empirical scope of any such promotion would have to explicitly
+exclude the {Split-FMNIST, Split-CIFAR-10} × {3-layer MLP,
+5-layer MLP, small CNN} cells of the escalation ladder.
+
+Provenance :
+- Pre-registration : `docs/osf-prereg-g4-quinto-pilot.md`
+- §9.1 amendment (HF parquet fallback) : same file, §9.1.
+- Aggregate verdict : `docs/milestones/g4-quinto-aggregate-2026-05-03.{json,md}`
+- Step 1 H5-A milestone : `docs/milestones/g4-quinto-step1-2026-05-03.{json,md}`
+- Step 2 H5-B milestone : `docs/milestones/g4-quinto-step2-2026-05-03.{json,md}`
+- Step 3 H5-C milestone : `docs/milestones/g4-quinto-step3-2026-05-03.{json,md}`
+- Paper 2 §7.1.7 : `docs/papers/paper2/results.md` + `docs/papers/paper2-fr/results.md`
