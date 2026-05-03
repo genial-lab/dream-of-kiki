@@ -1,11 +1,19 @@
 """Split-CIFAR-10 5-task loader — pure numpy, no torchvision.
 
-Source : https://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz
-Records (per CIFAR-10 binary spec) : 1 label byte + 3072 image
-bytes (CHW : 1024 R + 1024 G + 1024 B, row-major within each
-channel). Five training files ``data_batch_1.bin`` ..
-``data_batch_5.bin`` (10000 records each) plus ``test_batch.bin``
-(10000 records).
+Two acquisition paths are supported (both pinned by SHA-256) :
+
+1. **Canonical** — https://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz
+   (~163 MB). Records per the CIFAR-10 binary spec : 1 label byte
+   + 3072 image bytes (CHW : 1024 R + 1024 G + 1024 B, row-major
+   within each channel). Five training files
+   ``data_batch_1.bin`` .. ``data_batch_5.bin`` (10000 records
+   each) plus ``test_batch.bin`` (10000 records).
+
+2. **HF mirror fallback** — Hugging Face dataset
+   ``uoft-cs/cifar10`` (parquet, ~140 MB total : a 23.9 MB test
+   shard + a 119.7 MB train shard, each row carrying a PNG-encoded
+   32x32 image + integer label). Used when the canonical mirror
+   returns a non-2xx response — pre-reg §9.1 deviation envelope.
 
 Class-incremental 5-task split mirroring Split-FMNIST canonical :
 
@@ -24,11 +32,13 @@ Reference :
     Krizhevsky 2009 — "Learning Multiple Layers of Features from
         Tiny Images"
     https://www.cs.toronto.edu/~kriz/cifar.html
-    docs/osf-prereg-g4-quinto-pilot.md sec 5
+    https://huggingface.co/datasets/uoft-cs/cifar10
+    docs/osf-prereg-g4-quinto-pilot.md sec 5 + sec 9.1
 """
 from __future__ import annotations
 
 import hashlib
+import io
 import tarfile
 import urllib.request
 from pathlib import Path
@@ -48,6 +58,26 @@ CIFAR10_URL: Final[str] = (
 # Task 9 §2 of the G4-quinto plan. The placeholder leading "..."
 # disables the integrity check until the real hash is committed.
 CIFAR10_TAR_SHA256: Final[str] = "...replace_in_task9..."
+
+# HF mirror fallback — pinned 2026-05-03 against
+# https://huggingface.co/datasets/uoft-cs/cifar10 (commit
+# `0b2714987fa478483af9968de7c934580d0bb9a2`).
+CIFAR10_HF_TEST_URL: Final[str] = (
+    "https://huggingface.co/datasets/uoft-cs/cifar10/resolve/main/"
+    "plain_text/test-00000-of-00001.parquet"
+)
+CIFAR10_HF_TRAIN_URL: Final[str] = (
+    "https://huggingface.co/datasets/uoft-cs/cifar10/resolve/main/"
+    "plain_text/train-00000-of-00001.parquet"
+)
+CIFAR10_HF_TEST_SHA256: Final[str] = (
+    "841389e6f2d64f28bf17310e430aebac20ec3ba611a3c5e231dc93c645ce84de"
+)
+CIFAR10_HF_TRAIN_SHA256: Final[str] = (
+    "8428b53a88a11ac374111006708df51469e315a22ac6d66470afd9c78d2ae883"
+)
+HTTP_USER_AGENT: Final[str] = "g4-quinto-pilot/1 (mlx-on-m1max)"
+
 SPLIT_CIFAR10_TASKS: Final[tuple[tuple[int, int], ...]] = (
     (0, 1),
     (2, 3),
@@ -101,12 +131,22 @@ def decode_cifar10_bin(path: Path) -> tuple[np.ndarray, np.ndarray]:
     return nhwc, labels
 
 
+def _http_get(url: str, timeout: int = 60) -> bytes:
+    """HTTP GET with browser-style UA. Raises on non-2xx."""
+    req = urllib.request.Request(
+        url, headers={"User-Agent": HTTP_USER_AGENT}
+    )
+    with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310
+        return resp.read()
+
+
 def download_if_missing(data_dir: Path) -> Path:
-    """Download tar -> verify SHA-256 -> extract.
+    """Download tar -> verify SHA-256 -> extract (canonical path).
 
     Returns the ``cifar-10-batches-bin/`` extracted dir. Raises
     ``FileNotFoundError`` on network failure (pre-reg §9.1
-    deviation envelope).
+    deviation envelope) — caller may then fall back to
+    :func:`download_if_missing_hf` per the §9.1 amendment.
     """
     bin_dir = data_dir / "cifar-10-batches-bin"
     if bin_dir.exists() and (bin_dir / "test_batch.bin").exists():
@@ -115,7 +155,7 @@ def download_if_missing(data_dir: Path) -> Path:
     tar_path = data_dir / "cifar-10-binary.tar.gz"
     if not tar_path.exists():
         try:
-            urllib.request.urlretrieve(CIFAR10_URL, tar_path)
+            tar_path.write_bytes(_http_get(CIFAR10_URL, timeout=120))
         except OSError as exc:
             raise FileNotFoundError(
                 f"CIFAR-10 download failed : {exc}"
@@ -130,6 +170,142 @@ def download_if_missing(data_dir: Path) -> Path:
     with tarfile.open(tar_path, "r:gz") as tar:
         tar.extractall(data_dir)
     return bin_dir
+
+
+def _verify_sha256(blob: bytes, expected: str, label: str) -> None:
+    h = hashlib.sha256(blob).hexdigest()
+    if h != expected:
+        raise ValueError(
+            f"SHA-256 mismatch ({label}) : got {h}, "
+            f"expected {expected}"
+        )
+
+
+def download_if_missing_hf(data_dir: Path) -> tuple[Path, Path]:
+    """Fallback path : fetch the HF parquet shards if absent.
+
+    Returns ``(train_parquet, test_parquet)`` paths. SHA-256
+    pinned per ``CIFAR10_HF_{TRAIN,TEST}_SHA256``. Raises
+    ``FileNotFoundError`` on network failure (pre-reg §9.1
+    second-line deviation : if even the HF mirror is unreachable,
+    the pilot must abort).
+    """
+    data_dir.mkdir(parents=True, exist_ok=True)
+    train_path = data_dir / "cifar10-train.parquet"
+    test_path = data_dir / "cifar10-test.parquet"
+    pairs = (
+        (train_path, CIFAR10_HF_TRAIN_URL, CIFAR10_HF_TRAIN_SHA256, "train"),
+        (test_path, CIFAR10_HF_TEST_URL, CIFAR10_HF_TEST_SHA256, "test"),
+    )
+    for path, url, sha, label in pairs:
+        if path.exists():
+            _verify_sha256(path.read_bytes(), sha, f"hf-{label}")
+            continue
+        try:
+            blob = _http_get(url, timeout=300)
+        except OSError as exc:
+            raise FileNotFoundError(
+                f"CIFAR-10 HF mirror download failed for "
+                f"{label} : {exc}"
+            ) from exc
+        _verify_sha256(blob, sha, f"hf-{label}")
+        path.write_bytes(blob)
+    return train_path, test_path
+
+
+def _decode_parquet_shard(path: Path) -> tuple[np.ndarray, np.ndarray]:
+    """Decode a HF cifar10 parquet shard into (NHWC uint8, labels uint8)."""
+    import pyarrow.parquet as pq
+    from PIL import Image  # local import keeps base loader pure-numpy
+
+    table = pq.read_table(path)
+    df = table.to_pandas()
+    n = len(df)
+    images = np.empty((n, 32, 32, 3), dtype=np.uint8)
+    labels = np.empty((n,), dtype=np.uint8)
+    for i in range(n):
+        cell = df["img"].iloc[i]
+        png_bytes = cell["bytes"] if isinstance(cell, dict) else cell
+        with Image.open(io.BytesIO(png_bytes)) as pil_img:
+            arr = np.asarray(pil_img.convert("RGB"))
+        images[i] = arr
+        labels[i] = int(df["label"].iloc[i])
+    return images, labels
+
+
+def load_split_cifar10_5tasks_hf(
+    train_parquet: Path, test_parquet: Path
+) -> list["SplitCIFAR10Task"]:
+    """Build the 5-task split from HF parquet shards.
+
+    Same NHWC + flat float32 + label remapping contract as
+    :func:`load_split_cifar10_5tasks`.
+    """
+    if not train_parquet.exists():
+        raise FileNotFoundError(
+            f"missing CIFAR-10 HF train parquet : {train_parquet}"
+        )
+    if not test_parquet.exists():
+        raise FileNotFoundError(
+            f"missing CIFAR-10 HF test parquet : {test_parquet}"
+        )
+    x_train_raw, y_train_raw = _decode_parquet_shard(train_parquet)
+    x_test_raw, y_test_raw = _decode_parquet_shard(test_parquet)
+    return _build_tasks_from_arrays(
+        x_train_raw, y_train_raw, x_test_raw, y_test_raw
+    )
+
+
+def load_split_cifar10_5tasks_auto(data_dir: Path) -> list["SplitCIFAR10Task"]:
+    """Try canonical loader, fall back to HF parquet on FileNotFound.
+
+    Calls :func:`load_split_cifar10_5tasks` first (canonical
+    binary). If the canonical layout is absent, transparently
+    downloads + decodes the HF parquet mirror per pre-reg §9.1
+    amendment. ``data_dir`` is the workspace dir
+    (``experiments/g4_quinto_test/data``) ; this function will
+    locate or create the appropriate sub-paths.
+    """
+    canonical_dir = data_dir / "cifar-10-batches-bin"
+    if canonical_dir.exists() and (canonical_dir / "test_batch.bin").exists():
+        return load_split_cifar10_5tasks(canonical_dir)
+    train_path, test_path = download_if_missing_hf(data_dir)
+    return load_split_cifar10_5tasks_hf(train_path, test_path)
+
+
+def _build_tasks_from_arrays(
+    x_train_raw: np.ndarray,
+    y_train_raw: np.ndarray,
+    x_test_raw: np.ndarray,
+    y_test_raw: np.ndarray,
+) -> list[SplitCIFAR10Task]:
+    """Common 5-task split builder shared by canonical + HF paths."""
+    x_tr_nhwc = x_train_raw.astype(np.float32) / 255.0
+    x_te_nhwc = x_test_raw.astype(np.float32) / 255.0
+    x_tr_flat = x_tr_nhwc.reshape(x_tr_nhwc.shape[0], -1)
+    x_te_flat = x_te_nhwc.reshape(x_te_nhwc.shape[0], -1)
+
+    tasks: list[SplitCIFAR10Task] = []
+    for class_a, class_b in SPLIT_CIFAR10_TASKS:
+        tr = (y_train_raw == class_a) | (y_train_raw == class_b)
+        te = (y_test_raw == class_a) | (y_test_raw == class_b)
+        y_tr = np.where(
+            y_train_raw[tr] == class_a, 0, 1
+        ).astype(np.int64)
+        y_te = np.where(
+            y_test_raw[te] == class_a, 0, 1
+        ).astype(np.int64)
+        tasks.append(
+            SplitCIFAR10Task(
+                x_train=x_tr_flat[tr],
+                x_train_nhwc=x_tr_nhwc[tr],
+                y_train=y_tr,
+                x_test=x_te_flat[te],
+                x_test_nhwc=x_te_nhwc[te],
+                y_test=y_te,
+            )
+        )
+    return tasks
 
 
 def load_split_cifar10_5tasks(data_dir: Path) -> list[SplitCIFAR10Task]:
@@ -171,29 +347,6 @@ def load_split_cifar10_5tasks(data_dir: Path) -> list[SplitCIFAR10Task]:
     x_train_raw = np.concatenate(train_imgs, axis=0)
     y_train_raw = np.concatenate(train_lbls, axis=0)
     x_test_raw, y_test_raw = decode_cifar10_bin(test_path)
-    x_tr_nhwc = x_train_raw.astype(np.float32) / 255.0
-    x_te_nhwc = x_test_raw.astype(np.float32) / 255.0
-    x_tr_flat = x_tr_nhwc.reshape(x_tr_nhwc.shape[0], -1)
-    x_te_flat = x_te_nhwc.reshape(x_te_nhwc.shape[0], -1)
-
-    tasks: list[SplitCIFAR10Task] = []
-    for class_a, class_b in SPLIT_CIFAR10_TASKS:
-        tr = (y_train_raw == class_a) | (y_train_raw == class_b)
-        te = (y_test_raw == class_a) | (y_test_raw == class_b)
-        y_tr = np.where(
-            y_train_raw[tr] == class_a, 0, 1
-        ).astype(np.int64)
-        y_te = np.where(
-            y_test_raw[te] == class_a, 0, 1
-        ).astype(np.int64)
-        tasks.append(
-            SplitCIFAR10Task(
-                x_train=x_tr_flat[tr],
-                x_train_nhwc=x_tr_nhwc[tr],
-                y_train=y_tr,
-                x_test=x_te_flat[te],
-                x_test_nhwc=x_te_nhwc[te],
-                y_test=y_te,
-            )
-        )
-    return tasks
+    return _build_tasks_from_arrays(
+        x_train_raw, y_train_raw, x_test_raw, y_test_raw
+    )

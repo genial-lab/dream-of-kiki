@@ -173,3 +173,37 @@ Pre-known deviation envelopes (executor open questions) :
    deferred to a G4-sexto follow-up ; aggregator reports
    `h5c_deferred = True`, no H5-C verdict in this pilot ;
    document deferral in CHANGELOG entry.
+
+### §9.1 Amendment — HF parquet mirror fallback (filed 2026-05-03)
+
+**Trigger** : the canonical mirror at
+``https://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz``
+returned HTTP 503 Service Unavailable across multiple retries
+on 2026-05-03 during pre-pilot validation, including the
+front-page ``cifar.html`` (i.e. the entire ``~kriz`` tree was
+unreachable, not a single-file outage).
+
+**Amendment** : the loader gains a transparent fallback to the
+Hugging Face dataset ``uoft-cs/cifar10`` (commit
+``0b2714987fa478483af9968de7c934580d0bb9a2``), parquet shards
+``plain_text/train-00000-of-00001.parquet`` (119 705 255 bytes)
+and ``plain_text/test-00000-of-00001.parquet`` (23 940 850
+bytes). Both shards are SHA-256-pinned in
+``cifar10_dataset.CIFAR10_HF_{TRAIN,TEST}_SHA256``. PNG-encoded
+images are decoded with Pillow into the same NHWC float32
+``[0, 1]`` contract as the canonical path, and re-flattened to
+3072-dim. The 5-task split rule, label remap, and per-task
+record counts are unchanged ; the only divergence is the source
+mirror.
+
+**Why this preserves confirmatory status** : the underlying
+pixel data on both mirrors is the same Krizhevsky 2009 release
+(HF parquet shards are PNG re-encodings of the canonical
+batches with identical labels). The amendment changes the
+*acquisition path*, not the *experimental contract*. A
+deterministic SHA-256 pin on each shard preserves R1 bit-stable
+``run_id`` reproducibility for all downstream cells.
+
+**Pin commit** : the commit that introduces this §9.1
+amendment also pins the two SHA-256 hashes in the loader
+header ; subsequent CI runs verify them on every download.

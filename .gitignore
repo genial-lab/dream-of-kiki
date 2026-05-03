@@ -39,3 +39,5 @@ experiments/g4_split_fmnist/data/
 # G4-quinto pilot Split-CIFAR-10 raw binary files (not committed)
 experiments/g4_quinto_test/data/cifar-10-batches-bin/
 experiments/g4_quinto_test/data/cifar-10-binary.tar.gz
+experiments/g4_quinto_test/data/cifar10-train.parquet
+experiments/g4_quinto_test/data/cifar10-test.parquet
