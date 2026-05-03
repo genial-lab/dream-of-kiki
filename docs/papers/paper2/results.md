@@ -103,6 +103,52 @@ same `(c_version, profile, seed, commit_sha)` tuple is
 bit-stable on Apple Silicon M3 Ultra (verified 2026-05-03,
 ids identical across two consecutive sweeps).
 
+## 7.1.2 G4-bis pilot (replay-coupling re-run — 2026-05-03)
+
+The G4 pilot re-runs after the wrapper `dream_episode()` is wired
+to mutate classifier weights (Plan G4-bis). The β buffer fills
+with 32 raw image-class pairs per completed task (capacity 256) ;
+between tasks, dream-active arms run replay (n=32 records × 1
+SGD step at lr=0.01) and SHY downscale (factor 0.95). The arm
+sweep, seed sweep and pre-registered hypotheses are unchanged.
+Milestone dump :
+[`docs/milestones/g4-pilot-2026-05-03-bis.{json,md}`](../../milestones/g4-pilot-2026-05-03-bis.md).
+
+Three pre-registered hypotheses (re-evaluated under coupling) :
+
+- **H1** : observed `g_h1 = -2.3067`. Within Hu 2020 95 % CI :
+  `False` ; Welch one-sided p (α/3 = 0.0167) `0.9973` →
+  reject_h0 = `False`.
+
+- **H3** : observed `g_h3 = -2.3067`. Decrement-side (g ≤
+  -0.13) rejection : `True`.
+
+- **H_DR4** : `mean retention[P_max] = 0.5609`,
+  `mean retention[P_equ] = 0.5609`,
+  `mean retention[P_min] = 0.5609`. Monotonic ordering :
+  `True (degenerate equal-means)` ; Jonckheere one-sided p =
+  `0.5000` → reject_h0 = `False`.
+
+Run_ids in the bis dump differ from the original 2026-05-03 dump
+because `dream_episode()` semantics changed — coupling is part of
+the input tuple in spirit, even though `(c_version, profile,
+seed, commit_sha)` is the formal R1 key. The original 2026-05-03
+dump is preserved as the spectator-baseline reference.
+
+Important caveat on the bis cell distribution : the three dream-
+active arms (P_min, P_equ, P_max) produced bit-identical
+retention vectors across all five seeds. The binary MLP head
+exposes only the REPLAY + DOWNSCALE coupling channels ; the
+RESTRUCTURE and RECOMBINE operations registered for P_equ /
+P_max remain spectator-only on this substrate (no hierarchy nor
+VAE latents to mutate). The H_DR4 monotonic flag is therefore a
+*degenerate* equal-means tie, not a substantive ordering — H_DR4
+remains untestable on this substrate at this scale.
+
+Per N = 5 / arm this pilot remains exploratory for absolute
+g magnitudes ; pre-reg §4 still triggers a confirmatory N ≥ 30
+follow-up before any STABLE promotion.
+
 ## 7.2 Cross-substrate H1-H4 comparative table (synthetic substitute — not empirical claim)
 
 **Table 7.2 — MLX vs E-SNN hypotheses at Bonferroni α = 0.0125

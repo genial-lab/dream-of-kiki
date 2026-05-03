@@ -111,6 +111,57 @@ de 32 chiffres hex enregistré dans
 sur Apple Silicon M3 Ultra (vérifié 2026-05-03, identifiants
 identiques sur deux balayages consécutifs).
 
+## 7.1.2 Pilote G4-bis (re-exécution avec couplage de replay — 2026-05-03)
+
+Le pilote G4 est ré-exécuté après que le wrapper
+`dream_episode()` soit câblé pour modifier les poids du
+classifieur (Plan G4-bis). Le tampon β se remplit de 32 paires
+image-classe brutes par tâche complétée (capacité 256) ; entre
+tâches, les bras dream-actifs exécutent un replay (n=32
+enregistrements × 1 pas SGD à lr=0.01) et un downscale SHY
+(facteur 0.95). Le balayage des bras, des graines et les
+hypothèses pré-enregistrées sont inchangés. Dump du jalon :
+[`docs/milestones/g4-pilot-2026-05-03-bis.{json,md}`](../../milestones/g4-pilot-2026-05-03-bis.md).
+
+Trois hypothèses pré-enregistrées (réévaluées sous couplage) :
+
+- **H1** : `g_h1 observé = -2.3067`. Dans l'IC à 95 % de
+  Hu 2020 : `False` ; p unilatéral de Welch (α/3 =
+  0.0167) `0.9973` → rejet_h0 = `False`.
+
+- **H3** : `g_h3 observé = -2.3067`. Rejet côté décrément
+  (g ≤ -0.13) : `True`.
+
+- **H_DR4** : `rétention moyenne[P_max] = 0.5609`,
+  `rétention moyenne[P_equ] = 0.5609`,
+  `rétention moyenne[P_min] = 0.5609`. Ordre monotone :
+  `True (égalité dégénérée)` ; p unilatéral de Jonckheere =
+  `0.5000` → rejet_h0 = `False`.
+
+Les `run_id` du dump bis diffèrent du dump original
+2026-05-03 parce que la sémantique de `dream_episode()` a
+changé — le couplage fait partie du tuple d'entrée *en
+esprit*, même si la clé R1 formelle reste `(c_version,
+profile, seed, commit_sha)`. Le dump original 2026-05-03
+est conservé comme référence du baseline-spectateur.
+
+Mise en garde importante sur la distribution des cellules
+bis : les trois bras dream-actifs (P_min, P_equ, P_max) ont
+produit des vecteurs de rétention bit-identiques sur les cinq
+graines. La tête MLP binaire n'expose que les canaux de
+couplage REPLAY + DOWNSCALE ; les opérations RESTRUCTURE et
+RECOMBINE enregistrées pour P_equ / P_max restent
+spectateur-seulement sur ce substrat (pas de hiérarchie ni
+de latents VAE à muter). Le drapeau monotone de H_DR4 est
+donc une égalité *dégénérée*, pas un ordonnancement
+substantiel — H_DR4 reste non-testable sur ce substrat à
+cette échelle.
+
+Avec N = 5 / bras, ce pilote reste exploratoire pour les
+amplitudes absolues de g ; le pré-enregistrement §4
+déclenche toujours un suivi confirmatoire N ≥ 30 avant toute
+promotion STABLE.
+
 ## 7.2 Table comparative inter-substrats H1-H4 (substitution synthétique — pas de revendication empirique)
 
 **Table 7.2 — MLX vs E-SNN hypothèses à Bonferroni
