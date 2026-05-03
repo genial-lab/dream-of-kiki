@@ -1,0 +1,44 @@
+{
+  "alpha_per_arm": 0.0125,
+  "esnn_milestone": "docs/milestones/g5-bis-richer-esnn-2026-05-03.json",
+  "g_h7a_esnn": 0.10427473963266054,
+  "g_h7a_welch_p": 0.4052260009481831,
+  "g_h7a_welch_reject_h0": false,
+  "h7_classification": "H7-B",
+  "h7b_g_threshold": 0.5,
+  "mlx_milestone": "docs/milestones/g4-ter-pilot-2026-05-03.json",
+  "per_arm": {
+    "P_equ": {
+      "consistency": false,
+      "hedges_g_mlx_minus_esnn": 4.021065632580661,
+      "n_esnn": 10,
+      "n_mlx": 30,
+      "reject_h0": true,
+      "welch_p_two_sided": 2.3114778746818154e-18
+    },
+    "P_max": {
+      "consistency": false,
+      "hedges_g_mlx_minus_esnn": 4.021065632580661,
+      "n_esnn": 10,
+      "n_mlx": 30,
+      "reject_h0": true,
+      "welch_p_two_sided": 2.3114778746818154e-18
+    },
+    "P_min": {
+      "consistency": false,
+      "hedges_g_mlx_minus_esnn": 4.197541990022206,
+      "n_esnn": 10,
+      "n_mlx": 30,
+      "reject_h0": true,
+      "welch_p_two_sided": 7.354816809106604e-19
+    },
+    "baseline": {
+      "consistency": false,
+      "hedges_g_mlx_minus_esnn": 3.2261353065674485,
+      "n_esnn": 10,
+      "n_mlx": 30,
+      "reject_h0": true,
+      "welch_p_two_sided": 6.437442034736164e-16
+    }
+  }
+}
