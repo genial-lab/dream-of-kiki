@@ -88,6 +88,42 @@ def test_run_pilot_smoke_2_seeds(tmp_path: Path) -> None:
     assert len(payload["cells"]) == 8
 
 
+def test_smoke_pmin_arm_retention_diverges_from_baseline(
+    tmp_path: Path,
+) -> None:
+    """G4-bis : with coupling on, P_min retention must differ from baseline.
+
+    On the synthetic 4×4 fixture the absolute retention values are not
+    meaningful, but the *coupling* must produce at least some divergence
+    between baseline (no DE) and a dream-active arm — otherwise the
+    replay step is silently a no-op. Uses a larger n_train fixture so
+    each task carries enough test items for retention to land on
+    distinguishable buckets across arms.
+    """
+    data_dir = _make_synthetic_fmnist(tmp_path, n_train=2000)
+    result = run_pilot(
+        data_dir=data_dir,
+        seeds=(0, 1),
+        out_json=tmp_path / "g4bis.json",
+        out_md=tmp_path / "g4bis.md",
+        registry_db=tmp_path / "runs.sqlite",
+        epochs=2,
+        batch_size=32,
+        hidden_dim=16,
+        lr=0.05,
+    )
+    by_arm: dict[str, list[float]] = {}
+    for c in result["cells"]:
+        by_arm.setdefault(c["arm"], []).append(c["retention"])
+    # Baseline and P_min retention vectors must not be element-wise
+    # identical — coupling has *some* effect (sign-agnostic).
+    base = by_arm["baseline"]
+    p_min = by_arm["P_min"]
+    assert base != p_min, (
+        "P_min retention must differ from baseline once coupling is on"
+    )
+
+
 def test_run_pilot_deterministic_run_id(tmp_path: Path) -> None:
     """Same (c_version, profile, seed, commit_sha) -> same run_id."""
     data_dir = _make_synthetic_fmnist(tmp_path)

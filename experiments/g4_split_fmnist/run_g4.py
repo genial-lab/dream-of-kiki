@@ -56,6 +56,8 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+import numpy as np  # noqa: E402
+
 from harness.benchmarks.effect_size_targets import (  # noqa: E402
     HU_2020_OVERALL,
     JAVADI_2024_OVERALL,
@@ -72,6 +74,7 @@ from experiments.g4_split_fmnist.dataset import (  # noqa: E402
     load_split_fmnist_5tasks,
 )
 from experiments.g4_split_fmnist.dream_wrap import (  # noqa: E402
+    BetaBufferFIFO,
     G4Classifier,
     build_profile,
 )
@@ -122,6 +125,13 @@ DEFAULT_OUT_MD = (
 DEFAULT_REGISTRY_DB = REPO_ROOT / ".run_registry.sqlite"
 RETENTION_EPS = 1e-6
 
+# Plan G4-bis : β buffer holds raw exemplars from completed past
+# tasks. Capacity 256 ≈ 32 records × 8 tasks × 1 ep cushion (5
+# tasks × 1 ep here, but room for future extension). 32 samples
+# pushed per task is the typical CL replay buffer fill rate.
+BETA_BUFFER_CAPACITY = 256
+BETA_BUFFER_FILL_PER_TASK = 32
+
 
 # --------------------------------------------------------------------
 # Commit SHA resolution — matches scripts/ablation_g4.py convention
@@ -164,25 +174,36 @@ def _run_cell(
 ) -> _CellPartial:
     """Execute one (arm, seed) cell and return a :class:`_CellPartial`.
 
-    The returned dict carries ``arm, seed, acc_task1_initial,
-    acc_task1_final, retention, excluded_underperforming_baseline,
-    wall_time_s``. Excludes the cell from the verdict aggregation
-    when ``acc_task1_initial < 0.5`` (per pre-reg §5). The caller
-    upgrades it to :class:`CellResult` by adding ``run_id``.
+    Plan G4-bis : a per-cell β buffer accumulates
+    ``BETA_BUFFER_FILL_PER_TASK`` raw image-class pairs after each
+    completed task. Between tasks (when ``arm != "baseline"``) the
+    buffer is forwarded into :meth:`G4Classifier.dream_episode` so
+    the replay handler can actually run gradient steps against past
+    tasks.
     """
     start = time.time()
     feat_dim = tasks[0]["x_train"].shape[1]
     clf = G4Classifier(
         in_dim=feat_dim, hidden_dim=hidden_dim, n_classes=2, seed=seed
     )
+    buffer = BetaBufferFIFO(capacity=BETA_BUFFER_CAPACITY)
+    fill_rng = np.random.default_rng(seed + 5_000)
 
-    # Stage 1 — train task 0.
+    def _push_task_to_buffer(task: SplitFMNISTTask) -> None:
+        n = task["x_train"].shape[0]
+        n_take = min(BETA_BUFFER_FILL_PER_TASK, n)
+        idx = fill_rng.choice(n, size=n_take, replace=False)
+        for i in idx.tolist():
+            buffer.push(task["x_train"][i], int(task["y_train"][i]))
+
+    # Stage 1 — train task 0, snapshot acc, push exemplars to buffer.
     clf.train_task(
         tasks[0], epochs=epochs, batch_size=batch_size, lr=lr
     )
     acc_initial = clf.eval_accuracy(
         tasks[0]["x_test"], tasks[0]["y_test"]
     )
+    _push_task_to_buffer(tasks[0])
 
     # Stage 2 — train tasks 1..4 with optional dream-episode interleaving.
     profile = None
@@ -191,10 +212,13 @@ def _run_cell(
 
     for k in range(1, len(tasks)):
         if profile is not None:
-            clf.dream_episode(profile, seed=seed + k)
+            clf.dream_episode(
+                profile, seed=seed + k, beta_buffer=buffer
+            )
         clf.train_task(
             tasks[k], epochs=epochs, batch_size=batch_size, lr=lr
         )
+        _push_task_to_buffer(tasks[k])
 
     # Stage 3 — measure final task-0 accuracy.
     acc_final = clf.eval_accuracy(
