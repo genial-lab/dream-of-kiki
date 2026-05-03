@@ -12,6 +12,92 @@ see `docs/specs/2026-04-17-dreamofkiki-framework-C-design.md` §12).
 
 ## [Unreleased]
 
+### Empirical (G4-quinto, 2026-05-03)
+
+- G4-quinto pilot completed 2026-05-03 — confirmatory N = 30
+  follow-up to the G4-quater H4-C confirmation, escalating
+  from Split-FMNIST onto Split-CIFAR-10 with two substrates
+  (5-layer MLP-on-CIFAR + small CNN). Sequential 3-step
+  layout, total 600 cells, ~72 min wall time on M1 Max
+  (well under the pre-reg Option A 9-15 h envelope ; budget
+  was conservative). Pre-reg
+  `docs/osf-prereg-g4-quinto-pilot.md` locked at commit
+  `a02b82c` before any pilot run.
+- §9.1 amendment filed inline in the OSF pre-reg : the
+  canonical mirror at `www.cs.toronto.edu/~kriz` returned
+  HTTP 503 across the entire `~kriz` tree on 2026-05-03
+  during pre-pilot validation. The loader gained a
+  SHA-256-pinned fallback to the Hugging Face dataset
+  `uoft-cs/cifar10` (commit `0b2714987...`) — train shard
+  119,705,255 bytes, test shard 23,940,850 bytes, both PNG
+  re-encodings of the same Krizhevsky 2009 release. The
+  acquisition path changes ; the experimental contract does
+  not. R1 bit-stable run_ids preserved.
+- Step 1 (H5-A benchmark-scale) : 120 cells on a new 5-layer
+  `G4HierarchicalCIFARClassifier` (hidden 256-128-64-32,
+  in_dim 3072) at the C5 anchor. Jonckheere J = 1362.0,
+  p = 0.4646 at α = 0.0167 ; means P_min = 0.8713,
+  P_equ = 0.8754, P_max = 0.8754 (P_equ = P_max within 1e-4) ;
+  monotonic_observed = True ; reject_h0 = False. **H5-A NOT
+  confirmed** : benchmark scale-up alone (FMNIST -> CIFAR-10)
+  on a wider MLP does not statistically recover the predicted
+  DR-4 ordering at this N.
+- Step 2 (H5-B architecture-scale) : 120 cells on the new
+  `G4SmallCNN` substrate (Conv2d×2 + MaxPool2d×2 + Linear×2,
+  NHWC, latent_dim = 64). Jonckheere J = 1356.0, p = 0.4823
+  at α = 0.0167 ; means P_min = 0.9841, P_equ = 0.9842,
+  P_max = 0.9842 (P_equ = P_max within 1e-4) ;
+  monotonic_observed = True ; reject_h0 = False. **H5-B NOT
+  confirmed** : adding hierarchical conv structure also fails
+  to statistically recover the predicted ordering at this N.
+- Step 3 (H5-C universality of RECOMBINE-empty) : 360 cells
+  on the CNN substrate × strategy ∈ {mog, ae, none}. H5-C
+  operationalised as Welch two-sided P_max(mog) vs
+  P_max(none) failing to reject H0 at α = 0.0167. Result :
+  Welch t = -0.0104, p = 0.9918, Hedges' g (mog vs none) =
+  -0.0026 ; mean P_max(mog) = 0.9842 vs mean P_max(none) =
+  0.9845 (within 3e-4). AE secondary : mean P_max(ae) =
+  0.9840, Welch p (ae vs none) = 0.9857. **H5-C CONFIRMED** :
+  the G4-quater H4-C RECOMBINE-empty finding **universalises**
+  across substrates (FMNIST 3-layer MLP and CIFAR-CNN both
+  fail-to-reject mog vs none at the multiplicity-adjusted α).
+- Aggregate verdict : H5-A = False, H5-B = False, H5-C = True,
+  **h4c_to_h5c_universality = True**. The DR-4 partial
+  refutation from G4-ter §7.1.5 — strengthened by G4-quater
+  §7.1.6 — is now **universalised** across two benchmarks
+  (Split-FMNIST, Split-CIFAR-10) × two substrates (3-layer
+  MLP, small CNN). The framework-C "richer ops yield richer
+  consolidation" claim is empirically refuted at the
+  RECOMBINE-channel level across the escalation ladder cells
+  tested so far. Lemma DR-4.L itself is **not** refuted —
+  within-arm differences ≤ 0.001 across all G4-quinto cells.
+- DualVer : EC stays **PARTIAL** per pre-reg §6 row 4 ; FC
+  stays at **C-v0.12.0** (no formal-axis bump).
+  `docs/proofs/dr4-profile-inclusion.md` carries a
+  v0.4 G4-quinto empirical-evidence amendment ; Paper 2
+  §7.1.7 reports the verdicts honestly in EN + FR.
+- 600 R1-bit-stable run_ids registered under
+  `(C-v0.12.0+PARTIAL, g4-quinto/{step1,step2,step3}/<arm>/<combo>[/<strategy>])`
+  in `.run_registry.sqlite`. Honest reporting binding (pre-reg
+  §7) : Welch fail-to-reject for H5-C is reported as the
+  predicted positive empirical claim that RECOMBINE adds
+  nothing measurable beyond REPLAY+DOWNSCALE on the CNN
+  substrate at CIFAR-10 scale ; H5-A and H5-B nulls are
+  reported as "no evidence at this N" (absence of evidence
+  vs evidence of absence).
+- Milestone artefacts :
+  `docs/milestones/g4-quinto-step1-2026-05-03.{json,md}`,
+  `docs/milestones/g4-quinto-step2-2026-05-03.{json,md}`,
+  `docs/milestones/g4-quinto-step3-2026-05-03.{json,md}`,
+  `docs/milestones/g4-quinto-aggregate-2026-05-03.{json,md}`.
+- Future work pre-registered in
+  `docs/osf-prereg-g4-quinto-pilot.md` §6 row 6 : test on
+  ImageNet / transformer head / hierarchical E-SNN before
+  any STABLE promotion ; the empirical scope of any such
+  promotion would have to explicitly exclude the
+  {Split-FMNIST, Split-CIFAR-10} × {3-layer MLP, 5-layer MLP,
+  small CNN} cells of the escalation ladder tested so far.
+
 ### Empirical (G4-quater, 2026-05-03)
 
 - G4-quater pilot completed 2026-05-03 — confirmatory N≥95

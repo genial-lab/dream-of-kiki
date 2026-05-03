@@ -1,6 +1,6 @@
 # dream-of-kiki — Status
 
-**As of** : 2026-05-03 G4-quater pilot (3-step sequential, 1880 cells, ~58 min M1 Max) — H4-A False, H4-B False, **H4-C CONFIRMED** (RECOMBINE empirically empty at this scale, Welch p=0.989 g=0.002 N=95) ; DR-4 partial refutation strengthens, EC stays PARTIAL per pre-reg §6, FC stays C-v0.12.0
+**As of** : 2026-05-03 G4-quinto pilot (3-step sequential, 600 cells, ~72 min M1 Max) — H5-A False, H5-B False, **H5-C CONFIRMED** (RECOMBINE-empty finding universalises across FMNIST + CIFAR-CNN, Welch p=0.9918 g=-0.0026 N=30) ; DR-4 partial refutation **universalises** across 2 benchmarks × 2 substrates ; EC stays PARTIAL per pre-reg §6, FC stays C-v0.12.0. Prior : 2026-05-03 G4-quater pilot (3-step sequential, 1880 cells, ~58 min M1 Max) — H4-A False, H4-B False, **H4-C CONFIRMED** (RECOMBINE empirically empty at FMNIST 3-layer scale, Welch p=0.989 g=0.002 N=95).
 **Version** : C-v0.12.0+PARTIAL
 **Phase** : Paper 1 v0.2 PLOS CB submission preparation. Cycle-3
 Phase 1 1.5B sanity GO 3/3 (commit `22c58c9`, 46.75 min Studio) ;
@@ -70,7 +70,7 @@ Next target : C-v0.12.0+STABLE deferred to Paper 2 closeout (Phase 2 multi-scale
 | G2 — P_min viable | S8 | ⏳ Pending S5-S8 |
 | G3 — DR-2 proof peer-reviewed | S8 | ⏳ Draft S6 + review S6-S8 |
 | G3-draft — DR-2 proof circulated | S6 | ⏳ Pending |
-| G4 — P_equ fonctionnel | S12 | 🔶 G4-quater PARTIAL (2026-05-03 — H4-A False, H4-B False, H4-C **CONFIRMED** (Welch fail-to-reject mog vs none placebo, p=0.989 g=0.002 N=95) ; RECOMBINE empirically empty at this scale ; DR-4 partial refutation strengthens at the Split-FMNIST 3-layer scale ; EC stays PARTIAL per pre-reg §6 ; FC stays C-v0.12.0 ; promotion to STABLE blocked pending CIFAR-10 / ImageNet / hierarchical E-SNN follow-up) |
+| G4 — P_equ fonctionnel | S12 | 🔶 G4-quinto PARTIAL (2026-05-03 — H5-A False, H5-B False, H5-C **CONFIRMED** (Welch fail-to-reject mog vs none on CNN, p=0.9918 g=-0.0026 N=30) ; RECOMBINE-empty universalises across 2 benchmarks × 2 substrates ; DR-4 partial refutation **universalises** across FMNIST + CIFAR-CNN ; EC stays PARTIAL per pre-reg §6 ; FC stays C-v0.12.0 ; promotion to STABLE blocked pending ImageNet / transformer / hierarchical E-SNN follow-up. Prior : G4-quater 2026-05-03 PARTIAL — H4-A False, H4-B False, H4-C **CONFIRMED** (FMNIST 3-layer Welch p=0.989 g=0.002 N=95)). |
 | G5 — PUBLICATION-READY | S18 | ⏳ Pending |
 | G6 — Cycle 2 decision | S28 | ⏳ Pending |
 | G7 — E-SNN substrate conformance | cycle-2 Phase 1 | ✅ LOCKED |
