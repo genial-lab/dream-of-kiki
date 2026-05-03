@@ -143,3 +143,55 @@ def test_restructure_step_seed_determinism() -> None:
     np.testing.assert_array_equal(
         np.asarray(a._l2.weight), np.asarray(b._l2.weight)
     )
+
+
+def test_recombine_step_with_empty_buffer_is_noop() -> None:
+    clf = G4HierarchicalClassifier(
+        in_dim=10, hidden_1=4, hidden_2=3, n_classes=2, seed=13
+    )
+    w3_before = np.asarray(clf._l3.weight)
+    clf._recombine_step(
+        latents=[], n_synthetic=5, lr=0.01, seed=42
+    )
+    w3_after = np.asarray(clf._l3.weight)
+    np.testing.assert_array_equal(w3_before, w3_after)
+
+
+def test_recombine_step_modifies_l3_only() -> None:
+    clf = G4HierarchicalClassifier(
+        in_dim=10, hidden_1=4, hidden_2=3, n_classes=2, seed=13
+    )
+    # Synthetic latents indexed by class: list of (latent, label).
+    latents = [
+        ([0.5, 0.5, 0.5], 0),
+        ([0.6, 0.4, 0.5], 0),
+        ([-0.3, -0.4, -0.5], 1),
+        ([-0.4, -0.5, -0.6], 1),
+    ]
+    w1_before = np.asarray(clf._l1.weight)
+    w2_before = np.asarray(clf._l2.weight)
+    w3_before = np.asarray(clf._l3.weight)
+    clf._recombine_step(
+        latents=latents, n_synthetic=4, lr=0.1, seed=7
+    )
+    np.testing.assert_array_equal(w1_before, np.asarray(clf._l1.weight))
+    np.testing.assert_array_equal(w2_before, np.asarray(clf._l2.weight))
+    assert not np.array_equal(w3_before, np.asarray(clf._l3.weight))
+
+
+def test_recombine_step_seed_determinism() -> None:
+    latents = [
+        ([0.5, 0.5, 0.5], 0),
+        ([-0.5, -0.5, -0.5], 1),
+    ] * 4
+    a = G4HierarchicalClassifier(
+        in_dim=10, hidden_1=4, hidden_2=3, n_classes=2, seed=13
+    )
+    b = G4HierarchicalClassifier(
+        in_dim=10, hidden_1=4, hidden_2=3, n_classes=2, seed=13
+    )
+    a._recombine_step(latents=latents, n_synthetic=8, lr=0.1, seed=7)
+    b._recombine_step(latents=latents, n_synthetic=8, lr=0.1, seed=7)
+    np.testing.assert_array_equal(
+        np.asarray(a._l3.weight), np.asarray(b._l3.weight)
+    )

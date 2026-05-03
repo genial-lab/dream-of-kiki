@@ -160,6 +160,71 @@ class G4HierarchicalClassifier:
         self._l2.weight = mx.array(new_w)
         mx.eval(self._l2.weight)
 
+    def _recombine_step(
+        self,
+        *,
+        latents: list[tuple[list[float], int]],
+        n_synthetic: int,
+        lr: float,
+        seed: int,
+    ) -> None:
+        """Sample ``n_synthetic`` synthetic latents from a per-class
+        Gaussian-MoG and run one CE-loss SGD pass through ``_l3`` only.
+
+        ``latents`` is a list of ``(latent_vector, class_label)``
+        pairs accumulated from past tasks via ``BetaBufferHierFIFO``.
+        Per-class component means/std are estimated empirically;
+        synthetic samples are drawn from N(mean_c, std_c) and labeled
+        by ``c``. The forward pass uses ``self._l3`` only, so the
+        gradient flows into the output classifier weights - leaving
+        ``_l1`` / ``_l2`` untouched.
+
+        Empty ``latents`` -> no-op (S1-trivial branch). Single-class
+        ``latents`` -> no-op (degenerate MoG, no recombination signal).
+        """
+        if not latents:
+            return
+        classes = sorted({lbl for _, lbl in latents})
+        if len(classes) < 2:
+            return
+
+        rng = np.random.default_rng(seed)
+        components: dict[int, tuple[np.ndarray, np.ndarray]] = {}
+        for c in classes:
+            arr = np.asarray(
+                [lat for lat, lbl in latents if lbl == c],
+                dtype=np.float32,
+            )
+            mean = arr.mean(axis=0)
+            std = arr.std(axis=0) + 1e-6
+            components[c] = (mean, std)
+
+        per_class = max(1, n_synthetic // len(classes))
+        synth_x: list[np.ndarray] = []
+        synth_y: list[int] = []
+        for c in classes:
+            mean, std = components[c]
+            for _ in range(per_class):
+                synth_x.append(
+                    mean + std * rng.standard_normal(size=mean.shape).astype(
+                        np.float32
+                    )
+                )
+                synth_y.append(c)
+
+        x = mx.array(np.stack(synth_x).astype(np.float32))
+        y = mx.array(np.asarray(synth_y, dtype=np.int32))
+
+        opt = optim.SGD(learning_rate=lr)
+
+        def loss_fn(layer: nn.Linear, xb: mx.array, yb: mx.array) -> mx.array:
+            return nn.losses.cross_entropy(layer(xb), yb, reduction="mean")
+
+        loss_and_grad = nn.value_and_grad(self._l3, loss_fn)
+        _loss, grads = loss_and_grad(self._l3, x, y)
+        opt.update(self._l3, grads)
+        mx.eval(self._l3.parameters(), opt.state)
+
 
 class BetaBufferHierFIFO:
     """Bounded curated episodic buffer with optional latents (beta channel).
