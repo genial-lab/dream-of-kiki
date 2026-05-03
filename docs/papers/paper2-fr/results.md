@@ -294,7 +294,7 @@ Référence : `docs/superpowers/plans/2026-05-03-g6-micro-kiki-mmlu-cl.md`
 + `docs/osf-prereg-g6-pilot.md`
 + `docs/milestones/g6-pilot-pathB-2026-05-03.{json,md}`.
 
-## 7.1.5 Pilote G4-ter (balayage HP + substrat enrichi — 2026-05-03)
+## 7.1.5 Pilote G4-ter — le couplage REPLAY+DOWNSCALE sur substrat enrichi dépasse la référence sans rêve (2026-05-03)
 
 Le pilote G4-ter est le suivi confirmatoire N≥30 prévu par la règle
 d'évidence-positive-exploratoire de G4-bis
@@ -315,30 +315,90 @@ moyennes égales dégénérées) :
 - **H2 — limitation au niveau du substrat** : la tête binaire
   expose uniquement les canaux de couplage REPLAY + DOWNSCALE.
   Une tête hiérarchique (entrée → 32 → 16 → sortie) qui expose
-  `_l2.weight` comme site RESTRUCTURE et les activations
+  *en plus* `_l2.weight` comme site RESTRUCTURE et les activations
   hidden_2 comme source d'échantillonnage Gaussienne-MoG pour
   RECOMBINE produit `g_h2 = +2,77` à la combinaison ancre C5 sur
   120 cellules (N=30 par bras), Welch unilatéral
-  p = 4,9e-14 ≪ α/4 = 0,0125. H0_substrat **rejetée**.
-- **H_DR4-ter — monotonicité** : le substrat enrichi
-  structurellement-distingué brise partiellement le tie dégénéré
-  de G4-bis — la rétention de référence chute à 0,5869 (n=30)
-  tandis que les trois bras de rêve se regroupent autour de
-  0,7046–0,7065. Rétention moyenne `P_min = 0,7065`,
-  `P_equ = 0,7046`, `P_max = 0,7046` (Jonckheere J = 1335,0,
-  p = 0,544 à α/4 = 0,0125). L'ordre prédit
-  `P_max ≥ P_equ ≥ P_min` n'est **pas observé** (P_min dépasse
-  marginalement les autres). H_DR4-ter est **non concluante** —
-  ni monotonicité-rejetée, ni falsifiée.
+  p = 4,9e-14 ≪ α/4 = 0,0125. H0_substrat **rejetée**. *Lecture
+  honnête* (voir « Ce que dit et ne dit pas l'effet +2,77 »
+  ci-dessous) : le rejet de H0_substrat établit que **le couplage
+  REPLAY+DOWNSCALE sur un substrat hôte plus riche dépasse la
+  référence sans rêve** ; il n'établit **pas** que RESTRUCTURE
+  ou RECOMBINE ont contribué de manière mesurable au-dessus du
+  bruit.
+- **H_DR4-ter — monotonicité** : rétention moyenne
+  `P_min = 0,7065`, `P_equ = 0,7046`, `P_max = 0,7046`
+  (Jonckheere J = 1335,0, p = 0,544 à α/4 = 0,0125 ; rétention
+  référence 0,5869, n=30). L'ordre prédit
+  `P_max ≥ P_equ ≥ P_min` n'est **pas observé** : les trois bras
+  de rêve sont à égalité à ±0,002 près et `P_min` dépasse (et non
+  pas dépassé par) les autres. Ce n'est *pas* une monotonicité
+  non-concluante — c'est l'**inverse** de la prédiction DR-4
+  (`P_min > P_equ = P_max` au lieu de `P_max ≥ P_equ ≥ P_min`)
+  et cela constitue une réfutation partielle de la revendication
+  framework-C « profil plus riche → consolidation plus riche »
+  **à cette échelle, sur ce substrat**.
 
-Le verdict verrouille l'axe EC à `PARTIAL` selon la table DualVer
-de la pré-enregistration §7 (H_DR4-ter non concluante, même si H1
-et H2 rejettent H0). Les profils de rêve à tête enrichie battent la
-référence sans rêve par une large marge (g ≈ 2,8 ≫ borne ancre Hu
-2020 = 0,21), mais l'**ordre entre profils de rêve** est lessivé à
-l'ancre C5. Un suivi confirmatoire N≥95 (G4-quater) est prévu pour
-tester si substrat enrichi × `hp_best=C9` retrouve l'ordre prédit
-P_max ≥ P_equ ≥ P_min.
+### Ce que dit et ne dit pas l'effet +2,77 (post-pilote)
+
+Le résultat g=+2,77 se lit au mieux comme **une confirmation
+directionnelle qu'un effet de couplage de rêve sur la rétention
+existe**, et non comme une preuve calibrée de magnitude. Trois
+mises en garde sont structurantes pour le verdict EC et pour
+toute citation externe de ce nombre :
+
+- *Hu 2020 est une ancre directionnelle, pas un calibrateur de
+  magnitude.* Hu et al. 2020 g=0,29 est une estimation
+  méta-analytique sur **la consolidation mnésique
+  sommeil-dépendante humaine** ; g=+2,77 est sur une tête MLP
+  jouet dérivée de CIFAR-100 avec N=30 seeds. Les deux tailles
+  d'effet appartiennent à des classes de référence différentes
+  (cohorte biologique vs. pilote numérique seedé) et une
+  comparaison de magnitude inter-classes est une erreur de
+  catégorie. La pré-enregistration utilise Hu 2020 pour fixer
+  le **signe** de l'hypothèse alternative (`g > 0` plutôt que
+  `g > 0,29` comme seuil littéral) ; présenter g=+2,77 comme
+  un « swing à +9σ par rapport à Hu » ou « effet de rêve dix
+  fois plus fort que le sommeil humain » mésinterpréterait
+  l'ancre.
+- *Ordre des profils DR-4 NON soutenu.* L'ordre empirique
+  `P_min > P_equ = P_max` (0,7065 > 0,7046 = 0,7046) est
+  l'**inverse** de la prédiction DR-4 du framework-C
+  `P_max ≥ P_equ ≥ P_min`. RESTRUCTURE et RECOMBINE — les deux
+  canaux exposés par P_equ/P_max mais pas par P_min — n'ont
+  rien apporté de mesurable au-dessus du plancher de bruit
+  intra-bras à l'ancre C5. La revendication framework-C
+  « ops plus riches → consolidation plus riche » est donc
+  **partiellement réfutée par ce pilote à cette échelle**, et
+  pas seulement « non concluante ». C'est consigné comme une
+  réfutation explicite de la prédiction monotonique DR-4 et
+  non comme un échec de Type-II à détecter.
+- *Attribution des canaux actifs.* Le substrat enrichi expose
+  4 canaux mais seuls 2 sont démontrablement actifs. Le
+  résultat honnête que le +2,77 soutient est : « le couplage
+  REPLAY + DOWNSCALE sur un hôte dont la géométrie cachée
+  autorise déjà un signal de replay non trivial dépasse la
+  référence sans rêve par une large marge » — RESTRUCTURE et
+  RECOMBINE restent des canaux spectateurs à cette échelle,
+  reflétant le motif spectateur de G4-bis un cran plus haut
+  sur l'échelle de complexité du substrat.
+
+### Verdict
+
+Le verdict **renforce** plutôt qu'il n'affaiblit le verrouillage
+EC=PARTIAL selon la table DualVer de la pré-enregistration §7.
+H1+H2 rejettent fortement H0 (l'effet
+REPLAY+DOWNSCALE-sur-hôte-enrichi existe et est substantiel),
+mais H_DR4-ter est **partiellement réfutée** (P_min dépasse
+P_equ = P_max ; la prédiction de monotonicité centrale du
+framework ne tient pas). PARTIAL est le verdict honnête pour
+cette double issue — la promotion vers STABLE exigerait à la
+fois H1+H2 et un ordre soutenant DR-4 sur un pilote
+confirmatoire. Un suivi N≥95 (G4-quater) est prévu pour tester
+si substrat enrichi × `hp_best=C9` retrouve l'ordre prédit sur
+une cellule à seaux distingués, et pour épingler le N auquel
+l'égalité P_min ≈ P_equ ≈ P_max se résout dans l'ordre prédit
+ou se solidifie en réfutation réelle.
 
 Les clés de profil du registre de runs
 `g4-ter/{richer,hp}/<bras>/<combo>` identifient chaque cellule pour

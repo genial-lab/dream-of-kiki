@@ -70,7 +70,7 @@ Next target : C-v0.12.0+STABLE deferred to Paper 2 closeout (Phase 2 multi-scale
 | G2 — P_min viable | S8 | ⏳ Pending S5-S8 |
 | G3 — DR-2 proof peer-reviewed | S8 | ⏳ Draft S6 + review S6-S8 |
 | G3-draft — DR-2 proof circulated | S6 | ⏳ Pending |
-| G4 — P_equ fonctionnel | S12 | 🔶 G4-ter PARTIAL (2026-05-03 — H1+H2 reject H0 strongly (richer-head g=+2.77, p=4.9e-14, n=30), H_DR4-ter monotonicity inconclusive (Jonckheere p=0.544, dream profiles tie 0.7046-0.7065), N≥95 G4-quater scheduled) |
+| G4 — P_equ fonctionnel | S12 | 🔶 G4-ter PARTIAL (2026-05-03 — H1+H2 reject H0 : REPLAY+DOWNSCALE on richer substrate exceeds baseline (g=+2.77 p=4.9e-14 n=30 ; Hu 2020 directional anchor only, not magnitude calibrator), H_DR4 profile ordering NOT supported : observed `P_min 0.7065 > P_equ 0.7046 = P_max 0.7046` is the inverse of predicted `P_max ≥ P_equ ≥ P_min` — partial refutation ; N≥95 G4-quater scheduled) |
 | G5 — PUBLICATION-READY | S18 | ⏳ Pending |
 | G6 — Cycle 2 decision | S28 | ⏳ Pending |
 | G7 — E-SNN substrate conformance | cycle-2 Phase 1 | ✅ LOCKED |

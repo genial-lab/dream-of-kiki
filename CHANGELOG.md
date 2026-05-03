@@ -52,13 +52,22 @@ see `docs/specs/2026-04-17-dreamofkiki-framework-C-design.md` §12).
   `docs/milestones/g4-ter-pilot-2026-05-03.{json,md}`. Verdict :
   H1 (HP artefact) = **rejected H0** (g=+11.81 at C9, n=10
   screening), H2 (substrate-level) = **rejected H0** (g=+2.77,
-  Welch p=4.9e-14, n=30), H_DR4-ter (Jonckheere monotonicity) =
-  **inconclusive** (J=1335, p=0.544; P_min=0.7065 ties P_equ=
-  0.7046 ties P_max=0.7046). EC axis : **PARTIAL** (kept) per
-  `docs/osf-prereg-g4-ter-pilot.md` §7 — H_DR4-ter inconclusive
-  blocks STABLE promotion despite H1+H2 H0 rejections. Confirmatory
-  N≥95 G4-quater scheduled to test whether richer × `hp_best=C9`
-  recovers the predicted P_max ≥ P_equ ≥ P_min ordering.
+  Welch p=4.9e-14, n=30 — finding reframed as
+  "REPLAY+DOWNSCALE coupling on richer substrate exceeds no-dream
+  baseline" ; RESTRUCTURE+RECOMBINE remain spectator channels at
+  this scale), H_DR4-ter (Jonckheere monotonicity) = **DR-4
+  profile ordering NOT supported — partial refutation** (J=1335,
+  p=0.544; observed `P_min=0.7065 > P_equ=0.7046 = P_max=0.7046`
+  is the **inverse** of the predicted `P_max ≥ P_equ ≥ P_min`,
+  not an inconclusive tie). The Hu 2020 anchor (g=0.29) is
+  directional only (sign of the alternative), not a magnitude
+  calibrator — the human-sleep meta-analysis and a 100-class MLP
+  toy belong to different reference classes. EC axis :
+  **PARTIAL** (kept) per `docs/osf-prereg-g4-ter-pilot.md` §7 —
+  the DR-4 partial refutation strengthens (rather than weakens)
+  the PARTIAL lock. Confirmatory N≥95 G4-quater scheduled to test
+  whether richer × `hp_best=C9` recovers the predicted ordering
+  or solidifies the refutation.
 - Wall time : 653.8s on M1 Max (well under the 3-5h budget).
 - 420 run_ids under
   `(C-v0.12.0+PARTIAL, g4-ter/{richer,hp}/<arm>/<combo>, seed)`
