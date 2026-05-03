@@ -33,6 +33,28 @@ see `docs/specs/2026-04-17-dreamofkiki-framework-C-design.md` §12).
   `(C-v0.12.0+PARTIAL, g4/{baseline,P_min,P_equ,P_max}, seed)`
   with R1 bit-stable run_ids verified across two re-runs
 
+### Empirical (G4-bis re-run, 2026-05-03)
+- G4-bis re-run after `dream_episode()` wired to mutate classifier
+  weights via raw-image replay (n=32 × 1 SGD step) + SHY
+  downscale (factor 0.95). Pre-registered hypotheses re-evaluated
+  per `docs/osf-prereg-g4-pilot.md` §2 ; observed scalars in
+  `docs/milestones/g4-pilot-2026-05-03-bis.md`. Pre-coupling
+  run_ids preserved as spectator-baseline references in the
+  original `g4-pilot-2026-05-03.{json,md}`. Coupling
+  hyperparameters (replay batch n=32, lr=0.01, downscale 0.95) are
+  pilot defaults — empirical pin scheduled for the N≥30
+  confirmatory follow-up.
+- Observed scalars : `g_h1 = -2.3067` (H1 not confirmed), `g_h3
+  = -2.3067` with decrement-side rejection True (H3 confirmed
+  in sign), H_DR4 monotonic flag True but degenerate (P_min /
+  P_equ / P_max retention vectors bit-identical because the
+  binary MLP head exposes only REPLAY + DOWNSCALE channels —
+  RESTRUCTURE / RECOMBINE remain spectator-only).
+- Per framework-C §12.3, partial confirmation strengthens
+  PARTIAL — H3 sign confirmed under coupling, H1 not, H_DR4
+  untestable on this substrate at this scale ; N≥30 confirmatory
+  follow-up still required before any STABLE promotion.
+
 ### Versioning
 - **No DualVer bump.** EC stays PARTIAL (partial confirmation
   is not a STABLE-promotion event per §12.3). FC stays at v0.12.0.
