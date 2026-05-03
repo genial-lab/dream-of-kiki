@@ -149,6 +149,71 @@ Per N = 5 / arm this pilot remains exploratory for absolute
 g magnitudes ; pre-reg §4 still triggers a confirmatory N ≥ 30
 follow-up before any STABLE promotion.
 
+## 7.1.4 G6 pilot Path B (real-LLM CL stream — 2026-05-03)
+
+First exposure of `kiki_oniric.substrates.micro_kiki.MicroKikiSubstrate`
+to a 5-subdomain MMLU continual-learning stream
+(anatomy → astronomy → business_ethics → clinical_knowledge →
+college_biology) under the four arms (`baseline`, `P_min`, `P_equ`,
+`P_max`). The pilot ran on an Apple M1 Max / 32 GB host where
+`KIKI-Mac_tunner` is unavailable ; per the locked decisions
+document (`docs/milestones/g6-pilot-decisions-2026-05-03.md`),
+**Path B (inference-only adapter-tensor mutation)** was selected.
+Path A (Studio + `mlx_lm.lora` LoRA fine-tune) is scheduled as
+future work.
+
+**Pre-registration** : `docs/osf-prereg-g6-pilot.md` (locked
+2026-05-03). The pre-reg carries an explicit amendment of H_NEW
+given the G4-bis sign-reversal (g_h1 = −2.31) : H_NEW is recast as
+exploratory infrastructure validation, not a non-inferiority
+margin test. Per pre-reg §6, Path B never triggers a STABLE /
+UNSTABLE EC-axis bump regardless of effect-size outcome.
+
+**Cells** : 4 arms × 3 seeds = 12 sequences, each touching 5
+subdomains (60 forgetting measurements). Compute time : 0.02 s on
+M1 Max (the inference-only proxy is purely a numpy delta-norm
+calculation, not real Qwen inference).
+
+**Outcome scalars** (see
+`docs/milestones/g6-pilot-pathB-2026-05-03.json`,
+commit pinned in milestone) :
+
+| Hypothesis | Direction | Anchor | Observed | Reject H0 |
+|---|---|---|---|---|
+| H1' P_equ vs baseline | g ≥ 0.21 | Hu 2020 lower CI | g_h1' = 0.0 | False |
+| H3' P_min vs baseline | g ≤ −0.13 | Javadi 2024 lower CI | g_h3' = 0.0 | False |
+| H_DR4' Jonckheere | mono(P_min, P_equ, P_max) | DR-4 | True (degenerate, equal means) | False |
+| H_NEW (amended) | any non-zero diff | infrastructure threshold 1e-6 | max\|Δ\| = 0.0 | False (no effect) |
+
+**Spectator pattern observed** : the four dream handlers operate
+on synthetic payloads built by `experiments.g6_mmlu_stream.dream_wrap.
+build_episode_payload`, not on the live `InferenceOnlyAdapter._deltas`
+buffer. The handler return tensors are **not** fed back into the
+adapter delta — DR-0 / DR-1 stamps land on the substrate's
+`_recombine_state` / `_restructure_state` dataclasses, but the
+inference-time evaluation surface (an L2-norm-driven Path B
+accuracy proxy) sees an identical adapter delta across all four
+arms per seed. Hedges' g collapses to 0.0 ; the Jonckheere
+monotonicity check is degenerate (equal means).
+
+This mirrors the G4 spectator pattern (pre-coupling, see §7.1.1)
+and is the expected outcome when dream handlers operate on
+synthetic payloads disjoint from the evaluation surface. The
+lesson reinforces the G4 → G4-bis pivot : a genuine forgetting
+differential requires the handler return tensors to mutate the
+training surface (Path A real LoRA fine-tune ; or a Path B
+extension where handler outputs feed `adapter.set_delta`).
+
+**Verdict on G6 Path B** : pipeline shape validates (60 forgetting
+measurements, 12 R1 run_ids registered in `.run_registry.sqlite`,
+deterministic across re-runs). Substrate handlers are honestly
+spectator-only on the inference-only adapter. EC stays PARTIAL ;
+no FC bump. Path A on Studio remains the publishable G6 path.
+
+Reference : `docs/superpowers/plans/2026-05-03-g6-micro-kiki-mmlu-cl.md`
++ `docs/osf-prereg-g6-pilot.md`
++ `docs/milestones/g6-pilot-pathB-2026-05-03.{json,md}`.
+
 ## 7.2 Cross-substrate H1-H4 comparative table (synthetic substitute — not empirical claim)
 
 **Table 7.2 — MLX vs E-SNN hypotheses at Bonferroni α = 0.0125

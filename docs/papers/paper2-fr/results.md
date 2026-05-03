@@ -162,6 +162,79 @@ amplitudes absolues de g ; le pré-enregistrement §4
 déclenche toujours un suivi confirmatoire N ≥ 30 avant toute
 promotion STABLE.
 
+## 7.1.4 Pilote G6 Voie B (LLM réel, flux d'apprentissage continu — 2026-05-03)
+
+Première exposition de
+`kiki_oniric.substrates.micro_kiki.MicroKikiSubstrate` à un flux
+d'apprentissage continu sur 5 sous-domaines MMLU (anatomy →
+astronomy → business_ethics → clinical_knowledge → college_biology)
+sous les quatre bras (`baseline`, `P_min`, `P_equ`, `P_max`). Le
+pilote a tourné sur un hôte Apple M1 Max / 32 Go où
+`KIKI-Mac_tunner` est absent ; conformément au document de
+décisions verrouillé
+(`docs/milestones/g6-pilot-decisions-2026-05-03.md`), la
+**Voie B (mutation inference-only des tenseurs LoRA)** a été
+retenue. La Voie A (Studio + `mlx_lm.lora` fine-tuning LoRA réel)
+est planifiée comme travail futur.
+
+**Pré-enregistrement** : `docs/osf-prereg-g6-pilot.md` (verrouillé
+le 2026-05-03). Le pré-enregistrement intègre un amendement
+explicite de H_NEW étant donné l'inversion de signe de G4-bis
+(g_h1 = −2,31) : H_NEW est reformulé comme validation
+d'infrastructure exploratoire, non comme test de marge de
+non-infériorité. Conformément au pré-enregistrement §6, la Voie B
+ne déclenche jamais une promotion STABLE / UNSTABLE de l'axe EC,
+quel que soit le résultat.
+
+**Cellules** : 4 bras × 3 graines = 12 séquences, chacune
+touchant 5 sous-domaines (60 mesures d'oubli). Temps de calcul :
+0,02 s sur M1 Max (le proxy inference-only est un calcul de
+norme L2 numpy, pas une vraie inference Qwen).
+
+**Scalaires de verdict** (cf.
+`docs/milestones/g6-pilot-pathB-2026-05-03.json`,
+commit épinglé dans le jalon) :
+
+| Hypothèse | Direction | Ancrage | Observé | Rejet H0 |
+|---|---|---|---|---|
+| H1' P_equ vs baseline | g ≥ 0,21 | Hu 2020 borne inf CI | g_h1' = 0,0 | Faux |
+| H3' P_min vs baseline | g ≤ −0,13 | Javadi 2024 borne inf CI | g_h3' = 0,0 | Faux |
+| H_DR4' Jonckheere | mono(P_min, P_equ, P_max) | DR-4 | Vrai (dégénéré, moyennes égales) | Faux |
+| H_NEW (amendé) | toute différence non-nulle | seuil infrastructure 1e-6 | max\|Δ\| = 0,0 | Faux (aucun effet) |
+
+**Schéma de spectateur observé** : les quatre handlers oniriques
+opèrent sur des charges utiles synthétiques construites par
+`experiments.g6_mmlu_stream.dream_wrap.build_episode_payload`, et
+non sur le tampon vivant `InferenceOnlyAdapter._deltas`. Les
+tenseurs retournés par les handlers ne sont **pas** réinjectés
+dans le delta de l'adaptateur — les estampilles DR-0 / DR-1
+atterrissent sur les dataclasses `_recombine_state` /
+`_restructure_state` du substrat, mais la surface d'évaluation
+au runtime (proxy d'exactitude Voie B piloté par norme L2) voit
+un delta d'adaptateur identique à travers les quatre bras pour
+chaque graine. Le g de Hedges s'effondre à 0,0 ; le test de
+monotonicité Jonckheere est dégénéré (moyennes égales).
+
+Cela reproduit le schéma de spectateur G4 (pré-couplage, cf.
+§7.1.1) et constitue le résultat attendu lorsque les handlers
+oniriques opèrent sur des charges synthétiques disjointes de la
+surface d'évaluation. La leçon renforce le pivot G4 → G4-bis :
+un différentiel d'oubli authentique exige que les tenseurs
+retournés par les handlers mutent la surface d'entraînement
+(fine-tune LoRA réel Voie A ; ou extension Voie B où les sorties
+des handlers alimentent `adapter.set_delta`).
+
+**Verdict G6 Voie B** : la forme du pipeline est validée
+(60 mesures d'oubli, 12 `run_id` R1 enregistrés dans
+`.run_registry.sqlite`, déterminisme inter-exécutions). Les
+handlers du substrat sont honnêtement spectateurs uniquement sur
+l'adaptateur inference-only. EC reste PARTIAL ; pas de bump FC.
+La Voie A sur Studio reste le chemin G6 publiable.
+
+Référence : `docs/superpowers/plans/2026-05-03-g6-micro-kiki-mmlu-cl.md`
++ `docs/osf-prereg-g6-pilot.md`
++ `docs/milestones/g6-pilot-pathB-2026-05-03.{json,md}`.
+
 ## 7.2 Table comparative inter-substrats H1-H4 (substitution synthétique — pas de revendication empirique)
 
 **Table 7.2 — MLX vs E-SNN hypothèses à Bonferroni
