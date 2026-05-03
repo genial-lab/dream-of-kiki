@@ -5,8 +5,8 @@
 **Sister pilot:** G4-ter (g_h2 = +2.77, H_DR4 inverted)
 **Substrate:** MLX hierarchical (G4-ter 3-layer + new 5-layer)
 **Benchmark:** Split-FMNIST 5 binary tasks
-**Lock commit:** _filled at commit time_
-**Lock timestamp:** _filled at commit time_
+**Lock commit:** `e7232b9` (this file's first commit)
+**Lock timestamp:** 2026-05-03 18:52:41 CEST (verified `e7232b9` < first pilot run `e7d74e8` at 19:11:30, ~19 min gap)
 
 ## §1 Background
 
