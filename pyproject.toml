@@ -22,6 +22,7 @@ dependencies = [
     "click>=8.1",
     "scipy>=1.13",
     "pillow>=10.0",
+    "mlx-lm>=0.31.2",
 ]
 
 [project.optional-dependencies]
