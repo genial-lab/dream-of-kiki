@@ -12,6 +12,29 @@ see `docs/specs/2026-04-17-dreamofkiki-framework-C-design.md` §12).
 
 ## [Unreleased]
 
+### Empirical (G4-ter)
+
+- G4-ter pilot completed 2026-05-03 — confirmatory N≥30 follow-up to
+  the G4-bis null finding. 420 cells: richer substrate
+  (`G4HierarchicalClassifier`, 4 arms × 30 seeds × 1 HP at C5) plus
+  HP sub-grid on binary head (3 arms × 10 seeds × 10 combos). Pre-
+  registration `docs/osf-prereg-g4-ter-pilot.md` locked at commit
+  `0553a9f`. Milestone artefacts
+  `docs/milestones/g4-ter-pilot-2026-05-03.{json,md}`. Verdict :
+  H1 (HP artefact) = **rejected H0** (g=+11.81 at C9, n=10
+  screening), H2 (substrate-level) = **rejected H0** (g=+2.77,
+  Welch p=4.9e-14, n=30), H_DR4-ter (Jonckheere monotonicity) =
+  **inconclusive** (J=1335, p=0.544; P_min=0.7065 ties P_equ=
+  0.7046 ties P_max=0.7046). EC axis : **PARTIAL** (kept) per
+  `docs/osf-prereg-g4-ter-pilot.md` §7 — H_DR4-ter inconclusive
+  blocks STABLE promotion despite H1+H2 H0 rejections. Confirmatory
+  N≥95 G4-quater scheduled to test whether richer × `hp_best=C9`
+  recovers the predicted P_max ≥ P_equ ≥ P_min ordering.
+- Wall time : 653.8s on M1 Max (well under the 3-5h budget).
+- 420 run_ids under
+  `(C-v0.12.0+PARTIAL, g4-ter/{richer,hp}/<arm>/<combo>, seed)`
+  registered in `.run_registry.sqlite` with R1 bit-stable run_ids.
+
 ### Empirical (no DualVer bump — partial confirmation)
 - G4 pilot 2026-05-03 (Split-FMNIST × profile sweep, MLX
   substrate) returned partial confirmation of pre-registered
