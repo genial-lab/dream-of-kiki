@@ -91,3 +91,116 @@ class G4HierarchicalClassifier:
         h2 = nn.relu(self._l2(h1))
         mx.eval(h2)
         return np.asarray(h2)
+
+    def eval_accuracy(self, x: np.ndarray, y: np.ndarray) -> float:
+        if len(x) == 0:
+            return 0.0
+        logits = self.predict_logits(x)
+        pred = logits.argmax(axis=1)
+        return float((pred == y).mean())
+
+    def train_task(
+        self,
+        task: dict[str, np.ndarray],
+        *,
+        epochs: int,
+        batch_size: int,
+        lr: float,
+    ) -> None:
+        x = mx.array(task["x_train"])
+        y = mx.array(task["y_train"])
+        n = x.shape[0]
+        opt = optim.SGD(learning_rate=lr)
+        rng = np.random.default_rng(self.seed)
+
+        def loss_fn(model: nn.Module, xb: mx.array, yb: mx.array) -> mx.array:
+            return nn.losses.cross_entropy(model(xb), yb, reduction="mean")
+
+        loss_and_grad = nn.value_and_grad(self._model, loss_fn)
+        for _ in range(epochs):
+            order = rng.permutation(n)
+            for start in range(0, n, batch_size):
+                idx = order[start : start + batch_size]
+                if len(idx) == 0:
+                    continue
+                xb = x[mx.array(idx)]
+                yb = y[mx.array(idx)]
+                _loss, grads = loss_and_grad(self._model, xb, yb)
+                opt.update(self._model, grads)
+                mx.eval(self._model.parameters(), opt.state)
+
+
+class BetaBufferHierFIFO:
+    """Bounded curated episodic buffer with optional latents (beta channel).
+
+    FIFO eviction at capacity. Compared to ``BetaBufferFIFO`` (G4-bis),
+    each record carries an optional ``latent`` field - used by the
+    RECOMBINE Gaussian-MoG sampler. ``latent=None`` is allowed for
+    legacy / pre-classifier-warmup pushes.
+    """
+
+    def __init__(self, capacity: int) -> None:
+        if capacity <= 0:
+            raise ValueError(
+                f"capacity must be positive, got {capacity}"
+            )
+        self._capacity = capacity
+        self._records: deque[BetaRecordHier] = deque(maxlen=capacity)
+
+    def __len__(self) -> int:
+        return len(self._records)
+
+    def push(
+        self, *, x: np.ndarray, y: int, latent: np.ndarray | None
+    ) -> None:
+        record: BetaRecordHier = {
+            "x": x.astype(np.float32).tolist(),
+            "y": int(y),
+            "latent": (
+                latent.astype(np.float32).tolist()
+                if latent is not None
+                else None
+            ),
+        }
+        self._records.append(record)
+
+    def snapshot(self) -> list[BetaRecordHier]:
+        return [
+            {
+                "x": list(r["x"]),
+                "y": int(r["y"]),
+                "latent": (
+                    list(r["latent"]) if r["latent"] is not None else None
+                ),
+            }
+            for r in self._records
+        ]
+
+    def sample(self, n: int, seed: int) -> list[BetaRecordHier]:
+        n_avail = len(self._records)
+        if n_avail == 0:
+            return []
+        rng = np.random.default_rng(seed)
+        n_take = min(n, n_avail)
+        indices = rng.choice(n_avail, size=n_take, replace=False)
+        snapshot = list(self._records)
+        return [
+            {
+                "x": list(snapshot[i]["x"]),
+                "y": int(snapshot[i]["y"]),
+                "latent": (
+                    list(snapshot[i]["latent"])
+                    if snapshot[i]["latent"] is not None
+                    else None
+                ),
+            }
+            for i in sorted(indices.tolist())
+        ]
+
+    def latents(self) -> list[list[float]]:
+        """Return the list of populated latents (skips None)."""
+        return [
+            list(r["latent"])
+            for r in self._records
+            if r["latent"] is not None
+        ]
