@@ -107,23 +107,28 @@ def test_sample_beta_records_different_seeds_differ() -> None:
 
 
 def test_dream_episode_executes_pmin_handlers(tiny_task: SplitFMNISTTask) -> None:
-    """P_min episode must add at least 1 entry to runtime.log."""
+    """P_min episode must add at least 1 entry to runtime.log (DR-0)."""
+    from experiments.g4_split_fmnist.dream_wrap import BetaBufferFIFO
+
     clf = G4Classifier(in_dim=16, hidden_dim=32, n_classes=2, seed=42)
     clf.train_task(tiny_task, epochs=2, batch_size=16, lr=0.05)
     profile = build_profile("P_min", seed=7)
+    buf = BetaBufferFIFO(capacity=8)
     log_before = len(profile.runtime.log)
-    clf.dream_episode(profile, seed=7)
+    clf.dream_episode(profile, seed=7, beta_buffer=buf)
     assert len(profile.runtime.log) == log_before + 1
 
 
 def test_dream_episode_executes_pequ_with_4_ops(tiny_task: SplitFMNISTTask) -> None:
     """P_equ episode must execute 4 ops (replay/downscale/restructure/recombine)."""
     from kiki_oniric.dream.episode import Operation
+    from experiments.g4_split_fmnist.dream_wrap import BetaBufferFIFO
 
     clf = G4Classifier(in_dim=16, hidden_dim=32, n_classes=2, seed=42)
     clf.train_task(tiny_task, epochs=2, batch_size=16, lr=0.05)
     profile = build_profile("P_equ", seed=7)
-    clf.dream_episode(profile, seed=7)
+    buf = BetaBufferFIFO(capacity=8)
+    clf.dream_episode(profile, seed=7, beta_buffer=buf)
     last = profile.runtime.log[-1]
     assert last.completed
     assert set(last.operations_executed) == {
@@ -221,3 +226,50 @@ def test_downscale_step_factor_bounds() -> None:
         clf._downscale_step(factor=1.5)
     with pytest.raises(ValueError, match="shrink_factor|factor"):
         clf._downscale_step(factor=-0.1)
+
+
+def test_dream_episode_pmin_mutates_weights_when_buffer_nonempty(
+    tiny_task: SplitFMNISTTask,
+) -> None:
+    """P_min dream_episode with a populated β buffer must mutate weights."""
+    from experiments.g4_split_fmnist.dream_wrap import BetaBufferFIFO
+
+    clf = G4Classifier(in_dim=16, hidden_dim=32, n_classes=2, seed=42)
+    clf.train_task(tiny_task, epochs=2, batch_size=16, lr=0.05)
+    profile = build_profile("P_min", seed=7)
+
+    rng = np.random.default_rng(0)
+    buf = BetaBufferFIFO(capacity=8)
+    for i in range(4):
+        buf.push(rng.standard_normal(16).astype(np.float32), i % 2)
+
+    w_before = np.asarray(clf._model.layers[0].weight).copy()
+    clf.dream_episode(profile, seed=7, beta_buffer=buf)
+    w_after = np.asarray(clf._model.layers[0].weight)
+    assert not np.allclose(w_before, w_after), (
+        "P_min dream_episode with non-empty buffer must mutate weights"
+    )
+
+
+def test_dream_episode_pmin_empty_buffer_only_downscales(
+    tiny_task: SplitFMNISTTask,
+) -> None:
+    """Empty buffer → no replay step, but DOWNSCALE still fires (P_min ops)."""
+    from experiments.g4_split_fmnist.dream_wrap import BetaBufferFIFO
+
+    clf = G4Classifier(in_dim=16, hidden_dim=32, n_classes=2, seed=42)
+    clf.train_task(tiny_task, epochs=2, batch_size=16, lr=0.05)
+    profile = build_profile("P_min", seed=7)
+    buf = BetaBufferFIFO(capacity=8)  # left empty
+
+    w_before = np.asarray(clf._model.layers[0].weight).copy()
+    clf.dream_episode(profile, seed=7, beta_buffer=buf)
+    w_after = np.asarray(clf._model.layers[0].weight)
+    # Downscale by 0.95 must scale visibly.
+    np.testing.assert_allclose(w_after, w_before * 0.95, rtol=1e-6)
+
+
+def test_dream_episode_baseline_arm_does_not_call_dream_episode() -> None:
+    """build_profile('baseline') must still raise — driver-level guard."""
+    with pytest.raises(ValueError, match="baseline"):
+        build_profile("baseline", seed=7)

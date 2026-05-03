@@ -324,20 +324,58 @@ class G4Classifier:
 
     # -------------------- dream --------------------
 
-    def dream_episode(self, profile: ProfileT, seed: int) -> None:
-        """Drive one :class:`DreamEpisode` through the profile's runtime.
+    def dream_episode(
+        self,
+        profile: ProfileT,
+        seed: int,
+        *,
+        beta_buffer: BetaBufferFIFO,
+        replay_n_records: int = 32,
+        replay_n_steps: int = 1,
+        replay_lr: float = 0.01,
+        downscale_factor: float = 0.95,
+    ) -> None:
+        """Drive one :class:`DreamEpisode` and mutate classifier weights.
 
-        Builds an episode whose ``operation_set`` matches the
-        profile's wired handlers (P_min : replay+downscale ;
-        P_equ/P_max : +restructure+recombine), and dispatches via
-        ``profile.runtime.execute``. The classifier weights are
-        **not directly** mutated by this call — the episode logs
-        DR-0 evidence on the profile's runtime, and downstream
-        eval picks up any state drift the profile chose to apply.
+        Plan G4-bis coupling : after the profile's runtime executes
+        the operation set (DR-0 logging), this method also fires
+        weight-mutating steps on ``self._model`` :
 
-        For the G4 pilot the dream episode is the *interleaved*
-        signal between sequential tasks : its presence vs absence
-        is what distinguishes the dream-active arms from baseline.
+        - If ``Operation.REPLAY`` is in the dispatched op set, sample
+          ``replay_n_records`` from ``beta_buffer`` (seeded by
+          ``seed``) and run ``replay_n_steps`` SGD passes via
+          :meth:`_replay_optimizer_step`. Empty buffer → replay no-op
+          (S1-trivial branch).
+        - If ``Operation.DOWNSCALE`` is in the dispatched op set,
+          run :meth:`_downscale_step` with ``downscale_factor``.
+
+        ``Operation.RESTRUCTURE`` and ``Operation.RECOMBINE`` remain
+        spectator-only on this MLP head : the classifier has no
+        hierarchy nor VAE latents to restructure / recombine. Their
+        DR-0 log entries continue to register through
+        ``runtime.execute``.
+
+        Parameters
+        ----------
+        profile :
+            Active dream profile (``P_min`` / ``P_equ`` / ``P_max``).
+        seed :
+            Per-episode seed used for both the ``input_slice``
+            β-record sampler (legacy spectator path) and the
+            classifier-side sampler (new coupling path). Forms part
+            of R1's run_id input via the calling driver.
+        beta_buffer :
+            Curated episodic buffer accumulated by the driver from
+            past tasks' training samples.
+        replay_n_records, replay_n_steps, replay_lr :
+            Replay hyperparameters. Default n=32 records × 1 SGD step
+            per episode, lr=0.01 — typical class-incremental replay
+            (van de Ven 2020). Documented in the function signature
+            so all calls from ``run_g4.py`` can be grepped.
+        downscale_factor :
+            SHY shrinkage factor in (0, 1]. Default 0.95 calibrated
+            qualitatively (5 % per-episode drift). Future work : pin
+            empirically.
         """
         profile_name = type(profile).__name__
         if isinstance(profile, PMinProfile):
@@ -360,7 +398,12 @@ class G4Classifier:
                 OutputChannel.HIERARCHY_CHG,
                 OutputChannel.LATENT_SAMPLE,
             )
-        beta_records = sample_beta_records(
+
+        # Spectator runtime path (kept for DR-0 logging).
+        # Synthetic input_slice values for the existing spectator
+        # handlers ; the *coupling* step below uses real data from
+        # beta_buffer, decoupled from these synthetic placeholders.
+        synthetic_records = sample_beta_records(
             seed=seed, n_records=4, feat_dim=4
         )
         rng = np.random.default_rng(seed + 10_000)
@@ -371,7 +414,7 @@ class G4Classifier:
         episode = DreamEpisode(
             trigger=EpisodeTrigger.SCHEDULED,
             input_slice={
-                "beta_records": beta_records,
+                "beta_records": synthetic_records,
                 "shrink_factor": 0.99,
                 "topo_op": "reroute",
                 "swap_indices": [0, 1],
@@ -385,3 +428,14 @@ class G4Classifier:
             episode_id=f"g4-{profile_name}-seed{seed}",
         )
         profile.runtime.execute(episode)
+
+        # ---- Plan G4-bis coupling : mutate self._model on dispatched ops ----
+        if Operation.REPLAY in ops:
+            sampled = beta_buffer.sample(
+                n=replay_n_records, seed=seed
+            )
+            self._replay_optimizer_step(
+                sampled, lr=replay_lr, n_steps=replay_n_steps
+            )
+        if Operation.DOWNSCALE in ops:
+            self._downscale_step(factor=downscale_factor)
