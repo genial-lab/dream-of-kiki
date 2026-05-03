@@ -52,7 +52,7 @@ def test_deeper_classifier_train_then_eval() -> None:
     m = G4HierarchicalDeeperClassifier(
         in_dim=32, hidden=(16, 8, 8, 4), n_classes=2, seed=0
     )
-    task = {"x_train": x, "y_train": y}
+    task: dict[str, np.ndarray] = {"x_train": x, "y_train": y}
     m.train_task(task, epochs=2, batch_size=8, lr=0.05)
     acc = m.eval_accuracy(x, y)
     assert 0.0 <= acc <= 1.0
