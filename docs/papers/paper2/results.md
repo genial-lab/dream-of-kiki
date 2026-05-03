@@ -457,6 +457,104 @@ Provenance :
 - Substrate (3-layer) : `experiments.g4_ter_hp_sweep.dream_wrap_hier.G4HierarchicalClassifier`
 - RECOMBINE strategies : `experiments.g4_quater_test.recombine_strategies.sample_synthetic_latents`
 
+## 7.1.7 G4-quinto pilot — RECOMBINE-empty universalises across FMNIST + CIFAR-CNN (2026-05-03)
+
+Following the G4-quater §7.1.6 finding that RECOMBINE was
+empirically empty at the Split-FMNIST 3-layer MLP scale, the
+G4-quater pre-reg §6 row 5 explicitly flagged
+"future work : test deeper benchmarks (CIFAR-10, ImageNet)
+before any STABLE promotion". G4-quinto fires that follow-up
+on the next benchmark in the escalation ladder
+(Split-CIFAR-10) with two substrates (5-layer MLP-on-CIFAR
+and a small CNN) to test whether the H4-C verdict is
+**scale-bound** (FMNIST artefact) or **universal**.
+
+The pilot is pre-registered at
+[`docs/osf-prereg-g4-quinto-pilot.md`](../../osf-prereg-g4-quinto-pilot.md)
+(commit `a02b82c`, locked before any pilot run). A §9.1
+amendment was filed in the same lockfile when the canonical
+mirror at `www.cs.toronto.edu/~kriz` returned HTTP 503 across
+the entire `~kriz` tree on 2026-05-03 ; the loader gained a
+SHA-256-pinned fallback to the Hugging Face dataset
+`uoft-cs/cifar10` (commit `0b2714987...`), which is a PNG
+re-encoding of the same Krizhevsky 2009 release. The
+acquisition path changes ; the experimental contract does not.
+
+Three sequential steps mirror the G4-quater 3-step layout :
+
+### Verdict table
+
+| sub-hypothesis | test | observed | verdict |
+|---|---|---|---|
+| H5-A benchmark-scale (5-layer MLP-on-CIFAR, hidden 256-128-64-32, 120 cells, N = 30) | Jonckheere α = 0.0167 | J = 1362.0, p = 0.4646 ; means P_min = 0.8713, P_equ = 0.8754, P_max = 0.8754 (P_equ = P_max within 1e-4) ; monotonic_observed = True ; reject_h0 = False | **NOT confirmed** — the predicted DR-4 ordering is observed in mean retention (monotonic) but Jonckheere fails to reject H0 at the multiplicity-adjusted α ; benchmark scale-up alone (FMNIST → CIFAR-10) on a wider MLP does not statistically recover the ordering. |
+| H5-B architecture-scale (G4SmallCNN, Conv2d×2 + MaxPool2d×2 + Linear×2, latent_dim = 64, 120 cells, N = 30) | Jonckheere α = 0.0167 | J = 1356.0, p = 0.4823 ; means P_min = 0.9841, P_equ = 0.9842, P_max = 0.9842 (P_equ = P_max within 1e-4) ; monotonic_observed = True ; reject_h0 = False | **NOT confirmed** — same pattern as H5-A : monotonic in mean, not statistically rejecting H0. Adding hierarchical conv structure also fails to recover the predicted ordering at this N. |
+| H5-C universality of RECOMBINE-empty (G4SmallCNN × strategy ∈ {mog, ae, none}, 360 cells, N = 30) | Welch two-sided P_max(mog) vs P_max(none) at α = 0.0167 | mean P_max(mog) = 0.9842, mean P_max(none) = 0.9845 ; Welch t = -0.0104, p = 0.9918 ; Hedges' g (mog vs none) = -0.0026 ; fail_to_reject_h0 = True. AE secondary : mean P_max(ae) = 0.9840, Welch p (ae vs none) = 0.9857. | **CONFIRMED** — Welch fails to reject H0 between mog-RECOMBINE and the none-placebo arm at the multiplicity-adjusted α. The G4-quater H4-C RECOMBINE-empty finding **universalises** across substrates : FMNIST 3-layer MLP (g = 0.002, p = 0.989) and CIFAR-CNN (g = -0.0026, p = 0.9918) both fail to detect any mog vs none difference. |
+
+Aggregate wall time : Step 1 3.8 min + Step 2 17.3 min + Step 3
+50.9 min ≈ 72 min on M1 Max (well under the pre-reg Option A
+9-15 h envelope ; the budget was conservative).
+
+### Honest reading
+
+- **Welch fail-to-reject is the predicted outcome under H5-C.**
+  H5-C is operationalised exactly as H4-C : "RECOMBINE channel
+  is structurally empty at this scale", with "Welch two-sided
+  fails to reject H0 between RECOMBINE = mog and
+  RECOMBINE = none". The observed p = 0.9918 ≫ α = 0.0167, with
+  means within 3e-4 and Hedges' g = -0.0026, is therefore a
+  **positive empirical claim** that the channel is empty on the
+  CNN substrate at CIFAR-10 scale — not a Type-II detection
+  failure. Combined with the G4-quater H4-C confirmation
+  (g = 0.002, p = 0.989), the universality flag fires across
+  two benchmarks × two substrates.
+- **The DR-4 partial refutation universalises.** G4-ter §7.1.5
+  partially refuted "richer ops yield richer consolidation" on
+  the 3-layer MLP. G4-quater §7.1.6 strengthened that to a
+  positive empirical claim that RECOMBINE adds nothing
+  measurable on FMNIST. G4-quinto now extends that claim to
+  CIFAR-CNN : the channel is empty at every benchmark and
+  substrate combination tested in the escalation ladder. The
+  framework-C "richer ops" claim is now an empirically refuted
+  hypothesis at the RECOMBINE-channel level across **two
+  benchmarks × two substrates**, not one. Lemma DR-4.L
+  itself is **not** refuted — within-arm differences remain
+  ≤ 0.001 — but the predictive content of DR-4 is severely
+  scoped.
+- **What the verdict does not say.** G4-quinto tests
+  Split-CIFAR-10 with two substrates ; it does not test
+  ImageNet, a full transformer head, or a hierarchical E-SNN.
+  The pre-reg §6 row 6 still requires those before any STABLE
+  promotion. H5-A and H5-B nulls ("monotonic but not
+  significant") are reported here as **no evidence at this
+  N**, not as evidence-of-absence : the predicted ordering may
+  emerge at higher N or under different HP grids.
+
+### DualVer impact
+
+Per pre-reg `docs/osf-prereg-g4-quinto-pilot.md` §6 row 4, EC
+stays **PARTIAL** under the H5-C-confirmed outcome ; FC stays
+at **C-v0.12.0** (no formal-axis bump). The empirical evidence
+file `docs/proofs/dr4-profile-inclusion.md` is amended with a
+G4-quinto §7.1.7 addendum that universalises the FMNIST
+finding.
+
+Run-registry profile keys
+`g4-quinto/{step1,step2,step3}/<arm>/<combo>[/<strategy>]`
+identify each cell to satisfy R1.
+
+Provenance :
+- Pre-registration : [docs/osf-prereg-g4-quinto-pilot.md](../../osf-prereg-g4-quinto-pilot.md)
+- Step 1 milestone : `docs/milestones/g4-quinto-step1-2026-05-03.{json,md}`
+- Step 2 milestone : `docs/milestones/g4-quinto-step2-2026-05-03.{json,md}`
+- Step 3 milestone : `docs/milestones/g4-quinto-step3-2026-05-03.{json,md}`
+- Aggregate : `docs/milestones/g4-quinto-aggregate-2026-05-03.{json,md}`
+- Driver Step 1 : `experiments/g4_quinto_test/run_step1_mlp_cifar.py`
+- Driver Step 2 : `experiments/g4_quinto_test/run_step2_cnn_cifar.py`
+- Driver Step 3 : `experiments/g4_quinto_test/run_step3_cnn_recombine.py`
+- Substrate (MLP-on-CIFAR) : `experiments.g4_quinto_test.cifar_mlp_classifier.G4HierarchicalCIFARClassifier`
+- Substrate (CNN) : `experiments.g4_quinto_test.small_cnn.G4SmallCNN`
+- RECOMBINE strategies : `experiments.g4_quater_test.recombine_strategies.sample_synthetic_latents`
+
 ## 7.2 Cross-substrate H1-H4 comparative table (synthetic substitute — not empirical claim)
 
 **Table 7.2 — MLX vs E-SNN hypotheses at Bonferroni α = 0.0125
