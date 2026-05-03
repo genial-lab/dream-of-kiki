@@ -67,8 +67,12 @@ CIFAR100_HF_TEST_URL: Final[str] = (
     "https://huggingface.co/datasets/uoft-cs/cifar100/resolve/main/"
     "cifar100/test-00000-of-00001.parquet"
 )
-CIFAR100_HF_TRAIN_SHA256: Final[str] = "...replace_at_first_download..."
-CIFAR100_HF_TEST_SHA256: Final[str] = "...replace_at_first_download..."
+CIFAR100_HF_TRAIN_SHA256: Final[str] = (
+    "694865d6b990e234804f01268586c41e88bcbbb75e20858432c05ad4081aca23"
+)
+CIFAR100_HF_TEST_SHA256: Final[str] = (
+    "98776c529bb146a9c791229df74a5cf076be9b43d82dbbd334b6a7788d73dc68"
+)
 HTTP_USER_AGENT: Final[str] = "g4-sexto-pilot/1 (mlx-on-m1max)"
 
 CIFAR100_N_TASKS: Final[int] = 10
