@@ -1,0 +1,56 @@
+{
+  "ae_secondary": {
+    "deferred": false,
+    "mean_p_max_ae": 0.9839643167345095,
+    "mean_p_max_none": 0.9844733889614015,
+    "n_p_max_ae": 30,
+    "n_p_max_none": 30,
+    "welch_p_two_sided": 0.985656253400573,
+    "welch_t": -0.018055871708773822
+  },
+  "h5a_benchmark_scale": {
+    "alpha_per_test": 0.016666666666666666,
+    "confirmed": false,
+    "j_statistic": 1362.0,
+    "mean_p_equ": 0.8753800516738663,
+    "mean_p_max": 0.8753800516738663,
+    "mean_p_min": 0.8713243029045474,
+    "monotonic_observed": true,
+    "p_value": 0.4645851069892404,
+    "reject_h0": false
+  },
+  "h5b_architecture_scale": {
+    "alpha_per_test": 0.016666666666666666,
+    "confirmed": false,
+    "j_statistic": 1356.0,
+    "mean_p_equ": 0.9841811796903445,
+    "mean_p_max": 0.9841811796903445,
+    "mean_p_min": 0.9840667529735093,
+    "monotonic_observed": true,
+    "p_value": 0.4822750675428802,
+    "reject_h0": false
+  },
+  "h5c_universality_recombine_empty": {
+    "alpha_per_test": 0.016666666666666666,
+    "confirmed": true,
+    "deferred": false,
+    "fail_to_reject_h0": true,
+    "h5c_recombine_empty_confirmed": true,
+    "hedges_g_mog_vs_none": -0.002642886008106819,
+    "mean_p_max_mog": 0.9841811796903445,
+    "mean_p_max_none": 0.9844733889614015,
+    "n_p_max_mog": 30,
+    "n_p_max_none": 30,
+    "welch_p_two_sided": 0.991761248625539,
+    "welch_t": -0.010370535778155499
+  },
+  "summary": {
+    "all_three_confirmed": false,
+    "any_confirmed": true,
+    "h4c_to_h5c_universality": true,
+    "h5a_confirmed": false,
+    "h5b_confirmed": false,
+    "h5c_confirmed": true,
+    "h5c_deferred": false
+  }
+}
