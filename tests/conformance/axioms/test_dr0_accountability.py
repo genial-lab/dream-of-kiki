@@ -45,7 +45,7 @@ def noop_handler(episode: DreamEpisode) -> None:
 
 
 @given(ep=dream_episodes_with_replay_only())
-@settings(max_examples=50, deadline=None)
+@settings(max_examples=50, deadline=None, derandomize=True)
 def test_dr0_every_executed_de_has_log_entry(
     ep: DreamEpisode,
 ) -> None:
@@ -56,7 +56,7 @@ def test_dr0_every_executed_de_has_log_entry(
 
 
 @given(ep=dream_episodes_with_replay_only())
-@settings(max_examples=50, deadline=None)
+@settings(max_examples=50, deadline=None, derandomize=True)
 def test_dr0_budget_is_finite(ep: DreamEpisode) -> None:
     # Budget components must be non-negative AND finite
     assert ep.budget.flops >= 0

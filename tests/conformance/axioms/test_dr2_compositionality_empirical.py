@@ -180,6 +180,7 @@ def _non_canonical_closure_safe_permutation() -> st.SearchStrategy[
 @settings(
     max_examples=50,
     deadline=None,
+    derandomize=True,
     suppress_health_check=[HealthCheck.function_scoped_fixture],
 )
 def test_dr2_empirical_budget_additivity_and_bookkeeping_under_permutation(

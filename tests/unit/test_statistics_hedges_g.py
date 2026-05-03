@@ -91,7 +91,7 @@ def test_zero_variance_raises_when_means_differ() -> None:
         max_size=20,
     ),
 )
-@settings(max_examples=100, deadline=None)
+@settings(max_examples=100, deadline=None, derandomize=True)
 def test_hedges_g_finite_when_variance_positive(
     treatment: list[float], control: list[float]
 ) -> None:

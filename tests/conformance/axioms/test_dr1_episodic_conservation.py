@@ -40,7 +40,7 @@ class FakeBetaBuffer:
     record_count=st.integers(min_value=1, max_value=100),
     batch_size=st.integers(min_value=1, max_value=50),
 )
-@settings(max_examples=30, deadline=None)
+@settings(max_examples=30, deadline=None, derandomize=True)
 def test_dr1_all_records_eventually_consumed(
     record_count: int, batch_size: int
 ) -> None:
