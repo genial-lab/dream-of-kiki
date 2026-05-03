@@ -70,7 +70,7 @@ Next target : C-v0.12.0+STABLE deferred to Paper 2 closeout (Phase 2 multi-scale
 | G2 — P_min viable | S8 | ⏳ Pending S5-S8 |
 | G3 — DR-2 proof peer-reviewed | S8 | ⏳ Draft S6 + review S6-S8 |
 | G3-draft — DR-2 proof circulated | S6 | ⏳ Pending |
-| G4 — P_equ fonctionnel | S12 | 🔶 PARTIAL (Split-FMNIST pilot 2026-05-03, 20 cells, partial confirmation, N≥30 follow-up scheduled) |
+| G4 — P_equ fonctionnel | S12 | 🔶 PARTIAL (G4-bis 2026-05-03 with replay coupling — partial confirmation, N≥30 follow-up scheduled) |
 | G5 — PUBLICATION-READY | S18 | ⏳ Pending |
 | G6 — Cycle 2 decision | S28 | ⏳ Pending |
 | G7 — E-SNN substrate conformance | cycle-2 Phase 1 | ✅ LOCKED |
