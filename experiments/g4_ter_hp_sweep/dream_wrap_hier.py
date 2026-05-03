@@ -129,6 +129,37 @@ class G4HierarchicalClassifier:
                 opt.update(self._model, grads)
                 mx.eval(self._model.parameters(), opt.state)
 
+    def _restructure_step(self, *, factor: float, seed: int) -> None:
+        """Add ``factor * sigma * N(0, 1)`` to hidden_2 weights only.
+
+        ``sigma`` is the per-tensor standard deviation of
+        ``self._l2.weight`` at call time. ``factor=0`` is a no-op
+        (early exit). ``factor < 0`` raises ValueError. Determinism
+        is provided by ``np.random.default_rng(seed)``.
+
+        Hierarchy / RESTRUCTURE channel rationale: only the *middle*
+        hidden layer is mutated, so the input projection and output
+        classifier are preserved. This matches the framework-C sec
+        3.1 H_DR4 monotonicity intuition that RESTRUCTURE escalates
+        framework C's representational rearrangement without
+        wholesale weight collapse.
+        """
+        if factor < 0.0:
+            raise ValueError(
+                f"factor must be non-negative, got {factor}"
+            )
+        if factor == 0.0:
+            return
+        w = np.asarray(self._l2.weight)
+        sigma = float(w.std()) if w.size > 0 else 0.0
+        if sigma == 0.0:
+            return
+        rng = np.random.default_rng(seed)
+        noise = rng.standard_normal(size=w.shape).astype(np.float32)
+        new_w = w + factor * sigma * noise
+        self._l2.weight = mx.array(new_w)
+        mx.eval(self._l2.weight)
+
 
 class BetaBufferHierFIFO:
     """Bounded curated episodic buffer with optional latents (beta channel).

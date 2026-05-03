@@ -93,3 +93,53 @@ def test_buffer_sample_no_latent() -> None:
     buf.push(x=np.zeros(2, dtype=np.float32), y=0, latent=None)
     snap = buf.snapshot()
     assert snap[0]["latent"] is None
+
+
+def test_restructure_step_modifies_only_hidden_2() -> None:
+    clf = G4HierarchicalClassifier(
+        in_dim=10, hidden_1=4, hidden_2=3, n_classes=2, seed=13
+    )
+    w1_before = np.asarray(clf._l1.weight)
+    w2_before = np.asarray(clf._l2.weight)
+    w3_before = np.asarray(clf._l3.weight)
+    clf._restructure_step(factor=0.05, seed=99)
+    w1_after = np.asarray(clf._l1.weight)
+    w2_after = np.asarray(clf._l2.weight)
+    w3_after = np.asarray(clf._l3.weight)
+    # Input + output untouched.
+    np.testing.assert_array_equal(w1_before, w1_after)
+    np.testing.assert_array_equal(w3_before, w3_after)
+    # Hidden_2 perturbed (probabilistically: any element changed).
+    assert not np.array_equal(w2_before, w2_after)
+
+
+def test_restructure_step_factor_zero_is_noop() -> None:
+    clf = G4HierarchicalClassifier(
+        in_dim=10, hidden_1=4, hidden_2=3, n_classes=2, seed=13
+    )
+    w2_before = np.asarray(clf._l2.weight)
+    clf._restructure_step(factor=0.0, seed=99)
+    w2_after = np.asarray(clf._l2.weight)
+    np.testing.assert_array_equal(w2_before, w2_after)
+
+
+def test_restructure_step_factor_negative_raises() -> None:
+    clf = G4HierarchicalClassifier(
+        in_dim=10, hidden_1=4, hidden_2=3, n_classes=2, seed=13
+    )
+    with pytest.raises(ValueError, match="factor must be"):
+        clf._restructure_step(factor=-0.01, seed=99)
+
+
+def test_restructure_step_seed_determinism() -> None:
+    a = G4HierarchicalClassifier(
+        in_dim=10, hidden_1=4, hidden_2=3, n_classes=2, seed=13
+    )
+    b = G4HierarchicalClassifier(
+        in_dim=10, hidden_1=4, hidden_2=3, n_classes=2, seed=13
+    )
+    a._restructure_step(factor=0.05, seed=99)
+    b._restructure_step(factor=0.05, seed=99)
+    np.testing.assert_array_equal(
+        np.asarray(a._l2.weight), np.asarray(b._l2.weight)
+    )
