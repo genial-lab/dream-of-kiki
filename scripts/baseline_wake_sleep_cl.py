@@ -6,8 +6,11 @@ Validates       : pipeline-validation (variant c) — the baseline
                   adapter round-trips via the RunRegistry without
                   claiming new empirical results. Variants a/b
                   promote this to empirical.
-Output path     : docs/milestones/wake-sleep-baseline-2026-05-03.json
-                  + .md sibling.
+Output path     : docs/milestones/wake-sleep-baseline-rekey-2026-05-03.json
+                  + .md sibling. (The original
+                  `wake-sleep-baseline-2026-05-03.{json,md}` dump
+                  is frozen append-only and superseded by this
+                  re-key.)
 
 Usage :
     uv run python scripts/baseline_wake_sleep_cl.py --seeds 42 123 7
@@ -45,18 +48,23 @@ from kiki_oniric.substrates.wake_sleep_cl_baseline import (  # noqa: E402
 )
 
 DEFAULT_SEEDS = (42, 123, 7)
-DEFAULT_TASK_SPLIT = "split_fmnist_5tasks"
+DEFAULT_TASK_SPLIT = "cifar10_5tasks_buffer500"
 DEFAULT_PROFILE = "baseline_wake_sleep_cl"
 # Hardcoded milestone date — the JSON dump path is part of the R1
 # reproducibility contract and must be bit-stable across re-runs.
 # Using `date.today()` would silently shift the path each calendar
 # day even though the file contents are deterministic.
 MILESTONE_DATE = "2026-05-03"
+# The original `wake-sleep-baseline-{MILESTONE_DATE}.{json,md}`
+# milestone is frozen (append-only discipline, docs/CLAUDE.md).
+# After the 2026-05-03 re-key from `split_fmnist_5tasks` to
+# `cifar10_5tasks_buffer500`, the driver writes to a superseding
+# `-rekey` dump alongside the frozen original.
 DEFAULT_OUT = (
     REPO_ROOT
     / "docs"
     / "milestones"
-    / f"wake-sleep-baseline-{MILESTONE_DATE}.json"
+    / f"wake-sleep-baseline-rekey-{MILESTONE_DATE}.json"
 )
 
 
@@ -144,7 +152,9 @@ def md_companion(dump: dict[str, Any], json_path: Path) -> Path:
         f"**Task split :** `{dump['task_split']}`.",
         f"**Commit :** `{dump['commit_sha']}`.",
         "",
-        "**(synthetic placeholder — variant c, published reference values.)**",
+        "**(variant c — published reference values, re-keyed "
+        "2026-05-03 to CIFAR-10 buffer-500 to match Alfarano 2024 "
+        "Tables 2-3 ER-ACE+WSCL row.)**",
         "",
         "| seed | run_id | forgetting_rate | avg_accuracy |",
         "|------|--------|-----------------|--------------|",

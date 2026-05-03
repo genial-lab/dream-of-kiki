@@ -31,7 +31,7 @@ def test_name_and_version_are_pinned() -> None:
 
 def test_evaluate_continual_returns_M1ab_keys() -> None:
     bl = WakeSleepCLBaseline()
-    out = bl.evaluate_continual(seed=42, task_split="split_fmnist_5tasks")
+    out = bl.evaluate_continual(seed=42, task_split="cifar10_5tasks_buffer500")
     assert {"forgetting_rate", "avg_accuracy", "n_tasks", "seed"} <= out.keys()
     assert out["seed"] == 42
     forgetting = float(out["forgetting_rate"])
@@ -43,15 +43,15 @@ def test_evaluate_continual_returns_M1ab_keys() -> None:
 def test_evaluate_continual_is_deterministic_per_seed() -> None:
     """R1 contract : same (seed, task_split) -> same numbers."""
     bl = WakeSleepCLBaseline()
-    a = bl.evaluate_continual(seed=42, task_split="split_fmnist_5tasks")
-    b = bl.evaluate_continual(seed=42, task_split="split_fmnist_5tasks")
+    a = bl.evaluate_continual(seed=42, task_split="cifar10_5tasks_buffer500")
+    b = bl.evaluate_continual(seed=42, task_split="cifar10_5tasks_buffer500")
     assert a == b
 
 
 def test_evaluate_continual_seed_round_trips() -> None:
     bl = WakeSleepCLBaseline()
-    a = bl.evaluate_continual(seed=42, task_split="split_fmnist_5tasks")
-    b = bl.evaluate_continual(seed=7, task_split="split_fmnist_5tasks")
+    a = bl.evaluate_continual(seed=42, task_split="cifar10_5tasks_buffer500")
+    b = bl.evaluate_continual(seed=7, task_split="cifar10_5tasks_buffer500")
     # Numbers may match by coincidence (variant c) but seeds must
     # round-trip in output.
     assert a["seed"] == 42
@@ -76,7 +76,7 @@ def test_components_helper_omits_op_factories() -> None:
 def test_source_flag_marks_published_reference() -> None:
     """Variant c must surface the published-reference flag in the output."""
     bl = WakeSleepCLBaseline()
-    out = bl.evaluate_continual(seed=42, task_split="split_fmnist_5tasks")
+    out = bl.evaluate_continual(seed=42, task_split="cifar10_5tasks_buffer500")
     assert "source" in out
     assert "published_reference" in str(out["source"])
     assert "alfarano" in str(out["source"]).lower()
@@ -84,5 +84,5 @@ def test_source_flag_marks_published_reference() -> None:
 
 def test_n_tasks_default_is_five() -> None:
     bl = WakeSleepCLBaseline()
-    out = bl.evaluate_continual(seed=42, task_split="split_fmnist_5tasks")
+    out = bl.evaluate_continual(seed=42, task_split="cifar10_5tasks_buffer500")
     assert out["n_tasks"] == 5

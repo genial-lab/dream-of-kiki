@@ -36,33 +36,27 @@ WAKE_SLEEP_BASELINE_NAME = "wake_sleep_cl_baseline"
 WAKE_SLEEP_BASELINE_VERSION = "C-v0.12.0+PARTIAL"
 
 # Variant-c reference metrics. Source : Alfarano et al. 2024 IEEE
-# TNNLS Tables 2-3 (Split-FMNIST 5-task class-incremental).
+# TNNLS, Tables 2-3, ER-ACE+WSCL ("Ours") row, Split CIFAR-10
+# (5 binary tasks, class-incremental), buffer=500.
 #
-# PLACEHOLDER — verify attempt 2026-05-03 (arXiv 2401.08623v1
-# PDF, 14 pp, parsed via pypdf) revealed two mismatches that the
-# maintainer must resolve before any publication claim :
-#   1. Alfarano evaluates on CIFAR-10, Tiny-ImageNet1/2, and
-#      FG-ImageNet (paper §4.1) — NOT on Split-FMNIST. The
-#      `split_fmnist_5tasks` task_split key in this module does
-#      not correspond to any benchmark reported by the paper.
-#   2. Table 2 (forgetting Class-IL) and Table 3 (final average
-#      accuracy with std) report percentages, not unit-interval
-#      decimals. The placeholder values 0.082 / 0.847 do not
-#      match any cell of either table for any of the three
-#      reported benchmarks at any buffer size.
-# Resolution paths : (a) re-key on a benchmark Alfarano actually
-# scores (e.g. `cifar10_5tasks_buffer500` -> ER-ACE+WSCL FAA
-# 74.18 %, forgetting 10.69 %) ; (b) keep `split_fmnist_5tasks`
-# but switch the comparator anchor to a paper that does report
-# Split-FMNIST. Until then, the values stay frozen at the
-# pre-verify defaults so the milestone dump and §7.7 caveat
-# remain consistent ; the discipline is "expose the placeholder
-# so reviewers can re-derive it" rather than "ship a verified
-# number we cannot defend".
+# Re-keyed 2026-05-03 from the unverified `split_fmnist_5tasks`
+# placeholder (`forgetting_rate=0.082`, `avg_accuracy=0.847`)
+# which did NOT correspond to any benchmark Alfarano 2024 scores
+# (paper §4.1 evaluates on CIFAR-10, Tiny-ImageNet1/2, FG-ImageNet
+# only). The verify attempt
+# `docs/milestones/wake-sleep-baseline-verify-2026-05-03.md`
+# extracted Tables 2-3 via pypdf and identified resolution path
+# (a) — anchor on CIFAR-10 buffer-500 ER-ACE+WSCL with
+# `(forgetting=10.69 %, FAA=74.18 ± 1.28 %)`. Decimals are
+# unit-interval (Tables 2-3 percentages divided by 100).
+#
+# Supersedes the frozen `wake-sleep-baseline-2026-05-03.{json,md}`
+# milestone ; new dump under
+# `docs/milestones/wake-sleep-baseline-rekey-2026-05-03.{json,md}`.
 _REFERENCE_METRICS_BY_TASKSPLIT: dict[str, dict[str, float]] = {
-    "split_fmnist_5tasks": {
-        "forgetting_rate": 0.082,
-        "avg_accuracy": 0.847,
+    "cifar10_5tasks_buffer500": {
+        "forgetting_rate": 0.1069,
+        "avg_accuracy": 0.7418,
     },
 }
 
@@ -89,7 +83,8 @@ class WakeSleepCLBaseline:
 
         Raises ``ValueError`` if ``task_split`` is not one of the
         supported reference splits (currently
-        ``split_fmnist_5tasks`` only ; variants a/b may extend this).
+        ``cifar10_5tasks_buffer500`` only ; variants a/b may
+        extend this).
         """
         if task_split not in _SUPPORTED_TASKSPLITS:
             raise ValueError(

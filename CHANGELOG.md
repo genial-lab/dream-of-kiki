@@ -159,6 +159,28 @@ see `docs/specs/2026-04-17-dreamofkiki-framework-C-design.md` §12).
   that could promote PARTIAL → STABLE on confirmatory all-pass.
 
 ### Documentation
+- Re-key the Wake-Sleep CL baseline (Alfarano 2024) from the
+  unverified `split_fmnist_5tasks` placeholder pair
+  `(forgetting_rate=0.082, avg_accuracy=0.847)` to
+  `cifar10_5tasks_buffer500` with verified values
+  `(forgetting_rate=0.1069, avg_accuracy=0.7418)` imported from
+  Alfarano 2024 Tables 2-3, row "ER-ACE+WSCL (Ours)", Split
+  CIFAR-10 buffer-500 (resolution path Option 1 from the verify
+  attempt). Updates :
+  `kiki_oniric/substrates/wake_sleep_cl_baseline.py`
+  (`_REFERENCE_METRICS_BY_TASKSPLIT` constant) ;
+  `scripts/baseline_wake_sleep_cl.py` (`DEFAULT_TASK_SPLIT` and
+  `DEFAULT_OUT` re-pointed to the `-rekey` filename) ;
+  `tests/unit/test_wake_sleep_baseline_adapter.py` ; Paper 2 §7.7
+  EN + FR caption + table re-keyed. The frozen
+  `docs/milestones/wake-sleep-baseline-2026-05-03.{json,md}` and
+  the verify entry `wake-sleep-baseline-verify-2026-05-03.md`
+  are preserved ; the supersede dump
+  `docs/milestones/wake-sleep-baseline-rekey-2026-05-03.{json,md}`
+  records the new run_ids and resolution path. **No DualVer
+  bump** — bibkey + variant + scores_on semantics unchanged ;
+  this is a placeholder-resolution correction below the
+  FC-PATCH threshold.
 - Document outcome of Alfarano 2024 (arXiv 2401.08623) verify
   attempt for the Wake-Sleep CL baseline placeholder pair
   (`forgetting_rate=0.082`, `avg_accuracy=0.847`,
@@ -168,15 +190,7 @@ see `docs/specs/2026-04-17-dreamofkiki-framework-C-design.md` §12).
   Alfarano 2024 §4.1 evaluates on CIFAR-10 / Tiny-ImageNet1/2 /
   FG-ImageNet rather than Split-FMNIST. New supersede dump
   `docs/milestones/wake-sleep-baseline-verify-2026-05-03.md`
-  records the mismatches ; the PLACEHOLDER flags at the six
-  sites are retained pending a maintainer decision (re-key on
-  an Alfarano benchmark, or switch the comparator anchor to a
-  paper that reports Split-FMNIST). The §7.7 caveat in
-  `docs/papers/paper2/results.md` and its FR mirror is
-  expanded ; the module-level docstring in
-  `kiki_oniric/substrates/wake_sleep_cl_baseline.py` is
-  updated. **No DualVer bump** — placeholder discipline and
-  numerical values unchanged.
+  records the mismatches.
 
 ### Added
 - `kiki_oniric.profiles.so_calibration` module with

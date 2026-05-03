@@ -502,36 +502,42 @@ de [@alfarano2024wakesleep] (IEEE TNNLS, arXiv 2401.08623) —
 l'analogue NREM/REM dual-phase publié le plus proche
 (Article 1 §3, introduction.md L94, L108). La ligne est
 générée par `scripts/baseline_wake_sleep_cl.py` et dumpée
-vers `docs/milestones/wake-sleep-baseline-2026-05-03.json`.
-**(placeholder synthétique — variante c, valeurs de référence
-publiées.)**
+vers `docs/milestones/wake-sleep-baseline-rekey-2026-05-03.json`
+(supersède le dump gelé `wake-sleep-baseline-2026-05-03.json`).
+**(variante c — valeurs de référence publiées, re-clé du
+2026-05-03 vers CIFAR-10 pour correspondre au benchmark
+réellement rapporté par Alfarano 2024.)**
 
 | seed | run_id | forgetting_rate | avg_accuracy |
 |------|--------|-----------------|--------------|
-| 42  | `60a86e833d477c69745393df9b1b8af1` | 0,0820 | 0,8470 |
-| 123 | `4b6b475e9efbeb38363cd4be2e8ddf6e` | 0,0820 | 0,8470 |
-| 7   | `fcd2873d5efc5141178a4173e667485b` | 0,0820 | 0,8470 |
+| 42  | `38ad694fe99c2dfbb3f8ca4c312852b7` | 0,1069 | 0,7418 |
+| 123 | `2cdef3880915543654c81205fe4edf9a` | 0,1069 | 0,7418 |
+| 7   | `16f511205877c190074790f094309316` | 0,1069 | 0,7418 |
 
-Les valeurs numériques ci-dessus sont des PLACEHOLDERS en
-attente de vérification PDF des Tables 2-3 d'Alfarano 2024 ;
-le dump Markdown porte la même précaution. L'identité du
-seed-round-trip (mêmes nombres sur tous les seeds) est
-**attendue** sous variante c — les variantes a/b
-produiraient des lignes dépendantes du seed.
+Les valeurs numériques sont importées directement des
+Tables 2-3 d'Alfarano 2024, ligne « ER-ACE+WSCL (Ours) »,
+Split CIFAR-10 (5 tâches binaires, class-incremental),
+buffer = 500 : final-average-accuracy 74,18 ± 1,28 % et
+oubli 10,69 %, ré-échelonnés des pourcentages vers l'intervalle
+unité. L'identité du seed-round-trip (mêmes nombres sur tous
+les seeds) est **attendue** sous variante c — les variantes
+a/b produiraient des lignes dépendantes du seed.
 
-Une tentative de vérification du 2026-05-03 contre
+La tentative de vérification du 2026-05-03 contre
 arXiv 2401.08623v1
 (`docs/milestones/wake-sleep-baseline-verify-2026-05-03.md`)
-a identifié deux discordances : (i) Alfarano 2024 §4.1 évalue
-WSCL sur Split CIFAR-10, Tiny-ImageNet1/2 et Split FG-ImageNet
-— *pas* sur Split-FMNIST ; (ii) les Tables 2-3 rapportent des
-pourcentages et la paire placeholder `(0,082, 0,847)` ne
-correspond à aucune cellule ER-ACE+WSCL pour aucune taille de
-buffer ni aucun des trois benchmarks rapportés. Le drapeau
-PLACEHOLDER reste donc actif en attente d'une décision du
-mainteneur (re-clé sur un benchmark Alfarano, ou bascule de
-l'ancre comparateur vers un papier qui rapporte effectivement
-Split-FMNIST).
+avait identifié deux discordances dans la paire placeholder
+`split_fmnist_5tasks` antérieure `(0,082, 0,847)` : (i)
+Alfarano 2024 §4.1 évalue WSCL sur Split CIFAR-10,
+Tiny-ImageNet1/2 et Split FG-ImageNet — *pas* sur Split-FMNIST ;
+(ii) les Tables 2-3 rapportent des pourcentages et cette paire
+placeholder ne correspondait à aucune cellule ER-ACE+WSCL pour
+aucune taille de buffer ni aucun des trois benchmarks rapportés.
+L'entrée superséante
+`docs/milestones/wake-sleep-baseline-rekey-2026-05-03.md`
+enregistre le chemin de résolution retenu (Option 1 : re-clé
+sur un benchmark Alfarano) ; le dump parent gelé est préservé
+selon la discipline append-only des jalons.
 
 Un test d'équivalence TOST de style H2 contre P_equ est
 **délibérément omis** : la précaution prédicteur (§6.4) se
