@@ -59,6 +59,53 @@ see `docs/specs/2026-04-17-dreamofkiki-framework-C-design.md` §12).
 - **No DualVer bump.** EC stays PARTIAL (partial confirmation
   is not a STABLE-promotion event per §12.3). FC stays at v0.12.0.
 
+### Empirical (G6 pilot Path B, 2026-05-03)
+- G6 pilot 2026-05-03 (micro-kiki Qwen × MMLU subdomain CL stream,
+  Path B inference-only) returned exploratory infrastructure-
+  validation evidence per `docs/osf-prereg-g6-pilot.md`. Path
+  selection locked in `docs/milestones/g6-pilot-decisions-
+  2026-05-03.md` : Path A (Studio + KIKI-Mac_tunner +
+  mlx_lm.lora) unavailable on M1 Max host ; Path B is the
+  always-runnable fallback. Per pre-reg §6, Path B never
+  triggers a STABLE / UNSTABLE EC bump regardless of
+  effect-size outcome.
+- 12 cells under
+  `(C-v0.12.0+PARTIAL, g6/B/{baseline,P_min,P_equ,P_max}, seed)`
+  registered in `.run_registry.sqlite` with R1 bit-stable
+  run_ids ; deterministic across re-runs (verified by the
+  `test_run_pilot_path_b_is_deterministic` property test).
+- Observed scalars : `g_h1' = 0.0`, `g_h3' = 0.0`,
+  `H_DR4' monotonic = True (degenerate, equal means)`,
+  `H_NEW (amended) infrastructure_effect_observed = False`
+  (max\|Δ\| = 0). Spectator pattern : the four dream handlers
+  operate on synthetic payloads built by
+  `experiments.g6_mmlu_stream.dream_wrap.build_episode_payload`,
+  not on the live `InferenceOnlyAdapter._deltas` buffer ; DR-0
+  / DR-1 stamps land but the inference-time evaluation surface
+  sees an identical adapter delta across arms. Honest verdict :
+  pipeline-shape validation succeeded ; coupling extension
+  (handlers feeding `adapter.set_delta`, or Path A real LoRA
+  fine-tune) is the next confirmatory step.
+- H_NEW honest amendment : the original H_NEW formulation
+  ("real LLM g_h1' >= synthetic G4-bis g_h1 - 0.10") is
+  vacuous given G4-bis g_h1 = -2.31 (any real g satisfies the
+  inequality). H_NEW is reformulated in
+  `docs/osf-prereg-g6-pilot.md` §0 + §2 as exploratory
+  infrastructure validation ; the chain G4 spectator -> G4-bis
+  coupling -> G6 Path B inference-only is documented in the
+  pre-reg as scientific review trail.
+- Milestone artefacts :
+  `docs/milestones/g6-pilot-pathB-2026-05-03.{json,md}`,
+  `docs/milestones/g6-pilot-decisions-2026-05-03.md`,
+  `docs/osf-prereg-g6-pilot.md`.
+
+### Versioning (G6 outcome branch)
+- **No DualVer bump.** EC stays PARTIAL — Path B is exploratory
+  by pre-reg §6, never triggers STABLE / UNSTABLE regardless of
+  effect-size outcome. FC stays at v0.12.0 (no axiom or
+  primitive change). Path A on Studio is the future-work path
+  that could promote PARTIAL → STABLE on confirmatory all-pass.
+
 ### Documentation
 - Document outcome of Alfarano 2024 (arXiv 2401.08623) verify
   attempt for the Wake-Sleep CL baseline placeholder pair
