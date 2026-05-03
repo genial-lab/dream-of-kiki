@@ -261,6 +261,32 @@ class G4Classifier:
         logits = model(xb)
         return nn.losses.cross_entropy(logits, yb, reduction="mean")
 
+    def _replay_optimizer_step(
+        self,
+        records: list[BetaRecord],
+        *,
+        lr: float,
+        n_steps: int,
+    ) -> None:
+        """Run ``n_steps`` SGD passes over ``records`` (CE loss).
+
+        Generative-replay coupling per van de Ven 2020 §3.2 stored-
+        exemplar. Empty ``records`` → no-op (parallels the S1 no-op
+        branch in :func:`replay_real_handler`). Determinism : MLX SGD
+        + fixed batch order = bit-stable given identical model state
+        and record list.
+        """
+        if not records:
+            return
+        x = mx.array([r["x"] for r in records])
+        y = mx.array([r["y"] for r in records])
+        opt = optim.SGD(learning_rate=lr)
+        loss_and_grad = nn.value_and_grad(self._model, self._loss_fn)
+        for _ in range(n_steps):
+            _loss, grads = loss_and_grad(self._model, x, y)
+            opt.update(self._model, grads)
+            mx.eval(self._model.parameters(), opt.state)
+
     # -------------------- dream --------------------
 
     def dream_episode(self, profile: ProfileT, seed: int) -> None:

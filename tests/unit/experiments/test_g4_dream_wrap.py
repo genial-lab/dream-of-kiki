@@ -138,3 +138,56 @@ def test_dream_episode_baseline_returns_no_op() -> None:
     """build_profile('baseline') must raise — baseline runs no DE."""
     with pytest.raises(ValueError, match="baseline"):
         build_profile("baseline", seed=7)
+
+
+def test_replay_optimizer_step_changes_weights() -> None:
+    """A replay step on non-empty records must mutate weights."""
+    from experiments.g4_split_fmnist.dream_wrap import BetaBufferFIFO
+
+    clf = G4Classifier(in_dim=16, hidden_dim=32, n_classes=2, seed=42)
+    # Snapshot a layer's weight before any update.
+    w_before = np.asarray(clf._model.layers[0].weight).copy()
+
+    # Build a 4-record sample with deterministic RNG.
+    rng = np.random.default_rng(0)
+    buf = BetaBufferFIFO(capacity=8)
+    for i in range(4):
+        buf.push(rng.standard_normal(16).astype(np.float32), i % 2)
+
+    records = buf.sample(n=4, seed=0)
+    clf._replay_optimizer_step(records, lr=0.1, n_steps=2)
+
+    w_after = np.asarray(clf._model.layers[0].weight)
+    assert not np.allclose(w_before, w_after), (
+        "weights must change after replay step"
+    )
+
+
+def test_replay_optimizer_step_empty_records_noop() -> None:
+    """Empty record list must leave weights untouched."""
+    clf = G4Classifier(in_dim=16, hidden_dim=32, n_classes=2, seed=42)
+    w_before = np.asarray(clf._model.layers[0].weight).copy()
+    clf._replay_optimizer_step([], lr=0.1, n_steps=2)
+    w_after = np.asarray(clf._model.layers[0].weight)
+    np.testing.assert_array_equal(w_before, w_after)
+
+
+def test_replay_optimizer_step_seeded_reproducible() -> None:
+    """Two classifiers with same seed + same records → same final weights."""
+    from experiments.g4_split_fmnist.dream_wrap import BetaBufferFIFO
+
+    rng = np.random.default_rng(0)
+    buf = BetaBufferFIFO(capacity=8)
+    for i in range(4):
+        buf.push(rng.standard_normal(16).astype(np.float32), i % 2)
+    records = buf.sample(n=4, seed=42)
+
+    clf_a = G4Classifier(in_dim=16, hidden_dim=32, n_classes=2, seed=42)
+    clf_b = G4Classifier(in_dim=16, hidden_dim=32, n_classes=2, seed=42)
+    clf_a._replay_optimizer_step(records, lr=0.1, n_steps=2)
+    clf_b._replay_optimizer_step(records, lr=0.1, n_steps=2)
+
+    np.testing.assert_array_equal(
+        np.asarray(clf_a._model.layers[0].weight),
+        np.asarray(clf_b._model.layers[0].weight),
+    )
